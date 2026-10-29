@@ -1,0 +1,15 @@
+{
+  "name": "arychi-web-suite",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Arychi Web Suite Workspace",
+  "scripts": {
+    "start": "node launcher.mjs",
+    "dev": "node launcher.mjs",
+    "optimize": "node scripts/optimize.mjs",
+    "frontend": "npm --prefix \"font end\" run dev",
+    "build": "npm --prefix \"font end\" run build",
+    "quest": "npm --prefix quest start",
+    "stream": "npm --prefix stream run start:node"
+  }
+}
