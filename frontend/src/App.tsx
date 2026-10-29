@@ -255,7 +255,7 @@ const AppContent: React.FC = () => {
   const streamPlaying = Boolean(streamStatus?.stream.playing);
 
   return (
-    <div className="min-h-screen bg-[#030407] text-slate-100 flex flex-col cosmic-mesh cosmic-grid-subtle">
+    <div className="min-h-screen bg-[#000000] text-slate-100 flex flex-col cosmic-mesh cosmic-grid-subtle">
       <Navbar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}

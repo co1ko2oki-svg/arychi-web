@@ -234,7 +234,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
               <Lock className="w-5 h-5" />
             </div>
@@ -244,7 +244,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
               <Zap className="w-5 h-5" />
             </div>
@@ -254,7 +254,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
               <Tv className="w-5 h-5" />
             </div>
@@ -264,7 +264,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
@@ -287,7 +287,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <span className="text-xs font-mono font-bold text-indigo-400">01 / KHỞI ĐỘNG</span>
             <h3 className="text-base font-bold text-white">Chạy start.bat</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -295,7 +295,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <span className="text-xs font-mono font-bold text-indigo-400">02 / TOKEN DISCORD</span>
             <h3 className="text-base font-bold text-white">Lấy User Token</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -303,7 +303,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+          <div className="card-interactive p-6 space-y-3">
             <span className="text-xs font-mono font-bold text-indigo-400">03 / ĐIỀU KHIỂN</span>
             <h3 className="text-base font-bold text-white">Kết Nối &amp; Vận Hành</h3>
             <p className="text-xs text-slate-400 leading-relaxed">

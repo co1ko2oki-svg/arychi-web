@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#030407]/85 border-b border-white/[0.06] transition-all">
+      <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#000000]/85 border-b border-white/[0.06] transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           <div className="flex items-center gap-8">
             <a
@@ -105,7 +105,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-indigo-600 to-violet-700 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 border border-white/20 group-hover:scale-105 transition-transform">
                 <Sparkles className="w-4 h-4 fill-white/20" />
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#030407]" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[#000000]" />
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
@@ -188,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     alt={user.username}
                     className="w-7 h-7 rounded-full object-cover border border-emerald-500/50"
                   />
-                  <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#030407]" />
+                  <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#000000]" />
                 </div>
               </button>
             ) : (

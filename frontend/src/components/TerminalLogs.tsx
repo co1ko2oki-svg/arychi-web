@@ -162,7 +162,7 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/[0.08] bg-[#030508] shadow-2xl overflow-hidden">
+      <div className="rounded-2xl border border-white/[0.08] bg-[#000000] shadow-2xl overflow-hidden">
         <div className="px-4 py-3 bg-white/[0.02] border-b border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />

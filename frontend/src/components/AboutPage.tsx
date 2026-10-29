@@ -332,7 +332,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-2.5">
+          <div className="card-interactive p-6 space-y-2.5">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Lock className="w-4 h-4 text-indigo-400" />
               <span>Không Lưu Trữ Cloud &bull; Client-Side Only</span>
@@ -342,7 +342,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-2.5">
+          <div className="card-interactive p-6 space-y-2.5">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Zap className="w-4 h-4 text-emerald-400" />
               <span>Mô Phỏng Nhịp Độ Chuẩn (Anti-Rate Limit)</span>
@@ -352,7 +352,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-2.5">
+          <div className="card-interactive p-6 space-y-2.5">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Globe className="w-4 h-4 text-cyan-400" />
               <span>Không Cài Cắm Theo Dõi (Zero Analytics)</span>
@@ -362,7 +362,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </p>
           </div>
 
-          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-2.5">
+          <div className="card-interactive p-6 space-y-2.5">
             <h3 className="text-sm font-bold text-white flex items-center gap-2">
               <Code2 className="w-4 h-4 text-amber-400" />
               <span>Minh Bạch Mã Nguồn (Audit-Ready)</span>
