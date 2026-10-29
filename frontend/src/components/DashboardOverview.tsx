@@ -467,7 +467,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               </div>
               <div className="flex justify-between text-slate-400">
                 <span>Script:</span>
-                <span className="text-slate-200">bage fam/spoofer.py</span>
+                <span className="text-slate-200">badge-farm/spoofer.py</span>
               </div>
             </div>
           </div>

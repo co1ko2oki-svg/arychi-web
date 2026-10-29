@@ -7,8 +7,8 @@
     "start": "node launcher.mjs",
     "dev": "node launcher.mjs",
     "optimize": "node scripts/optimize.mjs",
-    "frontend": "npm --prefix \"font end\" run dev",
-    "build": "npm --prefix \"font end\" run build",
+    "frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
     "quest": "npm --prefix quest start",
     "stream": "npm --prefix stream run start:node"
   }

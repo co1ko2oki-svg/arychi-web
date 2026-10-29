@@ -20,7 +20,7 @@ export const BadgeDashboard: React.FC = () => {
   const parsedThreads = Math.max(1, Math.min(10, parseInt(threads, 10) || 1));
 
   const getCommand = () => {
-    const base = 'cd "bage fam" && python spoofer.py';
+    const base = 'cd badge-farm && python spoofer.py';
     if (mode === 'playtime') {
       return `${base} --hours ${parsedHours} --threads ${parsedThreads}`;
     }
@@ -70,7 +70,7 @@ export const BadgeDashboard: React.FC = () => {
           <span>Cơ Chế Hoạt Động Của Telemetry Science Spoofer</span>
         </h2>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Script <code className="text-slate-200 bg-surface-2 px-1.5 py-0.5 rounded font-mono">bage fam/spoofer.py</code> gửi các event{' '}
+          Script <code className="text-slate-200 bg-surface-2 px-1.5 py-0.5 rounded font-mono">badge-farm/spoofer.py</code> gửi các event{' '}
           <code className="text-indigo-400">launch_game</code> và <code className="text-indigo-400">running_game_heartbeat</code> kèm chữ ký Windows PE Fingerprint. Discord ghi nhận số giờ này vào lịch sử chơi game của tài khoản mà không cần cài hay mở game thật.
         </p>
       </div>

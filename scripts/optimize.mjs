@@ -49,9 +49,9 @@ const runOptimization = () => {
   console.log('\x1b[36m===================================================\x1b[0m');
 
   const targets = [
-    { name: 'Frontend (font end)', dir: path.join(rootDir, 'font end', 'node_modules') },
-    { name: 'Quest Backend', dir: path.join(rootDir, 'quest', 'node_modules') },
-    { name: 'StreamBot Voice', dir: path.join(rootDir, 'stream', 'node_modules') },
+    { name: 'Frontend (frontend)', dir: path.join(rootDir, 'frontend', 'node_modules') },
+    { name: 'Quest Backend (quest)', dir: path.join(rootDir, 'quest', 'node_modules') },
+    { name: 'StreamBot Voice (stream)', dir: path.join(rootDir, 'stream', 'node_modules') },
   ];
 
   let initialTotalMB = 0;
@@ -73,9 +73,17 @@ const runOptimization = () => {
         removedItemsCount++;
       }
     }
+    const ffmpegStaticPath = path.join(rootDir, 'stream', 'node_modules', 'ffmpeg-static');
+    if (fs.existsSync(ffmpegStaticPath)) {
+      const ffmpegSize = getDirSizeInMB(ffmpegStaticPath);
+      if (removeDirectory(ffmpegStaticPath)) {
+        console.log(`\x1b[32m[OK]\x1b[0m Da go bo ffmpeg-static trung lap (da co san trong node-av): -\x1b[32m${ffmpegSize} MB\x1b[0m`);
+        removedItemsCount++;
+      }
+    }
   }
 
-  const viteCache = path.join(rootDir, 'font end', 'node_modules', '.vite');
+  const viteCache = path.join(rootDir, 'frontend', 'node_modules', '.vite');
   if (fs.existsSync(viteCache)) {
     const cacheSize = getDirSizeInMB(viteCache);
     if (removeDirectory(viteCache)) {

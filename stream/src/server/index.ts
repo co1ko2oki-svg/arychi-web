@@ -536,7 +536,7 @@ export function startServer(
 	});
 
 	const possibleDistPaths = [
-		path.resolve(process.cwd(), "../font end/dist"),
+		path.resolve(process.cwd(), "../frontend/dist"),
 		path.resolve(process.cwd(), "dist/public")
 	];
 

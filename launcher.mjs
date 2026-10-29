@@ -106,7 +106,7 @@ const startServices = () => {
     {
       name: 'WEB :5173',
       color: '\x1b[32m',
-      cwd: path.join(rootDir, 'font end'),
+      cwd: path.join(rootDir, 'frontend'),
       cmd: process.platform === 'win32' ? 'cmd.exe' : 'npx',
       args: process.platform === 'win32' ? ['/c', 'npx', 'vite', '--port', '5173'] : ['vite', '--port', '5173'],
     },
