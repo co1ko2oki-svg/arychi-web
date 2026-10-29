@@ -8,6 +8,7 @@ import { StreamDashboard } from './components/StreamDashboard';
 import { BadgeDashboard } from './components/BadgeDashboard';
 import { TerminalLogs } from './components/TerminalLogs';
 import { LoginModal } from './components/LoginModal';
+import { SiteFooter } from './components/SiteFooter';
 import { ToastProvider, useToast } from './components/Toast';
 import { AuthUser, QuestDTO, QuestJob, LogEntry, StreamStatus } from './types';
 import { questApi, streamApi, QUEST_WS_URL, STREAM_WS_URL } from './services/api';
@@ -62,14 +63,14 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     const titles: Record<NavTabId, string> = {
-      home: 'Arychi Suite v2.0 | Tổng Quan',
-      about: 'Giới Thiệu Hệ Thống | Arychi Suite',
-      quests: 'Nhiệm Vụ Discord | Arychi Suite',
-      stream: 'StreamBot Voice | Arychi Suite',
-      badges: 'Cày Giờ Chơi | Arychi Suite',
-      logs: 'Nhật Ký Hệ Thống | Arychi Suite',
+      home: 'Tổng quan · Arychi Suite',
+      about: 'Giới thiệu · Arychi Suite',
+      quests: 'Nhiệm vụ Discord · Arychi Suite',
+      stream: 'StreamBot Voice · Arychi Suite',
+      badges: 'Giờ chơi · Arychi Suite',
+      logs: 'Nhật ký hệ thống · Arychi Suite',
     };
-    document.title = titles[activeTab] || 'Arychi Suite v2.0';
+    document.title = titles[activeTab] || 'Arychi Suite';
   }, [activeTab]);
 
   const loadQuests = useCallback(async () => {
@@ -255,7 +256,7 @@ const AppContent: React.FC = () => {
   const streamPlaying = Boolean(streamStatus?.stream.playing);
 
   return (
-    <div className="min-h-screen bg-[#000000] text-slate-100 flex flex-col cosmic-mesh">
+    <div className="min-h-screen flex flex-col">
       <Navbar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
@@ -267,7 +268,7 @@ const AppContent: React.FC = () => {
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
       />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="page flex-1 pt-8 pb-16">
         {activeTab === 'home' && (
           user && token ? (
             <DashboardOverview
@@ -332,6 +333,8 @@ const AppContent: React.FC = () => {
           <TerminalLogs logs={logs} onClear={() => setLogs([])} />
         )}
       </main>
+
+      <SiteFooter onNavigateTab={handleSelectTab} />
 
       <LoginModal
         isOpen={isLoginModalOpen}

@@ -1,49 +1,65 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  Trash2,
-  ArrowDown,
-  Search,
-  Copy,
-  Download,
-  Terminal,
-} from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Copy, Download, Search, Trash2 } from 'lucide-react';
 import { LogEntry } from '../types';
 import { useToast } from './Toast';
+import { EmptyState, PageHeader, SegmentedControl, Switch } from './ui';
+import { levelClass, levelLabel, parseLog } from './format';
 
 interface TerminalLogsProps {
   logs: LogEntry[];
   onClear: () => void;
 }
 
+type LevelFilter = 'all' | LogEntry['level'];
+
 export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => {
   const { toast } = useToast();
-  const [filter, setFilter] = useState<'all' | 'info' | 'warn' | 'error' | 'success'>('all');
+  const [filter, setFilter] = useState<LevelFilter>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [autoScroll, setAutoScroll] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const counts = useMemo(() => {
+    const c = { info: 0, warn: 0, error: 0, success: 0 };
+    logs.forEach((l) => {
+      c[l.level] += 1;
+    });
+    return c;
+  }, [logs]);
+
+  const filteredLogs = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return logs.filter((l) => {
+      if (filter !== 'all' && l.level !== filter) return false;
+      if (term && !l.message.toLowerCase().includes(term)) return false;
+      return true;
+    });
+  }, [logs, filter, searchTerm]);
 
   useEffect(() => {
-    if (autoScroll) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [logs, autoScroll]);
+    const el = scrollRef.current;
+    if (autoScroll && el) el.scrollTop = el.scrollHeight;
+  }, [filteredLogs, autoScroll]);
 
-  const filteredLogs = logs.filter((l) => {
-    if (filter !== 'all' && l.level !== filter) return false;
-    if (searchTerm.trim() && !l.message.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-    return true;
-  });
+  const serialize = (iso: boolean) =>
+    filteredLogs
+      .map((l) => {
+        const t = iso ? new Date(l.timestamp).toISOString() : new Date(l.timestamp).toLocaleTimeString();
+        return `[${t}] [${l.level.toUpperCase()}] ${l.message}`;
+      })
+      .join('\n');
 
-  const handleCopyAll = () => {
+  const handleCopyAll = async () => {
     if (filteredLogs.length === 0) {
       toast.warning('Không có dòng log nào để sao chép');
       return;
     }
-    const formatted = filteredLogs
-      .map((l) => `[${new Date(l.timestamp).toLocaleTimeString()}] [${l.level.toUpperCase()}] ${l.message}`)
-      .join('\n');
-    navigator.clipboard.writeText(formatted);
-    toast.success(`Đã sao chép ${filteredLogs.length} dòng log vào clipboard!`);
+    try {
+      await navigator.clipboard.writeText(serialize(false));
+      toast.success(`Đã sao chép ${filteredLogs.length} dòng log`);
+    } catch {
+      toast.error('Trình duyệt không cho phép truy cập clipboard');
+    }
   };
 
   const handleDownloadLog = () => {
@@ -51,10 +67,7 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
       toast.warning('Không có dòng log nào để xuất file');
       return;
     }
-    const formatted = filteredLogs
-      .map((l) => `[${new Date(l.timestamp).toISOString()}] [${l.level.toUpperCase()}] ${l.message}`)
-      .join('\n');
-    const blob = new Blob([formatted], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([serialize(true)], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -66,144 +79,118 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
 
   const handleClear = () => {
     onClear();
-    toast.info('Đã xóa bộ nhớ log hiển thị trên màn hình');
+    toast.info('Đã xóa bộ đệm log trên màn hình');
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Nhật Ký Hệ Thống
-            </h1>
-            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-white/[0.04] text-cyan-400 border border-cyan-500/25">
-              WebSocket Live Feed
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-400">
-            Truy vết trực tiếp các sự kiện từ Quest Automation (:3001) và StreamBot Voice (:3000).
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <button
-            onClick={() => setAutoScroll(!autoScroll)}
-            className={`btn-secondary text-xs py-2 px-3 ${autoScroll ? 'border-cyan-500/40 text-cyan-300' : ''}`}
-            title="Tự động cuộn xuống dòng mới nhất"
-          >
-            <ArrowDown className="w-3.5 h-3.5" />
-            <span>{autoScroll ? 'Auto-Scroll: Bật' : 'Auto-Scroll: Tắt'}</span>
-          </button>
-
-          <button
-            onClick={handleCopyAll}
-            className="btn-secondary text-xs py-2 px-3"
-            title="Sao chép toàn bộ dòng log đang lọc vào clipboard"
-          >
-            <Copy className="w-3.5 h-3.5" />
-            <span>Sao Chép</span>
-          </button>
-
-          <button
-            onClick={handleDownloadLog}
-            className="btn-secondary text-xs py-2 px-3"
-            title="Tải về file nhật ký .log"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Xuất File</span>
-          </button>
-
-          <button
-            onClick={handleClear}
-            className="btn-danger text-xs py-2 px-3"
-            title="Xóa bộ đệm log hiện tại"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Xóa</span>
-          </button>
-        </div>
-      </div>
-
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative min-w-[260px] sm:max-w-xs flex-1">
-          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Lọc sự kiện theo từ khóa..."
-            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-9 pr-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-cyan-500"
-          />
-        </div>
-
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-          {(
-            [
-              ['all', 'Tất Cả'],
-              ['info', 'Info'],
-              ['warn', 'Warning'],
-              ['error', 'Error'],
-              ['success', 'Success'],
-            ] as const
-          ).map(([lvl, label]) => (
-            <button
-              key={lvl}
-              onClick={() => setFilter(lvl)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-mono font-medium transition-colors whitespace-nowrap ${
-                filter === lvl
-                  ? 'bg-white/[0.1] text-white border border-white/[0.15] font-semibold'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
-              }`}
-            >
-              {label}
+    <div className="space-y-5">
+      <PageHeader
+        title="Nhật ký hệ thống"
+        description="Sự kiện trực tiếp từ Quest Engine (:3001) và StreamBot (:3000), nhận qua WebSocket."
+        actions={
+          <>
+            <button type="button" onClick={handleCopyAll} className="btn-secondary">
+              <Copy className="w-4 h-4" />
+              Sao chép
             </button>
-          ))}
+            <button type="button" onClick={handleDownloadLog} className="btn-secondary">
+              <Download className="w-4 h-4" />
+              Xuất .log
+            </button>
+            <button type="button" onClick={handleClear} className="btn-ghost hover:text-rose-300">
+              <Trash2 className="w-4 h-4" />
+              Xóa
+            </button>
+          </>
+        }
+      />
+
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <SegmentedControl
+          ariaLabel="Lọc theo mức độ"
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: 'all', label: 'Tất cả', count: logs.length },
+            { value: 'error', label: 'Lỗi', count: counts.error },
+            { value: 'warn', label: 'Cảnh báo', count: counts.warn },
+            { value: 'success', label: 'Thành công', count: counts.success },
+            { value: 'info', label: 'Thông tin', count: counts.info },
+          ]}
+        />
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 text-[13px] text-zinc-400 shrink-0">
+            <Switch checked={autoScroll} onChange={() => setAutoScroll((v) => !v)} label="Tự động cuộn" />
+            Tự động cuộn
+          </label>
+          <div className="relative w-full lg:w-64">
+            <Search className="w-4 h-4 text-zinc-600 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Tìm trong nội dung"
+              aria-label="Tìm trong nhật ký"
+              className="input pl-8"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-white/[0.08] bg-[#000000] shadow-2xl overflow-hidden">
-        <div className="px-4 py-3 bg-white/[0.02] border-b border-white/[0.06] flex items-center justify-between text-xs text-slate-400">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
-            <span className="font-mono text-[11px] text-slate-400 ml-2">stdout — arychi-daemon</span>
-          </div>
-          <span className="font-mono text-[11px] text-slate-500">{filteredLogs.length} dòng sự kiện</span>
+      <div className="surface overflow-hidden">
+        <div className="hidden sm:grid grid-cols-[76px_56px_84px_1fr] gap-3 px-4 h-9 items-center border-b border-line text-2xs font-medium uppercase tracking-[0.06em] text-zinc-500">
+          <span>Thời gian</span>
+          <span>Mức</span>
+          <span>Nguồn</span>
+          <span>Nội dung</span>
         </div>
-
-        <div className="p-4 font-mono text-xs space-y-1.5 max-h-[580px] overflow-y-auto leading-relaxed">
+        <div
+          ref={scrollRef}
+          className="h-[calc(100vh-340px)] min-h-[360px] overflow-y-auto font-mono text-xs leading-5"
+          role="log"
+          aria-live="polite"
+        >
           {filteredLogs.length === 0 ? (
-            <div className="py-24 text-center space-y-2 text-slate-500">
-              <Terminal className="w-8 h-8 mx-auto opacity-30" />
-              <p className="italic">Chưa có thông điệp nhật ký nào...</p>
-            </div>
+            <EmptyState
+              title={logs.length === 0 ? 'Chưa có sự kiện nào' : 'Không có dòng nào khớp bộ lọc'}
+              description={
+                logs.length === 0
+                  ? 'Nhật ký sẽ xuất hiện ngay khi các dịch vụ gửi sự kiện.'
+                  : 'Thử chọn mức độ khác hoặc xóa từ khóa tìm kiếm.'
+              }
+            />
           ) : (
             filteredLogs.map((log, index) => {
-              const color =
-                log.level === 'error'
-                  ? 'text-rose-400 font-bold'
-                  : log.level === 'warn'
-                  ? 'text-amber-400'
-                  : log.level === 'success'
-                  ? 'text-emerald-400 font-bold'
-                  : 'text-slate-300';
-
+              const p = parseLog(log);
               return (
-                <div key={index} className="flex items-start gap-2.5 text-[11px] hover:bg-white/[0.02] py-0.5 px-2 rounded">
-                  <span className="text-slate-500 select-none shrink-0 font-mono">
-                    {new Date(log.timestamp).toLocaleTimeString()}
-                  </span>
-                  <span className={`uppercase shrink-0 ${color}`}>
-                    [{log.level}]
-                  </span>
-                  <span className="text-slate-300 break-all">{log.message}</span>
+                <div
+                  key={`${log.timestamp}-${index}`}
+                  className={`grid grid-cols-[64px_48px_1fr] sm:grid-cols-[76px_56px_84px_1fr] gap-3 px-4 py-1 hover:bg-white/[0.03] ${
+                    log.level === 'error' ? 'bg-rose-500/[0.04]' : ''
+                  }`}
+                >
+                  <span className="text-zinc-600 tabular-nums">{p.time}</span>
+                  <span className={`font-medium ${levelClass[p.level]}`}>{levelLabel[p.level]}</span>
+                  <span className="hidden sm:block text-zinc-500 truncate">{p.source}</span>
+                  <span className="text-zinc-300 break-words min-w-0">{p.message}</span>
                 </div>
               );
             })
           )}
-          <div ref={bottomRef} />
+        </div>
+        <div className="flex items-center justify-between px-4 h-9 border-t border-line text-xs text-zinc-500">
+          <span>
+            Hiển thị <span className="tabular-nums text-zinc-300">{filteredLogs.length}</span> / {logs.length} dòng
+          </span>
+          {!autoScroll && filteredLogs.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setAutoScroll(true)}
+              className="text-brand-text hover:text-white transition-colors"
+            >
+              Cuộn tới mới nhất
+            </button>
+          )}
         </div>
       </div>
     </div>

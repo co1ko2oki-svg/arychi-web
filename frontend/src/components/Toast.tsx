@@ -52,33 +52,16 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
       {children}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
+      <div
+        className="fixed bottom-4 right-4 left-4 sm:left-auto z-[60] flex flex-col gap-2 sm:w-[360px] pointer-events-none"
+        aria-live="polite"
+      >
         {toasts.map((t) => {
           const config = {
-            success: {
-              icon: CheckCircle2,
-              border: 'border-l-4 border-l-emerald-400 border border-white/[0.08]',
-              bg: 'bg-[#08100C]/95',
-              text: 'text-emerald-400',
-            },
-            error: {
-              icon: AlertCircle,
-              border: 'border-l-4 border-l-rose-500 border border-white/[0.08]',
-              bg: 'bg-[#150A0E]/95',
-              text: 'text-rose-400',
-            },
-            warning: {
-              icon: AlertTriangle,
-              border: 'border-l-4 border-l-amber-400 border border-white/[0.08]',
-              bg: 'bg-[#141008]/95',
-              text: 'text-amber-400',
-            },
-            info: {
-              icon: Info,
-              border: 'border-l-4 border-l-indigo-400 border border-white/[0.08]',
-              bg: 'bg-[#0A0D18]/95',
-              text: 'text-indigo-400',
-            },
+            success: { icon: CheckCircle2, text: 'text-emerald-400' },
+            error: { icon: AlertCircle, text: 'text-rose-400' },
+            warning: { icon: AlertTriangle, text: 'text-amber-400' },
+            info: { icon: Info, text: 'text-zinc-400' },
           }[t.type];
 
           const Icon = config.icon;
@@ -86,20 +69,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl ${config.border} ${config.bg} shadow-elevated backdrop-blur-md transition-all duration-200`}
-              role="alert"
+              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg bg-overlay border border-line-strong shadow-xl shadow-black/60"
+              role={t.type === 'error' ? 'alert' : 'status'}
             >
               <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${config.text}`} />
-              <div className="flex-1 text-xs">
-                {t.title && <p className="font-bold text-white mb-0.5">{t.title}</p>}
-                <p className="text-slate-300 leading-relaxed break-words">{t.message}</p>
+              <div className="flex-1 min-w-0 text-[13px] leading-5">
+                {t.title && <p className="font-medium text-white">{t.title}</p>}
+                <p className="text-zinc-300 break-words">{t.message}</p>
               </div>
               <button
+                type="button"
                 onClick={() => removeToast(t.id)}
-                className="text-slate-500 hover:text-slate-300 p-0.5 rounded transition-colors shrink-0"
+                className="text-zinc-500 hover:text-zinc-200 p-0.5 -mr-1 rounded transition-colors shrink-0"
                 aria-label="Đóng thông báo"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           );
