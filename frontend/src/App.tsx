@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Sidebar, NavTabId } from './components/Sidebar';
-import { AppHeader } from './components/AppHeader';
+import { Navbar, NavTabId } from './components/Navbar';
 import { DashboardOverview } from './components/DashboardOverview';
 import { LandingPage } from './components/LandingPage';
 import { AboutPage } from './components/AboutPage';
@@ -24,7 +23,6 @@ const getTabFromHash = (): NavTabId => {
 const AppContent: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<NavTabId>(getTabFromHash);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   const [token, setToken] = useState<string>(() => localStorage.getItem('arychi_discord_token') || '');
   const [user, setUser] = useState<AuthUser | null>(() => {
@@ -47,7 +45,6 @@ const AppContent: React.FC = () => {
   const [loadingStream, setLoadingStream] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  // Sync activeTab with URL hash changes
   useEffect(() => {
     const handleHashChange = () => {
       setActiveTab(getTabFromHash());
@@ -63,7 +60,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Update document title dynamically
   useEffect(() => {
     const titles: Record<NavTabId, string> = {
       home: 'Arychi Suite v2.0 | Tổng Quan',
@@ -121,7 +117,6 @@ const AppContent: React.FC = () => {
     }
   };
 
-  // Quest WebSocket connection
   useEffect(() => {
     let ws: WebSocket | null = null;
     let timer: any = null;
@@ -186,7 +181,6 @@ const AppContent: React.FC = () => {
     };
   }, [loadQuests]);
 
-  // StreamBot WebSocket connection
   useEffect(() => {
     let ws: WebSocket | null = null;
     let timer: any = null;
@@ -260,18 +254,9 @@ const AppContent: React.FC = () => {
   ).length;
   const streamPlaying = Boolean(streamStatus?.stream.playing);
 
-  const tabAtmosphere = {
-    home: 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(99,102,241,0.08),transparent_70%)]',
-    about: 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(99,102,241,0.08),transparent_70%)]',
-    quests: 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(99,102,241,0.11),transparent_70%)]',
-    stream: 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(245,158,11,0.08),transparent_70%)]',
-    badges: 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(16,185,129,0.08),transparent_70%)]',
-    logs: 'bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(6,182,212,0.08),transparent_70%)]',
-  }[activeTab];
-
   return (
-    <div className="flex min-h-screen bg-[#040508] bg-cosmic-grid text-slate-100">
-      <Sidebar
+    <div className="min-h-screen bg-[#030407] text-slate-100 flex flex-col cosmic-mesh cosmic-grid-subtle">
+      <Navbar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         user={user}
@@ -280,85 +265,73 @@ const AppContent: React.FC = () => {
         runningQuestsCount={runningQuestsCount}
         streamPlaying={streamPlaying}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
-        mobileOpen={mobileOpen}
-        onCloseMobile={() => setMobileOpen(false)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        <AppHeader
-          onOpenMobileMenu={() => setMobileOpen(true)}
-          user={user}
-          onOpenLoginModal={() => setIsLoginModalOpen(true)}
-          questConnected={questConnected}
-          streamConnected={streamConnected}
-        />
-
-        <main className={`flex-1 w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 max-w-7xl transition-colors duration-500 ${tabAtmosphere}`}>
-          {activeTab === 'home' && (
-            user && token ? (
-              <DashboardOverview
-                user={user}
-                token={token}
-                questConnected={questConnected}
-                streamConnected={streamConnected}
-                quests={quests}
-                jobs={jobs}
-                loadingQuests={loadingQuests}
-                onRefreshQuests={loadQuests}
-                streamStatus={streamStatus}
-                loadingStream={loadingStream}
-                onRefreshStream={loadStreamStatus}
-                logs={logs}
-                onNavigateTab={(tab) => handleSelectTab(tab)}
-                onOpenLoginModal={() => setIsLoginModalOpen(true)}
-              />
-            ) : (
-              <LandingPage
-                onOpenLoginModal={() => setIsLoginModalOpen(true)}
-                questConnected={questConnected}
-                streamConnected={streamConnected}
-                onNavigateTab={(tab) => handleSelectTab(tab)}
-              />
-            )
-          )}
-
-          {activeTab === 'about' && (
-            <AboutPage
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'home' && (
+          user && token ? (
+            <DashboardOverview
+              user={user}
+              token={token}
               questConnected={questConnected}
               streamConnected={streamConnected}
-              onNavigateTab={handleSelectTab}
-              onOpenLoginModal={() => setIsLoginModalOpen(true)}
-              isLoggedIn={Boolean(user && token)}
-            />
-          )}
-
-          {activeTab === 'quests' && (
-            <QuestDashboard
-              token={token}
               quests={quests}
               jobs={jobs}
-              loading={loadingQuests}
-              onRefresh={loadQuests}
+              loadingQuests={loadingQuests}
+              onRefreshQuests={loadQuests}
+              streamStatus={streamStatus}
+              loadingStream={loadingStream}
+              onRefreshStream={loadStreamStatus}
+              logs={logs}
+              onNavigateTab={(tab) => handleSelectTab(tab)}
               onOpenLoginModal={() => setIsLoginModalOpen(true)}
             />
-          )}
-
-          {activeTab === 'stream' && (
-            <StreamDashboard
-              status={streamStatus}
-              loading={loadingStream}
-              onRefresh={loadStreamStatus}
+          ) : (
+            <LandingPage
+              onOpenLoginModal={() => setIsLoginModalOpen(true)}
+              questConnected={questConnected}
               streamConnected={streamConnected}
+              onNavigateTab={(tab) => handleSelectTab(tab)}
             />
-          )}
+          )
+        )}
 
-          {activeTab === 'badges' && <BadgeDashboard />}
+        {activeTab === 'about' && (
+          <AboutPage
+            questConnected={questConnected}
+            streamConnected={streamConnected}
+            onNavigateTab={handleSelectTab}
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            isLoggedIn={Boolean(user && token)}
+          />
+        )}
 
-          {activeTab === 'logs' && (
-            <TerminalLogs logs={logs} onClear={() => setLogs([])} />
-          )}
-        </main>
-      </div>
+        {activeTab === 'quests' && (
+          <QuestDashboard
+            token={token}
+            quests={quests}
+            jobs={jobs}
+            loading={loadingQuests}
+            onRefresh={loadQuests}
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
+          />
+        )}
+
+        {activeTab === 'stream' && (
+          <StreamDashboard
+            status={streamStatus}
+            loading={loadingStream}
+            onRefresh={loadStreamStatus}
+            streamConnected={streamConnected}
+          />
+        )}
+
+        {activeTab === 'badges' && <BadgeDashboard />}
+
+        {activeTab === 'logs' && (
+          <TerminalLogs logs={logs} onClear={() => setLogs([])} />
+        )}
+      </main>
 
       <LoginModal
         isOpen={isLoginModalOpen}

@@ -72,7 +72,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="panel bg-[#0C0E17] border border-white/[0.1] rounded-2xl max-w-md w-full overflow-hidden shadow-elevated">
+      <div className="glass-panel-elevated rounded-2xl max-w-md w-full overflow-hidden">
         <div className="flex items-center justify-between p-4 px-5 border-b border-white/[0.08]">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-700 flex items-center justify-center text-white shadow-glow-sm">

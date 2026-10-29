@@ -10,8 +10,8 @@
 
   body {
     font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: #040508;
-    color: #F1F5F9;
+    background-color: #030407;
+    color: #F8FAFC;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -23,60 +23,55 @@
 
   :focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.6), 0 0 0 4px #040508;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.6), 0 0 0 4px #030407;
   }
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #040508;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #171B2A;
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #2A314C;
+  background: rgba(255, 255, 255, 0.22);
 }
 
-.bg-cosmic-grid {
-  background-size: 32px 32px;
+.cosmic-mesh {
+  background-image: 
+    radial-gradient(at 20% 0%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
+    radial-gradient(at 80% 10%, rgba(139, 92, 246, 0.08) 0px, transparent 40%),
+    radial-gradient(at 50% 50%, rgba(6, 182, 212, 0.04) 0px, transparent 60%);
+}
+
+.cosmic-grid-subtle {
+  background-size: 40px 40px;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
 }
 
-.bg-cosmic-glow {
-  background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.12) 0%, rgba(139, 92, 246, 0.05) 35%, transparent 70%);
-}
-
-.panel {
-  background-color: #0C0E17;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.875rem;
-  position: relative;
-}
-
-.panel-subtle {
-  background-color: #111420;
+.glass-panel {
+  background: rgba(14, 18, 30, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 0.75rem;
 }
 
-.panel-interactive {
-  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.panel-interactive:hover {
-  border-color: rgba(99, 102, 241, 0.35);
-  background-color: #131726;
-  transform: translateY(-1px);
+.glass-panel-elevated {
+  background: rgba(18, 23, 38, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
 .btn-primary {
@@ -84,26 +79,26 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-image: linear-gradient(135deg, #6366F1 0%, #4F46E5 50%, #4338CA 100%);
+  background-image: linear-gradient(135deg, #6366F1 0%, #4F46E5 60%, #4338CA 100%);
   color: #FFFFFF;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  padding: 0.5rem 0.95rem;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 16px -2px rgba(99, 102, 241, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.55rem 1.1rem;
+  border-radius: 0.625rem;
+  box-shadow: 0 4px 18px -2px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-primary:hover:not(:disabled) {
-  background-image: linear-gradient(135deg, #818CF8 0%, #6366F1 50%, #4F46E5 100%);
-  box-shadow: 0 0 22px 0 rgba(99, 102, 241, 0.5);
-  transform: translateY(-0.5px);
+  background-image: linear-gradient(135deg, #818CF8 0%, #6366F1 60%, #4F46E5 100%);
+  box-shadow: 0 6px 24px -2px rgba(99, 102, 241, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
 }
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
 }
 .btn-primary:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -113,24 +108,27 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.035);
   color: #E2E8F0;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  font-size: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.8125rem;
   font-weight: 600;
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.5rem;
-  backdrop-filter: blur(8px);
-  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.55rem 1rem;
+  border-radius: 0.625rem;
+  backdrop-filter: blur(10px);
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-secondary:hover:not(:disabled) {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.15);
   color: #FFFFFF;
-  transform: translateY(-0.5px);
+  transform: translateY(-1px);
+}
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
 }
 .btn-secondary:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
@@ -139,37 +137,21 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background-color: rgba(244, 63, 94, 0.1);
+  background-color: rgba(244, 63, 94, 0.08);
   color: #FB7185;
-  border: 1px solid rgba(244, 63, 94, 0.25);
-  font-size: 0.75rem;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  font-size: 0.8125rem;
   font-weight: 600;
-  padding: 0.5rem 0.875rem;
-  border-radius: 0.5rem;
-  transition: all 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 0.55rem 1rem;
+  border-radius: 0.625rem;
+  transition: all 180ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-danger:hover:not(:disabled) {
-  background-color: rgba(244, 63, 94, 0.2);
-  border-color: rgba(244, 63, 94, 0.4);
+  background-color: rgba(244, 63, 94, 0.16);
+  border-color: rgba(244, 63, 94, 0.35);
   color: #FFE4E6;
 }
 .btn-danger:disabled {
-  opacity: 0.45;
+  opacity: 0.4;
   cursor: not-allowed;
-}
-
-.radar-dot {
-  position: relative;
-  display: inline-flex;
-  width: 0.5rem;
-  height: 0.5rem;
-}
-.radar-dot::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 9999px;
-  background-color: inherit;
-  opacity: 0.75;
-  animation: radar 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

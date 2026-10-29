@@ -36,7 +36,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="panel bg-[#0C0E17] border border-white/[0.1] rounded-2xl max-w-sm w-full overflow-hidden shadow-elevated">
+      <div className="glass-panel-elevated rounded-2xl max-w-sm w-full overflow-hidden">
         <div className="p-5 space-y-3.5">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">

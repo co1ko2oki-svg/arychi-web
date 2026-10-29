@@ -5,7 +5,6 @@ import {
   Award,
   ArrowRight,
   Lock,
-  HelpCircle,
   ChevronDown,
   ChevronUp,
   Server,
@@ -13,8 +12,10 @@ import {
   ShieldCheck,
   CheckCircle2,
   Zap,
+  Terminal,
+  Activity,
 } from 'lucide-react';
-import { NavTabId } from './Sidebar';
+import { NavTabId } from './Navbar';
 
 interface LandingPageProps {
   onOpenLoginModal: () => void;
@@ -40,35 +41,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   return (
-    <div className="space-y-12 py-4 max-w-5xl mx-auto">
-      <section className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0C14] p-8 sm:p-12 text-center space-y-6 shadow-panel">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_0%,rgba(99,102,241,0.14),transparent_70%)] pointer-events-none" />
-        <div className="relative space-y-4 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-slate-300">
+    <div className="space-y-20 py-6 max-w-6xl mx-auto">
+      <section className="relative pt-6 pb-12 text-center space-y-8">
+        <div className="space-y-5 max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-slate-300 backdrop-blur-md">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
             </span>
-            <span>Arychi Suite v2.0</span>
+            <span className="font-semibold text-white">Arychi Suite v2.0</span>
             <span className="text-slate-600">•</span>
-            <span className="text-indigo-400 font-mono">Localhost Automation Engine</span>
+            <span className="text-indigo-400 font-mono text-[11px]">Localhost Automation Platform</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
-            Tự Động Hóa Discord <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-cyan-400 bg-clip-text text-transparent">
-              Chuyên Nghiệp &amp; Cục Bộ
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-white tracking-tight leading-[1.12]">
+            Tự Động Hóa Discord <br />
+            <span className="bg-gradient-to-r from-indigo-300 via-indigo-100 to-cyan-300 bg-clip-text text-transparent">
+              Cục Bộ &amp; Chuyên Sâu
             </span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Hợp nhất 3 giải pháp độc lập chạy trực tiếp trên thiết bị của bạn: Tự động hoàn thành Discord Quests không cần game, truyền phát video vào Voice Channel 24/7 và cày giờ chơi hồ sơ qua Discord Science API.
+          <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed font-normal">
+            Hợp nhất 3 giải pháp độc lập chạy trực tiếp trên thiết bị của bạn: Tự động hoàn thành Discord Quests không cần tải game, truyền phát video vào Voice Channel và cày giờ chơi hồ sơ qua Discord Science API.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-3">
             <button
               onClick={onOpenLoginModal}
-              className="btn-primary py-3 px-6 text-xs sm:text-sm shadow-glow-md"
+              className="btn-primary py-3 px-6 text-sm shadow-xl shadow-indigo-500/25"
             >
               <span>Kết Nối Tài Khoản Discord</span>
               <ArrowRight className="w-4 h-4" />
@@ -76,239 +76,254 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <button
               onClick={() => navigateTo('about')}
-              className="btn-secondary py-3 px-5 text-xs sm:text-sm"
+              className="btn-secondary py-3 px-5 text-sm"
             >
               <Info className="w-4 h-4 text-indigo-400" />
-              <span>Giới Thiệu Chi Tiết</span>
+              <span>Tìm Hiểu Kiến Trúc</span>
             </button>
           </div>
         </div>
-      </section>
 
-      <section id="architecture" className="panel p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/[0.08]">
-          <div>
+        <div className="max-w-2xl mx-auto pt-4">
+          <div className="glass-panel rounded-2xl p-3 px-6 flex flex-wrap items-center justify-around gap-4 text-xs font-mono">
             <div className="flex items-center gap-2">
-              <Server className="w-4 h-4 text-indigo-400" />
-              <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">Sơ Đồ Dịch Vụ Cục Bộ</h2>
-              <span className="text-slate-600 font-light select-none text-sm">/</span>
-              <span className="text-indigo-400 font-medium text-xs sm:text-sm">Kiến Trúc Vận Hành Độc Lập</span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Toàn bộ dữ liệu và tiến trình xử lý nằm hoàn toàn trên máy trạm của bạn, giao tiếp trực tiếp Discord API.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 text-xs font-mono shrink-0">
-            <span className="flex items-center gap-2 text-slate-400 bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/[0.06]">
               <span className="relative flex h-2 w-2">
                 {questConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${questConnected ? 'bg-emerald-400' : 'bg-rose-500'}`} />
               </span>
-              :3001 {questConnected ? 'Online' : 'Offline'}
-            </span>
-            <span className="flex items-center gap-2 text-slate-400 bg-white/[0.03] px-3 py-1.5 rounded-lg border border-white/[0.06]">
+              <span className="text-slate-400">Quest Engine</span>
+              <span className={`font-semibold ${questConnected ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {questConnected ? ':3001 Online' : ':3001 Offline'}
+              </span>
+            </div>
+
+            <div className="w-[1px] h-4 bg-white/[0.08] hidden sm:block" />
+
+            <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 {streamConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
                 <span className={`relative inline-flex rounded-full h-2 w-2 ${streamConnected ? 'bg-emerald-400' : 'bg-amber-500'}`} />
               </span>
-              :3000 {streamConnected ? 'Live' : 'Standby'}
-            </span>
+              <span className="text-slate-400">StreamBot Voice</span>
+              <span className={`font-semibold ${streamConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {streamConnected ? ':3000 Live' : ':3000 Standby'}
+              </span>
+            </div>
+
+            <div className="w-[1px] h-4 bg-white/[0.08] hidden sm:block" />
+
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-indigo-400" />
+              <span className="text-slate-400">Science Telemetry</span>
+              <span className="text-indigo-400 font-semibold">Python Ready</span>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="panel-subtle p-5 space-y-3 relative overflow-hidden group hover:border-indigo-500/40 transition-colors">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase tracking-widest px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20">
-                Module 01
-              </span>
-              <span className="text-[10px] font-mono text-slate-500">Port :3001</span>
+      <section className="space-y-8">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">
+              Kiến Trúc Dịch Vụ
+            </span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            3 Trụ Cột Tự Động Hóa Chuyên Biệt
+          </h2>
+          <p className="text-sm text-slate-400 max-w-2xl leading-relaxed">
+            Mỗi module vận hành độc lập trên cổng mạng riêng biệt, giao tiếp trực tiếp hạ tầng Discord API qua kết nối Loopback nội bộ.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between space-y-5 hover:border-indigo-500/30 transition-all duration-200">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-indigo-400 px-2 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20">
+                  PORT :3001
+                </span>
+                <Sparkles className="w-5 h-5 text-indigo-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Quest Engine</h3>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  Cào danh sách nhiệm vụ từ Discord, mô phỏng heartbeat 30 giây định kỳ theo chuẩn client Desktop và tự động nhận phần thưởng game mà không cần tải game nặng 50GB-100GB.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
-                Quest Engine
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Tự động cào danh sách nhiệm vụ, mô phỏng xem video theo chu kỳ heartbeat và nhận phần thưởng game mà không cần tải game.
-              </p>
-            </div>
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-500">Fastify • WS API</span>
+
+            <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-[11px] font-mono text-slate-500">Fastify + WebSocket</span>
               <button
                 onClick={() => navigateTo('quests')}
-                className="text-xs text-indigo-400 hover:text-indigo-300 font-medium inline-flex items-center gap-1"
+                className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1.5 transition-colors"
               >
-                <span>Xem Quests</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>Xem nhiệm vụ</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          <div className="panel-subtle p-5 space-y-3 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-widest px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
-                Module 02
-              </span>
-              <span className="text-[10px] font-mono text-slate-500">Port :3000</span>
+          <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between space-y-5 hover:border-amber-500/30 transition-all duration-200">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-amber-400 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20">
+                  PORT :3000
+                </span>
+                <Tv className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">StreamBot Voice</h3>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  Phát trực tiếp YouTube, Twitch hoặc file video MP4 vào phòng họp thoại Voice Channel với âm thanh Opus chất lượng cao, tích hợp tính năng Viewer Farm cày phút xem 24/7.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
-                StreamBot Voice
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Phát video trực tiếp từ YouTube, Twitch hoặc file MP4 vào phòng thoại Discord với yt-dlp và FFmpeg, tích hợp Viewer Farm 24/7.
-              </p>
-            </div>
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-500">Opus • FFmpeg</span>
+
+            <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-[11px] font-mono text-slate-500">FFmpeg + Opus Codec</span>
               <button
                 onClick={() => navigateTo('stream')}
-                className="text-xs text-amber-400 hover:text-amber-300 font-medium inline-flex items-center gap-1"
+                className="text-xs font-semibold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1.5 transition-colors"
               >
-                <span>Mở StreamBot</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>Mở phát stream</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          <div className="panel-subtle p-5 space-y-3 relative overflow-hidden group hover:border-emerald-500/40 transition-colors">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                Module 03
-              </span>
-              <span className="text-[10px] font-mono text-slate-500">Python 3</span>
+          <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between space-y-5 hover:border-emerald-500/30 transition-all duration-200">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                  PYTHON 3
+                </span>
+                <Award className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Science Telemetry</h3>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  Tạo chữ ký Windows PE Fingerprint gửi các gói tin telemetry trực tiếp lên <code className="text-emerald-400 font-mono">/api/v9/science</code> để tăng giờ chơi và mở khóa mốc game trên trang cá nhân.
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
-                Science Spoofer
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Tạo chữ ký bảo mật Windows PE Fingerprint gửi telemetry lên <code className="text-emerald-400 font-mono">/api/v9/science</code> để tăng giờ chơi và mở mốc game.
-              </p>
-            </div>
-            <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-500">PE Fingerprint</span>
+
+            <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
+              <span className="text-[11px] font-mono text-slate-500">PE Hash Spoofer</span>
               <button
                 onClick={() => navigateTo('badges')}
-                className="text-xs text-emerald-400 hover:text-emerald-300 font-medium inline-flex items-center gap-1"
+                className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1.5 transition-colors"
               >
-                <span>Cấu Hình</span>
-                <ArrowRight className="w-3 h-3" />
+                <span>Tạo lệnh chạy</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-indigo-400" />
-          <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">Khả Năng Cốt Lõi</h2>
-          <span className="text-slate-600 font-light select-none text-sm">/</span>
-          <span className="text-indigo-400 font-medium text-xs sm:text-sm">Giải Pháp Độc Quyền Thiết Kế Chuyên Biệt</span>
+      <section className="space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">
+            Năng Lực Cốt Lõi
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            An Toàn &amp; Không Phụ Thuộc Máy Chủ Đám Mây
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="panel p-5 space-y-2.5 hover:border-indigo-500/30 transition-colors">
-            <div className="flex items-center gap-2.5 text-indigo-400">
-              <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                <Sparkles className="w-3.5 h-3.5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Tự Động 100% Discord Quests</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+              <Lock className="w-5 h-5" />
             </div>
+            <h3 className="text-base font-bold text-white">Bảo Mật Cục Bộ 100% (Client-Side Only)</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Hệ thống tự động gửi các gói tin telemetry định kỳ tương tự như client Discord chính thức. Bạn không cần tải hay cài đặt bất kỳ trò chơi nặng 50GB-100GB nào.
+              Discord User Token được lưu trữ trong LocalStorage trình duyệt của bạn và gửi thẳng về backend máy tính nội bộ localhost:3001. Tuyệt đối không có bất kỳ máy chủ bên thứ ba nào thu thập hay trung chuyển dữ liệu.
             </p>
           </div>
 
-          <div className="panel p-5 space-y-2.5 hover:border-amber-500/30 transition-colors">
-            <div className="flex items-center gap-2.5 text-amber-400">
-              <div className="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
-                <Tv className="w-3.5 h-3.5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Phát Video Kênh Thoại &amp; Viewer Farm</h3>
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+              <Zap className="w-5 h-5" />
             </div>
+            <h3 className="text-base font-bold text-white">Mô Phỏng Nhịp Độ Chuẩn (Anti-Rate Limit)</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Truyền phát trực tiếp từ các liên kết YouTube hoặc video MP4 vào phòng họp thoại với chuẩn âm thanh tối ưu, kèm chế độ tự động farm phút xem stream.
+              Tiến trình làm quest và telemetry được thiết kế với chu kỳ đệm tự nhiên tương tự ứng dụng chính thức, không bắn dồn dập nhằm triệt tiêu nguy cơ vi phạm giới hạn tốc độ (HTTP 429).
             </p>
           </div>
 
-          <div className="panel p-5 space-y-2.5 hover:border-emerald-500/30 transition-colors">
-            <div className="flex items-center gap-2.5 text-emerald-400">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                <Award className="w-3.5 h-3.5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Cày Giờ Chơi Hồ Sơ Qua Science API</h3>
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+              <Tv className="w-5 h-5" />
             </div>
+            <h3 className="text-base font-bold text-white">Truyền Phát Video Voice Đa Nguồn</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Tạo chữ ký bảo mật Windows PE để gửi telemetry nhịp độ chơi game trực tiếp tới máy chủ Discord, mở khóa mốc giờ chơi và danh sách game trên trang cá nhân.
+              Giải mã trực tiếp luồng stream YouTube hoặc file video cục bộ với binary FFmpeg và yt-dlp tích hợp sẵn, hỗ trợ phát lặp vô hạn và cày giờ xem cho thành viên phòng thoại.
             </p>
           </div>
 
-          <div className="panel p-5 space-y-2.5 hover:border-cyan-500/30 transition-colors">
-            <div className="flex items-center gap-2.5 text-cyan-400">
-              <div className="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-                <Lock className="w-3.5 h-3.5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Bảo Mật Cục Bộ 100% (Client-Side Only)</h3>
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+              <ShieldCheck className="w-5 h-5" />
             </div>
+            <h3 className="text-base font-bold text-white">Minh Bạch Mã Nguồn (Audit-Ready)</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Discord User Token được lưu trữ trong LocalStorage trình duyệt của bạn và gửi thẳng về backend máy tính cục bộ. Không có bất kỳ máy chủ bên thứ ba nào can thiệp.
+              Toàn bộ source code TypeScript và script Python nằm ngay trên máy của bạn. Bạn có thể mở bất kỳ tệp tin nào để kiểm tra logic xử lý gói tin hoặc mở tab F12 Network để giám sát.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="panel p-6 sm:p-8 space-y-5">
-        <div className="flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-indigo-400" />
-          <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">Khởi Chạy Nhanh</h2>
-          <span className="text-slate-600 font-light select-none text-sm">/</span>
-          <span className="text-indigo-400 font-medium text-xs sm:text-sm">Vận Hành Hệ Thống Trong 3 Bước</span>
+      <section className="space-y-8">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">
+            Bắt Đầu Nhanh
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Vận Hành Hệ Thống Trong 3 Bước
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="panel-subtle p-4 rounded-xl space-y-2">
-            <span className="font-mono text-xs font-bold text-indigo-400 uppercase tracking-wider">
-              Bước 01
-            </span>
-            <p className="text-xs text-slate-200 font-bold">Khởi động launcher.mjs</p>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Chạy file <code className="text-indigo-300 bg-white/[0.04] px-1 py-0.5 rounded font-mono">start.bat</code> để khởi chạy đồng thời Backend Quests (:3001), StreamBot (:3000) và Web Dashboard (:5173).
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <span className="text-xs font-mono font-bold text-indigo-400">01 / KHỞI ĐỘNG</span>
+            <h3 className="text-base font-bold text-white">Chạy start.bat</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Nhấp đúp file <code className="text-indigo-300 font-mono bg-white/[0.05] px-1.5 py-0.5 rounded">start.bat</code> ở thư mục gốc để mở đồng thời cả Backend Quest (:3001), StreamBot (:3000) và Web Dashboard (:5173).
             </p>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl space-y-2">
-            <span className="font-mono text-xs font-bold text-indigo-400 uppercase tracking-wider">
-              Bước 02
-            </span>
-            <p className="text-xs text-slate-200 font-bold">Lấy Token Discord</p>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Mở Discord Web, nhấn F12 &gt; tab Network &gt; lọc <code className="text-indigo-300 bg-white/[0.04] px-1 py-0.5 rounded font-mono">science</code> hoặc <code className="text-indigo-300 bg-white/[0.04] px-1 py-0.5 rounded font-mono">/users/@me</code> và sao chép header Authorization.
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <span className="text-xs font-mono font-bold text-indigo-400">02 / TOKEN DISCORD</span>
+            <h3 className="text-base font-bold text-white">Lấy User Token</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Mở Discord trên Chrome/Edge, nhấn <kbd className="font-mono bg-white/[0.08] px-1 rounded">F12</kbd> &gt; tab Network &gt; lọc <code className="text-indigo-300 font-mono bg-white/[0.05] px-1.5 py-0.5 rounded">science</code> hoặc <code className="text-indigo-300 font-mono bg-white/[0.05] px-1.5 py-0.5 rounded">/users/@me</code> và sao chép header Authorization.
             </p>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl space-y-2">
-            <span className="font-mono text-xs font-bold text-indigo-400 uppercase tracking-wider">
-              Bước 03
-            </span>
-            <p className="text-xs text-slate-200 font-bold">Kết nối &amp; Vận hành</p>
-            <p className="text-[11px] text-slate-400 leading-relaxed">
-              Bấm nút "Kết Nối Tài Khoản Discord", dán token vào và quản lý tất cả nhiệm vụ từ bảng điều khiển tập trung.
+          <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+            <span className="text-xs font-mono font-bold text-indigo-400">03 / ĐIỀU KHIỂN</span>
+            <h3 className="text-base font-bold text-white">Kết Nối &amp; Vận Hành</h3>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              Bấm nút &quot;Kết Nối Tài Khoản Discord&quot; ở góc trên, dán token vào và quản lý tất cả nhiệm vụ, stream voice từ bảng điều khiển tập trung.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="panel p-6 sm:p-8 space-y-4">
-        <div className="flex items-center gap-2">
-          <HelpCircle className="w-4 h-4 text-indigo-400" />
-          <h2 className="text-sm sm:text-base font-bold text-white tracking-tight">Giải Đáp Kỹ Thuật (FAQ)</h2>
-          <span className="text-slate-600 font-light select-none text-sm">/</span>
-          <span className="text-indigo-400 font-medium text-xs sm:text-sm">Bảo Mật Tài Khoản &amp; Cơ Chế Vận Hành</span>
+      <section className="space-y-6 pt-4">
+        <div className="space-y-2">
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">
+            Câu Hỏi Thường Gặp
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+            Giải Đáp Kỹ Thuật (FAQ)
+          </h2>
         </div>
 
-        <div className="space-y-2.5">
+        <div className="divide-y divide-white/[0.06] border-y border-white/[0.06]">
           {[
             {
               q: 'Token của tôi có được gửi ra máy chủ bên ngoài không?',
@@ -316,31 +331,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             },
             {
               q: 'Tại sao làm quest không cần phải tải game?',
-              a: 'Discord xác định tiến độ quest thông qua các gói tin telemetry định kỳ (heartbeat) được gửi từ ứng dụng Discord Desktop. Backend Arychi mô phỏng chính xác các gói tin này theo định dạng chính thức.',
+              a: 'Discord xác định tiến độ quest thông qua các gói tin telemetry định kỳ (heartbeat) được gửi từ ứng dụng Discord Desktop. Backend Arychi mô phỏng chính xác các gói tin này theo định dạng chính thức với chu kỳ 30 giây.',
             },
             {
               q: 'StreamBot cần những phần mềm gì trên máy?',
-              a: 'StreamBot đã tích hợp sẵn yt-dlp và sử dụng binary ffmpeg cục bộ. Bạn chỉ cần đảm bảo máy tính đã cài đặt Node.js phiên bản 18 trở lên.',
+              a: 'StreamBot đã tích hợp sẵn yt-dlp và sử dụng binary ffmpeg cục bộ trong thư mục node_modules. Bạn chỉ cần đảm bảo máy tính đã cài đặt Node.js phiên bản 18 trở lên.',
             },
           ].map((item, idx) => {
             const isOpen = openFaq === idx;
             return (
-              <div key={idx} className="panel-subtle rounded-xl overflow-hidden border border-white/[0.06]">
+              <div key={idx} className="py-4">
                 <button
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  className="w-full p-4 text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-colors"
+                  className="w-full text-left flex items-center justify-between text-sm font-bold text-slate-200 hover:text-white transition-colors"
                 >
                   <span>{item.q}</span>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-indigo-400 shrink-0 ml-4" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-500 shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-slate-500 shrink-0 ml-4" />
                   )}
                 </button>
                 {isOpen && (
-                  <div className="px-4 pb-4 text-xs text-slate-400 leading-relaxed border-t border-white/[0.04] pt-3">
+                  <p className="mt-3 text-xs text-slate-400 leading-relaxed max-w-3xl">
                     {item.a}
-                  </div>
+                  </p>
                 )}
               </div>
             );
@@ -348,20 +363,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      <footer className="pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+      <footer className="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Arychi Dashboard • Production Discord Automation Platform</span>
+          <span className="font-bold text-slate-400">Arychi Suite v2.0.0</span>
+          <span>•</span>
+          <span>Localhost Automation Environment</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 text-slate-400">
           <button
             onClick={() => navigateTo('about')}
-            className="hover:text-indigo-400 text-slate-400 transition-colors"
+            className="hover:text-indigo-400 transition-colors"
           >
             Trang Giới Thiệu
           </button>
-          <span>&bull;</span>
-          <span className="font-mono text-[11px] text-slate-400">Localhost Environment</span>
+          <span>•</span>
+          <button
+            onClick={() => navigateTo('quests')}
+            className="hover:text-indigo-400 transition-colors"
+          >
+            Nhiệm Vụ
+          </button>
+          <span>•</span>
+          <button
+            onClick={() => navigateTo('stream')}
+            className="hover:text-indigo-400 transition-colors"
+          >
+            StreamBot
+          </button>
         </div>
       </footer>
     </div>

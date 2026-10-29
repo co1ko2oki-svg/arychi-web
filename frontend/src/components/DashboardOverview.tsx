@@ -8,18 +8,17 @@ import {
   Square,
   RefreshCw,
   ArrowRight,
-  Activity,
-  Radio,
+  ShieldCheck,
   CheckCircle2,
   Clock,
+  Radio,
   ExternalLink,
   Info,
-  ShieldCheck,
 } from 'lucide-react';
 import { AuthUser, QuestDTO, QuestJob, LogEntry, StreamStatus } from '../types';
 import { questApi, streamApi } from '../services/api';
 import { useToast } from './Toast';
-import { NavTabId } from './Sidebar';
+import { NavTabId } from './Navbar';
 
 interface DashboardOverviewProps {
   user: AuthUser;
@@ -141,45 +140,32 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const recentLogs = logs.slice(-5).reverse();
 
   return (
-    <div className="space-y-6">
-      <div className="panel p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0A0C14] border-white/[0.08] shadow-panel">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+    <div className="space-y-8 max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
+        <div className="space-y-1">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
               Bảng Điều Khiển
             </h1>
-            <span className="text-slate-600 font-light select-none text-base">/</span>
-            <span className="text-xs sm:text-sm font-semibold text-indigo-400">
-              Giám Sát Vận Hành &amp; Điều Khiển Nhanh
-            </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-300 border border-white/[0.08]">
-              @{user.username}
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
+              <ShieldCheck className="w-3 h-3" />
+              <span>@{user.username}</span>
+            </div>
           </div>
-          <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-            Giám sát trạng thái thực thi của 3 module: Discord Quests (:3001), StreamBot Voice (:3000) và Science Telemetry.
+          <p className="text-xs sm:text-sm text-slate-400">
+            Giám sát vận hành 3 module: Discord Quests (:3001), StreamBot Voice (:3000) và Science Telemetry.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 flex-wrap">
-          <button
-            onClick={() => onNavigateTab('about')}
-            className="btn-secondary text-xs"
-            title="Xem giới thiệu hệ thống &amp; kiến trúc"
-          >
-            <Info className="w-3.5 h-3.5 text-indigo-400" />
-            <span>Giới Thiệu</span>
-          </button>
-
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
           <button
             onClick={() => {
               onRefreshQuests();
               onRefreshStream();
-              toast.info('Đã đồng bộ lại dữ liệu từ các dịch vụ');
+              toast.info('Đã đồng bộ lại dữ liệu');
             }}
             disabled={loadingQuests}
-            className="btn-secondary text-xs"
-            title="Làm mới trạng thái"
+            className="btn-secondary text-xs py-2 px-3.5"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingQuests ? 'animate-spin' : ''}`} />
             <span>Đồng Bộ</span>
@@ -189,7 +175,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <button
               onClick={handleStopAll}
               disabled={questActionLoading.all}
-              className="btn-danger text-xs"
+              className="btn-danger text-xs py-2 px-4"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
               <span>Dừng Tất Cả ({runningJobs.length})</span>
@@ -198,7 +184,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <button
               onClick={handleStartAll}
               disabled={questActionLoading.all || quests.length === 0}
-              className="btn-primary text-xs"
+              className="btn-primary text-xs py-2 px-4 shadow-md"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
               <span>Chạy Toàn Bộ Quests</span>
@@ -207,105 +193,46 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <div className="panel p-4 flex items-center justify-between border-white/[0.08] hover:border-indigo-500/30 transition-colors">
-          <div className="flex items-center gap-3">
-            <span className="relative flex h-2.5 w-2.5">
-              {questConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${questConnected ? 'bg-emerald-400' : 'bg-rose-500'}`} />
-            </span>
-            <div>
-              <p className="text-xs font-bold text-white">Quest Engine</p>
-              <p className="text-[10px] font-mono text-slate-400">Port :3001 • REST &amp; WebSocket</p>
-            </div>
-          </div>
-          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-            questConnected
-              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-              : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-          }`}>
-            {questConnected ? 'ONLINE' : 'OFFLINE'}
-          </span>
-        </div>
-
-        <div className="panel p-4 flex items-center justify-between border-white/[0.08] hover:border-amber-500/30 transition-colors">
-          <div className="flex items-center gap-3">
-            <span className="relative flex h-2.5 w-2.5">
-              {streamConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
-              <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${streamConnected ? 'bg-emerald-400' : 'bg-amber-500'}`} />
-            </span>
-            <div>
-              <p className="text-xs font-bold text-white">StreamBot Voice</p>
-              <p className="text-[10px] font-mono text-slate-400">Port :3000 • yt-dlp &amp; FFmpeg</p>
-            </div>
-          </div>
-          <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
-            streamConnected
-              ? streamStatus?.stream.playing
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-              : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-          }`}>
-            {streamConnected ? (streamStatus?.stream.playing ? 'STREAMING' : 'IDLE') : 'STANDBY'}
-          </span>
-        </div>
-
-        <div className="panel p-4 flex items-center justify-between border-white/[0.08] hover:border-indigo-500/30 transition-colors">
-          <div className="flex items-center gap-3">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-400" />
-            </span>
-            <div>
-              <p className="text-xs font-bold text-white">Science Telemetry</p>
-              <p className="text-[10px] font-mono text-slate-400">Python 3 • PE Fingerprint</p>
-            </div>
-          </div>
-          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-            READY
-          </span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="panel p-4 border-white/[0.08]">
-          <p className="text-[11px] font-medium text-slate-400">Nhiệm Vụ Khả Dụng</p>
-          <div className="flex items-baseline justify-between mt-1.5">
-            <span className="text-xl sm:text-2xl font-extrabold text-white">{totalQuests}</span>
-            <span className="text-[11px] text-slate-500 font-mono">Quests</span>
+      <div className="glass-panel rounded-2xl p-4 sm:p-6 grid grid-cols-2 md:grid-cols-4 gap-4 divide-y md:divide-y-0 md:divide-x divide-white/[0.06]">
+        <div className="px-2 pt-2 md:pt-0">
+          <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">Nhiệm Vụ Khả Dụng</p>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-extrabold text-white">{totalQuests}</span>
+            <span className="text-xs font-mono text-slate-500">nhiệm vụ</span>
           </div>
         </div>
 
-        <div className="panel p-4 border-white/[0.08]">
-          <p className="text-[11px] font-medium text-slate-400">Tác Vụ Đang Chạy</p>
-          <div className="flex items-baseline justify-between mt-1.5">
-            <span className="text-xl sm:text-2xl font-extrabold text-indigo-400">{runningJobs.length}</span>
+        <div className="px-2 pt-4 md:pt-0 md:pl-6">
+          <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">Đang Thực Thi</p>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-extrabold text-indigo-400">{runningJobs.length}</span>
             {runningJobs.length > 0 && (
-              <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded border border-indigo-500/30 shadow-glow-sm">
+              <span className="text-[10px] font-mono text-indigo-300 bg-indigo-500/15 px-2 py-0.5 rounded-full border border-indigo-500/25">
                 ACTIVE
               </span>
             )}
           </div>
         </div>
 
-        <div className="panel p-4 border-white/[0.08]">
-          <p className="text-[11px] font-medium text-slate-400">Đã Hoàn Thành</p>
-          <div className="flex items-baseline justify-between mt-1.5">
-            <span className="text-xl sm:text-2xl font-extrabold text-emerald-400">{completedQuests}</span>
+        <div className="px-2 pt-4 md:pt-0 md:pl-6">
+          <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">Đã Hoàn Thành</p>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-3xl font-extrabold text-emerald-400">{completedQuests}</span>
             {claimableQuests > 0 && (
-              <span className="text-[10px] font-mono text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30">
+              <span className="text-[10px] font-mono text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/25">
                 {claimableQuests} chờ nhận
               </span>
             )}
           </div>
         </div>
 
-        <div className="panel p-4 border-white/[0.08]">
-          <p className="text-[11px] font-medium text-slate-400">Stream Voice</p>
-          <div className="flex items-baseline justify-between mt-1.5">
-            <span className="text-xs sm:text-sm font-semibold text-slate-200 truncate max-w-[120px]">
-              {streamStatus?.stream.playing ? 'Đang phát' : 'Không có stream'}
+        <div className="px-2 pt-4 md:pt-0 md:pl-6">
+          <p className="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">StreamBot Voice</p>
+          <div className="flex items-baseline gap-2 mt-2">
+            <span className="text-sm font-bold text-white truncate max-w-[140px]">
+              {streamStatus?.stream.playing ? 'Đang phát video' : streamConnected ? 'Nhàn rỗi' : 'Offline'}
             </span>
-            <span className="text-[10px] font-mono text-slate-500">
+            <span className="text-xs font-mono text-slate-500">
               {streamStatus?.bot.ping ?? 0}ms
             </span>
           </div>
@@ -313,49 +240,49 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       </div>
 
       {runningJobs.length > 0 && (
-        <div className="panel p-5 space-y-3 border-indigo-500/40 bg-[#0E1222]">
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
               </span>
-              <h2 className="text-xs sm:text-sm font-bold text-white">
-                Tiến Trình Đang Chạy Thời Gian Thực ({runningJobs.length})
+              <h2 className="text-sm font-bold text-white uppercase tracking-wider">
+                Tiến Trình Thời Gian Thực ({runningJobs.length})
               </h2>
             </div>
-            <span className="text-[11px] text-slate-400 font-mono">WebSocket Sync</span>
+            <span className="text-xs font-mono text-slate-500">WebSocket Sync</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {runningJobs.map((job) => (
               <div
                 key={job.questId}
-                className="panel-subtle p-3.5 flex flex-col justify-between space-y-2.5 border-indigo-500/20"
+                className="glass-panel rounded-2xl p-4 space-y-3 border-indigo-500/30"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="truncate">
-                    <p className="text-xs font-bold text-white truncate">{job.questName}</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 truncate">{job.message}</p>
+                    <p className="text-sm font-bold text-white truncate">{job.questName}</p>
+                    <p className="text-xs text-slate-400 mt-0.5 truncate">{job.message}</p>
                   </div>
                   <button
                     onClick={() => handleStopJob(job.questId)}
                     disabled={questActionLoading[job.questId]}
-                    className="btn-danger py-1 px-2.5 text-[11px] shrink-0"
+                    className="btn-danger py-1 px-2.5 text-xs shrink-0"
                   >
                     <Square className="w-3 h-3 fill-current" />
                     <span>Hủy</span>
                   </button>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-mono text-slate-400">
                     <span>{job.currentSeconds}s / {job.targetSeconds}s</span>
                     <span className="text-indigo-400 font-bold">{job.progressPercent.toFixed(0)}%</span>
                   </div>
-                  <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300 shadow-glow-sm"
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300"
                       style={{ width: `${Math.min(100, Math.max(0, job.progressPercent))}%` }}
                     />
                   </div>
@@ -366,164 +293,122 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="panel p-5 flex flex-col justify-between space-y-4 hover:border-indigo-500/30 transition-colors">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center shrink-0">
-                  <Sparkles className="w-4 h-4" />
-                </div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Nhiệm Vụ Discord
-                </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 glass-panel rounded-2xl p-6 space-y-5">
+          <div className="flex items-center justify-between pb-4 border-b border-white/[0.06]">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                <Tv className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-mono text-slate-500">Port :3001</span>
+              <div>
+                <h3 className="text-sm font-bold text-white">StreamBot Voice Controller</h3>
+                <p className="text-xs text-slate-400">Phát video vào kênh đàm thoại &amp; tự động cày giờ xem</p>
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigateTab('stream')}
+              className="text-xs font-semibold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1 transition-colors"
+            >
+              <span>Xem chi tiết</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={streamInput}
+              onChange={(e) => setStreamInput(e.target.value)}
+              placeholder="Nhập URL YouTube, Twitch hoặc tên file video..."
+              className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              onKeyDown={(e) => e.key === 'Enter' && handlePlayStream()}
+            />
+            <button
+              onClick={handlePlayStream}
+              disabled={streamActionLoading || !streamInput.trim()}
+              className="btn-primary py-2 px-4 text-xs shrink-0"
+            >
+              Phát Video
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05] text-xs">
+            <div>
+              <p className="font-bold text-slate-200">Viewer Farm (Xem Kênh Thoại)</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">Duy trì sự hiện diện tài khoản để mở khóa huy hiệu</p>
+            </div>
+            <button
+              onClick={handleToggleFarm}
+              disabled={streamActionLoading}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
+                streamStatus?.farm.autoWatch
+                  ? 'btn-danger py-1 px-3 text-xs'
+                  : 'btn-primary py-1 px-3 text-xs'
+              }`}
+            >
+              {streamStatus?.farm.autoWatch ? 'Đang Bật' : 'Bật Ngay'}
+            </button>
+          </div>
+        </div>
+
+        <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between space-y-4">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 pb-4 border-b border-white/[0.06]">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Quản Lý Quests</h3>
+                <p className="text-xs text-slate-400">Tự động nhận &amp; claim phần thưởng</p>
+              </div>
             </div>
 
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Tự động enroll, mô phỏng heartbeat xem video hoặc game và nhận quà tặng.
-            </p>
-
-            <div className="panel-subtle p-3 space-y-1 text-xs font-mono">
-              <div className="flex justify-between text-slate-400">
+            <div className="space-y-2 text-xs font-mono text-slate-400">
+              <div className="flex justify-between py-1 border-b border-white/[0.04]">
                 <span>Quests khả dụng:</span>
-                <span className="font-semibold text-slate-200">{totalQuests}</span>
+                <span className="font-bold text-white">{totalQuests}</span>
               </div>
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between py-1 border-b border-white/[0.04]">
                 <span>Chờ nhận quà:</span>
-                <span className="font-semibold text-amber-400">{claimableQuests}</span>
+                <span className="font-bold text-amber-400">{claimableQuests}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span>Trạng thái kết nối:</span>
+                <span className={`font-bold ${questConnected ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  {questConnected ? 'Online :3001' : 'Offline'}
+                </span>
               </div>
             </div>
           </div>
 
           <button
             onClick={() => onNavigateTab('quests')}
-            className="w-full btn-secondary justify-between text-xs"
+            className="w-full btn-secondary text-xs py-2.5 justify-between"
           >
-            <span>Mở Quản Lý Nhiệm Vụ</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="panel p-5 flex flex-col justify-between space-y-4 hover:border-amber-500/30 transition-colors">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center shrink-0">
-                  <Tv className="w-4 h-4" />
-                </div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  StreamBot Voice
-                </h3>
-              </div>
-              <span className="text-[10px] font-mono text-slate-500">Port :3000</span>
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={streamInput}
-                onChange={(e) => setStreamInput(e.target.value)}
-                placeholder="URL YouTube, Twitch hoặc file..."
-                className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-                onKeyDown={(e) => e.key === 'Enter' && handlePlayStream()}
-              />
-              <button
-                onClick={handlePlayStream}
-                disabled={streamActionLoading || !streamInput.trim()}
-                className="btn-primary px-3 py-1.5 text-xs"
-              >
-                Phát
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between panel-subtle p-3 text-xs">
-              <div>
-                <p className="font-medium text-slate-200">Viewer Farm</p>
-                <p className="text-[10px] text-slate-500">Tự động xem kênh cày huy hiệu</p>
-              </div>
-              <button
-                onClick={handleToggleFarm}
-                disabled={streamActionLoading}
-                className={`text-[11px] font-semibold px-2.5 py-1 rounded transition-colors ${
-                  streamStatus?.farm.autoWatch
-                    ? 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 border border-rose-500/30'
-                    : 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30'
-                }`}
-              >
-                {streamStatus?.farm.autoWatch ? 'Đang Bật' : 'Đang Tắt'}
-              </button>
-            </div>
-          </div>
-
-          <button
-            onClick={() => onNavigateTab('stream')}
-            className="w-full btn-secondary justify-between text-xs"
-          >
-            <span>Mở Bảng Điều Khiển Stream</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="panel p-5 flex flex-col justify-between space-y-4 hover:border-emerald-500/30 transition-colors">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0">
-                  <Award className="w-4 h-4" />
-                </div>
-                <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-                  Science Spoofer
-                </h3>
-              </div>
-              <span className="text-[10px] font-mono text-slate-500">Python 3</span>
-            </div>
-
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Gửi telemetry giả lập lên <code className="text-indigo-400 font-mono">/api/v9/science</code> để tăng giờ chơi và danh sách game trên hồ sơ Discord.
-            </p>
-
-            <div className="panel-subtle p-3 space-y-1 text-xs font-mono">
-              <div className="flex justify-between text-slate-400">
-                <span>Chữ ký:</span>
-                <span className="text-slate-200">Windows PE Fingerprint</span>
-              </div>
-              <div className="flex justify-between text-slate-400">
-                <span>Script:</span>
-                <span className="text-slate-200">badge-farm/spoofer.py</span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            onClick={() => onNavigateTab('badges')}
-            className="w-full btn-secondary justify-between text-xs"
-          >
-            <span>Cấu Hình &amp; Lệnh Chạy</span>
+            <span>Mở Bảng Nhiệm Vụ</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      <div className="panel p-5 space-y-3 border-white/[0.08]">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <div className="glass-panel rounded-2xl p-6 space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+          <div className="flex items-center gap-2.5">
             <Terminal className="w-4 h-4 text-slate-400" />
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Nhật Ký Sự Kiện Gần Nhất
+            <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300">
+              Nhật Ký Sự Kiện Trực Tiếp
             </h3>
           </div>
           <button
             onClick={() => onNavigateTab('logs')}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1"
+            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1 transition-colors"
           >
-            <span>Xem Toàn Bộ ({logs.length})</span>
+            <span>Toàn bộ ({logs.length})</span>
             <ArrowRight className="w-3 h-3" />
           </button>
         </div>
 
-        <div className="panel-subtle p-3.5 rounded-xl font-mono text-xs space-y-1.5 max-h-48 overflow-y-auto border-white/[0.06] bg-[#070910]">
+        <div className="font-mono text-xs space-y-1.5 max-h-40 overflow-y-auto">
           {recentLogs.length === 0 ? (
             <p className="text-slate-500 italic py-2">Chưa có sự kiện nào được ghi nhận...</p>
           ) : (
@@ -539,7 +424,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
               return (
                 <div key={index} className="flex items-start gap-2.5 text-[11px] leading-relaxed">
-                  <span className="text-slate-500 select-none shrink-0 font-mono">
+                  <span className="text-slate-500 select-none shrink-0">
                     {new Date(log.timestamp).toLocaleTimeString()}
                   </span>
                   <span className={`uppercase shrink-0 ${color}`}>
