@@ -52,31 +52,31 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
       {children}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none">
         {toasts.map((t) => {
           const config = {
             success: {
               icon: CheckCircle2,
-              border: 'border-emerald-500/30',
-              bg: 'bg-[#101512]',
+              border: 'border-l-4 border-l-emerald-400 border border-white/[0.08]',
+              bg: 'bg-[#08100C]/95',
               text: 'text-emerald-400',
             },
             error: {
               icon: AlertCircle,
-              border: 'border-rose-500/30',
-              bg: 'bg-[#181113]',
+              border: 'border-l-4 border-l-rose-500 border border-white/[0.08]',
+              bg: 'bg-[#150A0E]/95',
               text: 'text-rose-400',
             },
             warning: {
               icon: AlertTriangle,
-              border: 'border-amber-500/30',
-              bg: 'bg-[#18150f]',
+              border: 'border-l-4 border-l-amber-400 border border-white/[0.08]',
+              bg: 'bg-[#141008]/95',
               text: 'text-amber-400',
             },
             info: {
               icon: Info,
-              border: 'border-indigo-500/30',
-              bg: 'bg-[#11131c]',
+              border: 'border-l-4 border-l-indigo-400 border border-white/[0.08]',
+              bg: 'bg-[#0A0D18]/95',
               text: 'text-indigo-400',
             },
           }[t.type];
@@ -86,12 +86,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border ${config.border} ${config.bg} shadow-elevated backdrop-blur-md transition-all duration-200`}
+              className={`pointer-events-auto flex items-start gap-3 p-4 rounded-xl ${config.border} ${config.bg} shadow-elevated backdrop-blur-md transition-all duration-200`}
               role="alert"
             >
               <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${config.text}`} />
               <div className="flex-1 text-xs">
-                {t.title && <p className="font-semibold text-slate-100 mb-0.5">{t.title}</p>}
+                {t.title && <p className="font-bold text-white mb-0.5">{t.title}</p>}
                 <p className="text-slate-300 leading-relaxed break-words">{t.message}</p>
               </div>
               <button

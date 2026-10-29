@@ -16,12 +16,10 @@ import {
   ChevronDown,
   ChevronUp,
   HelpCircle,
-  ExternalLink,
   Code2,
   Activity,
   Zap,
   Globe,
-  Radio,
   Clock,
 } from 'lucide-react';
 import { NavTabId } from './Sidebar';
@@ -54,12 +52,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
   return (
     <div className="space-y-10 py-4 max-w-5xl mx-auto">
-      <section id="section-overview" className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-surface-1 p-6 sm:p-10 space-y-6 shadow-panel">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_0%,rgba(99,102,241,0.12),transparent_70%)] pointer-events-none" />
+      <section id="section-overview" className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0C14] p-6 sm:p-10 space-y-6 shadow-panel">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_75%_65%_at_50%_0%,rgba(99,102,241,0.14),transparent_70%)] pointer-events-none" />
         
         <div className="relative space-y-4">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-2 border border-white/[0.08] text-xs font-medium text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-xs font-medium text-slate-300">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
               <span>Arychi Suite v2.0.0</span>
             </span>
@@ -74,7 +72,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </div>
 
           <div className="space-y-2 max-w-3xl">
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-100 tracking-tight leading-tight flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight flex flex-wrap items-center gap-x-3 gap-y-1">
               <span>Giới Thiệu Arychi Suite</span>
               <span className="text-slate-600 font-light select-none text-2xl sm:text-3xl">/</span>
               <span className="text-indigo-400 text-xl sm:text-3xl font-bold">
@@ -123,7 +121,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </div>
         </div>
 
-        <nav aria-label="Điều hướng các mục giới thiệu" className="pt-4 border-t border-white/[0.06] flex items-center gap-2 overflow-x-auto text-xs no-scrollbar">
+        <nav aria-label="Điều hướng các mục giới thiệu" className="pt-4 border-t border-white/[0.08] flex items-center gap-2 overflow-x-auto text-xs no-scrollbar">
           {[
             { id: 'section-overview', tab: 'overview' as const, label: 'Tổng Quan' },
             { id: 'section-modules', tab: 'modules' as const, label: '3 Trụ Cột Kỹ Thuật' },
@@ -138,8 +136,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               onClick={() => scrollToSection(item.id, item.tab)}
               className={`px-3 py-1.5 rounded-lg whitespace-nowrap font-medium transition-colors ${
                 activeTabSection === item.tab
-                  ? 'bg-surface-3 text-indigo-300 border border-white/[0.09]'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-surface-2'
+                  ? 'bg-white/[0.08] text-white border border-white/[0.12] font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
               }`}
             >
               {item.label}
@@ -148,14 +146,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </nav>
       </section>
 
-      <section className="panel p-4 sm:p-5 relative overflow-hidden">
+      <section className="panel p-5 relative overflow-hidden border-white/[0.08]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
               <Activity className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-xs sm:text-sm font-semibold text-slate-100">
+              <h2 className="text-xs sm:text-sm font-bold text-white">
                 Trạng Thái Vận Hành Máy Trạm Nội Bộ
               </h2>
               <p className="text-[11px] text-slate-400 font-mono">
@@ -164,27 +162,33 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 sm:gap-4 text-xs font-mono">
-            <div className="panel-subtle px-3 py-2 rounded-lg flex flex-col items-center justify-center">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3 text-xs font-mono">
+            <div className="panel-subtle px-3 py-2 rounded-lg flex flex-col items-center justify-center border-white/[0.06]">
               <span className="text-[10px] text-slate-400">Quest Engine</span>
-              <span className={`text-[11px] font-semibold flex items-center gap-1 mt-0.5 ${questConnected ? 'text-emerald-400' : 'text-rose-400'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${questConnected ? 'bg-emerald-400' : 'bg-rose-500'}`} />
+              <span className={`text-[11px] font-bold flex items-center gap-1.5 mt-0.5 ${questConnected ? 'text-emerald-400' : 'text-rose-400'}`}>
+                <span className="relative flex h-2 w-2">
+                  {questConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${questConnected ? 'bg-emerald-400' : 'bg-rose-500'}`} />
+                </span>
                 {questConnected ? ':3001 OK' : ':3001 Off'}
               </span>
             </div>
 
-            <div className="panel-subtle px-3 py-2 rounded-lg flex flex-col items-center justify-center">
+            <div className="panel-subtle px-3 py-2 rounded-lg flex flex-col items-center justify-center border-white/[0.06]">
               <span className="text-[10px] text-slate-400">StreamBot</span>
-              <span className={`text-[11px] font-semibold flex items-center gap-1 mt-0.5 ${streamConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${streamConnected ? 'bg-emerald-400' : 'bg-amber-500'}`} />
+              <span className={`text-[11px] font-bold flex items-center gap-1.5 mt-0.5 ${streamConnected ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <span className="relative flex h-2 w-2">
+                  {streamConnected && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${streamConnected ? 'bg-emerald-400' : 'bg-amber-500'}`} />
+                </span>
                 {streamConnected ? ':3000 Live' : ':3000 Standby'}
               </span>
             </div>
 
-            <div className="panel-subtle px-3 py-2 rounded-lg flex flex-col items-center justify-center">
+            <div className="panel-subtle px-3 py-2 rounded-lg flex flex-col items-center justify-center border-white/[0.06]">
               <span className="text-[10px] text-slate-400">Science Engine</span>
-              <span className="text-[11px] font-semibold text-indigo-400 flex items-center gap-1 mt-0.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+              <span className="text-[11px] font-bold text-indigo-400 flex items-center gap-1.5 mt-0.5">
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
                 Python Ready
               </span>
             </div>
@@ -195,7 +199,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       <section id="section-modules" className="space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
           <Layers className="w-4 h-4 text-indigo-400 shrink-0" />
-          <h2 className="text-base sm:text-lg font-bold text-slate-100">
+          <h2 className="text-base sm:text-lg font-bold text-white">
             3 Trụ Cột Kỹ Thuật Độc Lập
           </h2>
           <span className="text-slate-600 font-light select-none text-sm">/</span>
@@ -205,19 +209,19 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="panel p-5 space-y-4 relative overflow-hidden flex flex-col justify-between">
+          <div className="panel p-5 space-y-4 relative overflow-hidden flex flex-col justify-between border-white/[0.08] hover:border-indigo-500/30 transition-colors">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-md bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
-                    <Sparkles className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+                    <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="text-[10px] font-mono font-bold text-indigo-400 uppercase">Module 01</span>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-100">Quest Engine</h3>
+                    <h3 className="text-xs sm:text-sm font-bold text-white">Quest Engine</h3>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 text-slate-400 border border-white/[0.06]">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
                   Port :3001
                 </span>
               </div>
@@ -252,7 +256,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
 
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-400">Node.js + Fastify + WS</span>
+              <span className="text-[10px] font-mono text-slate-500">Node.js + Fastify + WS</span>
               <button
                 onClick={() => onNavigateTab('quests')}
                 className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 inline-flex items-center gap-1"
@@ -263,19 +267,19 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
           </div>
 
-          <div className="panel p-5 space-y-4 relative overflow-hidden flex flex-col justify-between">
+          <div className="panel p-5 space-y-4 relative overflow-hidden flex flex-col justify-between border-white/[0.08] hover:border-amber-500/30 transition-colors">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-md bg-amber-500/20 text-amber-400 flex items-center justify-center">
-                    <Tv className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center">
+                    <Tv className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="text-[10px] font-mono font-bold text-amber-400 uppercase">Module 02</span>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-100">StreamBot Voice</h3>
+                    <h3 className="text-xs sm:text-sm font-bold text-white">StreamBot Voice</h3>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 text-slate-400 border border-white/[0.06]">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
                   Port :3000
                 </span>
               </div>
@@ -310,7 +314,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
 
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-400">@discordjs/voice + FFmpeg</span>
+              <span className="text-[10px] font-mono text-slate-500">@discordjs/voice + FFmpeg</span>
               <button
                 onClick={() => onNavigateTab('stream')}
                 className="text-xs font-semibold text-amber-400 hover:text-amber-300 inline-flex items-center gap-1"
@@ -321,19 +325,19 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
           </div>
 
-          <div className="panel p-5 space-y-4 relative overflow-hidden flex flex-col justify-between">
+          <div className="panel p-5 space-y-4 relative overflow-hidden flex flex-col justify-between border-white/[0.08] hover:border-emerald-500/30 transition-colors">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-                <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                    <Award className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center">
+                    <Award className="w-4 h-4" />
                   </div>
                   <div>
                     <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">Module 03</span>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-100">Science Telemetry</h3>
+                    <h3 className="text-xs sm:text-sm font-bold text-white">Science Telemetry</h3>
                   </div>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 text-slate-400 border border-white/[0.06]">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.06]">
                   Python Engine
                 </span>
               </div>
@@ -368,7 +372,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
 
             <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-              <span className="text-[10px] font-mono text-slate-400">Python 3 + PE Header Hash</span>
+              <span className="text-[10px] font-mono text-slate-500">Python 3 + PE Header Hash</span>
               <button
                 onClick={() => onNavigateTab('badges')}
                 className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1"
@@ -381,13 +385,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </section>
 
-      <section id="section-architecture" className="panel p-6 sm:p-8 space-y-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/[0.03] via-transparent to-transparent pointer-events-none" />
-        
+      <section id="section-architecture" className="panel p-6 sm:p-8 space-y-6 border-white/[0.08]">
         <div className="space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Workflow className="w-4 h-4 text-indigo-400 shrink-0" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-100">
+            <h2 className="text-base sm:text-lg font-bold text-white">
               Kiến Trúc Hệ Thống &amp; Luồng Dữ Liệu
             </h2>
             <span className="text-slate-600 font-light select-none text-sm">/</span>
@@ -401,60 +403,60 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div className="panel-subtle p-4 rounded-xl space-y-3 relative">
+          <div className="panel-subtle p-5 rounded-xl space-y-3 border-white/[0.06]">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-indigo-400 font-bold uppercase tracking-wider">
                 Tầng 01 &bull; Giao Diện
               </span>
-              <span className="text-[10px] font-mono text-slate-400">:5173</span>
+              <span className="text-[10px] font-mono text-slate-500">:5173</span>
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-100">Web Dashboard</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Web Dashboard</h3>
               <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                 React 18, Vite &amp; Tailwind CSS. Lưu trữ User Token mã hóa tại <code className="text-indigo-300 font-mono">localStorage</code> trình duyệt.
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-surface-1 border border-white/[0.04] text-[11px] font-mono text-slate-400 space-y-1">
+            <div className="p-3 rounded-lg bg-black/30 border border-white/[0.04] text-[11px] font-mono text-slate-400 space-y-1">
               <div>&bull; WebSocket Client (:3001 &amp; :3000)</div>
               <div>&bull; Quản lý trạng thái đa tiến trình</div>
               <div>&bull; Bảng điều khiển thời gian thực</div>
             </div>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl space-y-3 relative">
+          <div className="panel-subtle p-5 rounded-xl space-y-3 border-white/[0.06]">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-amber-400 font-bold uppercase tracking-wider">
                 Tầng 02 &bull; Cục Bộ
               </span>
-              <span className="text-[10px] font-mono text-slate-400">127.0.0.1</span>
+              <span className="text-[10px] font-mono text-slate-500">127.0.0.1</span>
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-100">Local Backend Services</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Local Backend Services</h3>
               <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                 Tập hợp tiến trình Node.js &amp; Python chạy ngầm. Xử lý logic giải mã gói tin, FFmpeg audio codec và heartbeat timers.
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-surface-1 border border-white/[0.04] text-[11px] font-mono text-slate-400 space-y-1">
+            <div className="p-3 rounded-lg bg-black/30 border border-white/[0.04] text-[11px] font-mono text-slate-400 space-y-1">
               <div>&bull; Quest Automation Daemon (:3001)</div>
               <div>&bull; StreamBot Voice Engine (:3000)</div>
               <div>&bull; Python PE Telemetry Spoofer</div>
             </div>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl space-y-3 relative">
+          <div className="panel-subtle p-5 rounded-xl space-y-3 border-white/[0.06]">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
                 Tầng 03 &bull; Đích Đến
               </span>
-              <span className="text-[10px] font-mono text-slate-400">HTTPS TLS 1.3</span>
+              <span className="text-[10px] font-mono text-slate-500">HTTPS TLS 1.3</span>
             </div>
             <div>
-              <h3 className="text-xs sm:text-sm font-bold text-slate-100">Discord Official Endpoints</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Discord Official Endpoints</h3>
               <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
                 Kết nối mã hóa đầu-cuối trực tiếp từ máy trạm đến hạ tầng Discord. Nhận token và cập nhật dữ liệu tài khoản chính chủ.
               </p>
             </div>
-            <div className="p-2.5 rounded-lg bg-surface-1 border border-white/[0.04] text-[11px] font-mono text-slate-400 space-y-1">
+            <div className="p-3 rounded-lg bg-black/30 border border-white/[0.04] text-[11px] font-mono text-slate-400 space-y-1">
               <div>&bull; /api/v9/quests/&lt;id&gt;/heartbeat</div>
               <div>&bull; /api/v9/science (Game metrics)</div>
               <div>&bull; Discord Voice RTC Gateway</div>
@@ -463,28 +465,28 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="pt-2">
-          <div className="panel-subtle overflow-hidden rounded-xl">
-            <div className="p-3 bg-surface-2 border-b border-white/[0.06] flex items-center justify-between text-xs font-semibold text-slate-200">
+          <div className="panel-subtle overflow-hidden rounded-xl border-white/[0.06]">
+            <div className="p-3.5 bg-white/[0.02] border-b border-white/[0.06] flex items-center justify-between text-xs font-semibold text-slate-200">
               <div className="flex items-center gap-2">
                 <Server className="w-3.5 h-3.5 text-indigo-400" />
                 <span>Bảng Danh Mục Cổng Mạng (Port Map) &amp; Giao Thức</span>
               </div>
-              <span className="text-[10px] font-mono text-slate-400">Cục Bộ 100% Loopback</span>
+              <span className="text-[10px] font-mono text-slate-500">Cục Bộ 100% Loopback</span>
             </div>
             <div className="divide-y divide-white/[0.04] text-xs">
-              <div className="p-3 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-slate-300">
+              <div className="p-3.5 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-slate-300">
                 <span className="font-mono text-indigo-400 font-bold">5173 (TCP)</span>
                 <span>Giao diện Web Frontend</span>
                 <span className="text-slate-400 font-mono">Vite + React SPA</span>
                 <span className="text-emerald-400 font-mono text-[11px]">Chỉ mở trên Localhost</span>
               </div>
-              <div className="p-3 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-slate-300">
+              <div className="p-3.5 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-slate-300">
                 <span className="font-mono text-indigo-400 font-bold">3001 (TCP/WS)</span>
                 <span>Quest Engine Daemon</span>
                 <span className="text-slate-400 font-mono">Fastify + WebSocket Server</span>
                 <span className="text-emerald-400 font-mono text-[11px]">Đồng bộ tiến độ Quest realtime</span>
               </div>
-              <div className="p-3 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-slate-300">
+              <div className="p-3.5 grid grid-cols-1 sm:grid-cols-4 gap-2 items-center text-slate-300">
                 <span className="font-mono text-indigo-400 font-bold">3000 (TCP/WS)</span>
                 <span>StreamBot Voice Service</span>
                 <span className="text-slate-400 font-mono">Node.js + @discordjs/voice</span>
@@ -498,7 +500,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       <section id="section-security" className="space-y-4">
         <div className="flex items-center gap-2 flex-wrap">
           <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
-          <h2 className="text-base sm:text-lg font-bold text-slate-100">
+          <h2 className="text-base sm:text-lg font-bold text-white">
             Cam Kết Bảo Mật &amp; Quyền Riêng Tư
           </h2>
           <span className="text-slate-600 font-light select-none text-sm">/</span>
@@ -508,40 +510,40 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="panel p-5 space-y-2.5 relative overflow-hidden">
+          <div className="panel p-5 space-y-2.5 border-white/[0.08] hover:border-indigo-500/30 transition-colors">
             <div className="flex items-center gap-2 text-indigo-400">
               <Lock className="w-4 h-4 shrink-0" />
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-100">Không Lưu Trữ Cloud &bull; Client-Side Only</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Không Lưu Trữ Cloud &bull; Client-Side Only</h3>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               Discord User Token của bạn chỉ được lưu trong bộ nhớ máy trạm (LocalStorage trình duyệt và biến cục bộ trong RAM của backend). Arychi không sở hữu bất kỳ cơ sở dữ liệu trên mây nào để thu thập dữ liệu người dùng.
             </p>
           </div>
 
-          <div className="panel p-5 space-y-2.5 relative overflow-hidden">
+          <div className="panel p-5 space-y-2.5 border-white/[0.08] hover:border-emerald-500/30 transition-colors">
             <div className="flex items-center gap-2 text-emerald-400">
               <Zap className="w-4 h-4 shrink-0" />
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-100">Mô Phỏng Nhịp Độ Chuẩn (Anti-Rate Limit)</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Mô Phỏng Nhịp Độ Chuẩn (Anti-Rate Limit)</h3>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               Các gói tin telemetry gửi đến Discord được thiết kế với chu kỳ đệm tự nhiên tương tự ứng dụng chính thức, không bắn dồn dập bất thường nhằm triệt tiêu nguy cơ vi phạm giới hạn tốc độ (HTTP 429).
             </p>
           </div>
 
-          <div className="panel p-5 space-y-2.5 relative overflow-hidden">
+          <div className="panel p-5 space-y-2.5 border-white/[0.08] hover:border-cyan-500/30 transition-colors">
             <div className="flex items-center gap-2 text-cyan-400">
               <Globe className="w-4 h-4 shrink-0" />
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-100">Không Cài Cắm Theo Dõi (Zero Analytics)</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Không Cài Cắm Theo Dõi (Zero Analytics)</h3>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               Ứng dụng không nhúng bất kỳ đoạn mã theo dõi hành vi, Google Analytics, pixel quảng cáo hay dịch vụ báo cáo lỗi của bên thứ ba nào. Mã nguồn chạy sạch sẽ 100%.
             </p>
           </div>
 
-          <div className="panel p-5 space-y-2.5 relative overflow-hidden">
+          <div className="panel p-5 space-y-2.5 border-white/[0.08] hover:border-amber-500/30 transition-colors">
             <div className="flex items-center gap-2 text-amber-400">
               <Code2 className="w-4 h-4 shrink-0" />
-              <h3 className="text-xs sm:text-sm font-semibold text-slate-100">Minh Bạch Mã Nguồn (Audit-Ready)</h3>
+              <h3 className="text-xs sm:text-sm font-bold text-white">Minh Bạch Mã Nguồn (Audit-Ready)</h3>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               Toàn bộ source code TypeScript, Python và tệp thực thi đều nằm trực tiếp trên máy của bạn. Bạn hoàn toàn có thể mở bất kỳ tệp tin nào để kiểm tra, debug gói tin mạng hoặc mở tab F12 Network để giám sát.
@@ -550,11 +552,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </section>
 
-      <section id="section-specs" className="panel p-6 sm:p-8 space-y-6 relative overflow-hidden">
+      <section id="section-specs" className="panel p-6 sm:p-8 space-y-6 border-white/[0.08]">
         <div className="space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Cpu className="w-4 h-4 text-indigo-400 shrink-0" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-100">
+            <h2 className="text-base sm:text-lg font-bold text-white">
               Thông Số Kỹ Thuật &amp; Yêu Cầu Môi Trường
             </h2>
             <span className="text-slate-600 font-light select-none text-sm">/</span>
@@ -568,8 +570,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="panel-subtle p-4 rounded-xl space-y-3">
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+          <div className="panel-subtle p-5 rounded-xl space-y-3 border-white/[0.06]">
+            <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-indigo-400" />
               <span>Yêu Cầu Phần Mềm Môi Trường</span>
             </h3>
@@ -597,8 +599,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </div>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl space-y-3">
-            <h3 className="text-xs sm:text-sm font-semibold text-slate-200 flex items-center gap-2">
+          <div className="panel-subtle p-5 rounded-xl space-y-3 border-white/[0.06]">
+            <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
               <Activity className="w-4 h-4 text-emerald-400" />
               <span>Hiệu Suất Tiêu Thụ Tài Nguyên</span>
             </h3>
@@ -621,18 +623,18 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-slate-400">Khởi động hệ thống</span>
-                <span className="font-mono text-slate-200">1-click qua start-all.bat</span>
+                <span className="font-mono text-slate-200">1-click qua start.bat</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="section-changelog" className="panel p-6 sm:p-8 space-y-6 relative overflow-hidden">
+      <section id="section-changelog" className="panel p-6 sm:p-8 space-y-6 border-white/[0.08]">
         <div className="space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <Clock className="w-4 h-4 text-indigo-400 shrink-0" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-100">
+            <h2 className="text-base sm:text-lg font-bold text-white">
               Lịch Sử Phát Triển &amp; Lộ Trình (Changelog)
             </h2>
             <span className="text-slate-600 font-light select-none text-sm">/</span>
@@ -643,17 +645,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="space-y-4">
-          <div className="panel-subtle p-4.5 rounded-xl border-l-2 border-l-indigo-500 space-y-2.5">
+          <div className="panel-subtle p-5 rounded-xl border-l-2 border-l-indigo-500 space-y-2.5 border-white/[0.06]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 font-mono text-xs font-bold border border-indigo-500/30">
                   v2.0.0
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-slate-100">
+                <span className="text-xs sm:text-sm font-bold text-white">
                   Hợp Nhất Toàn Diện &bull; Dark UI Công Nghiệp
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-slate-400">Phiên bản hiện tại</span>
+              <span className="text-[11px] font-mono text-slate-500">Phiên bản hiện tại</span>
             </div>
             <ul className="space-y-1 text-xs text-slate-300 list-disc list-inside">
               <li>Xây dựng trung tâm điều khiển Web hợp nhất với React 18, Vite 5 và Tailwind CSS.</li>
@@ -663,7 +665,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </ul>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl border-l-2 border-l-amber-500/60 space-y-2">
+          <div className="panel-subtle p-5 rounded-xl border-l-2 border-l-amber-500/60 space-y-2 border-white/[0.06]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-xs font-bold border border-amber-500/30">
@@ -673,7 +675,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                   Nâng Cấp StreamBot Voice &amp; Viewer Farm
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-slate-400">Lịch sử</span>
+              <span className="text-[11px] font-mono text-slate-500">Lịch sử</span>
             </div>
             <ul className="space-y-1 text-xs text-slate-400 list-disc list-inside">
               <li>Tích hợp yt-dlp bản sửa lỗi thuật toán YouTube và chống trễ tiếng.</li>
@@ -682,17 +684,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </ul>
           </div>
 
-          <div className="panel-subtle p-4 rounded-xl border-l-2 border-l-slate-600 space-y-2">
+          <div className="panel-subtle p-5 rounded-xl border-l-2 border-l-slate-600 space-y-2 border-white/[0.06]">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded bg-surface-2 text-slate-400 font-mono text-xs font-bold border border-white/[0.06]">
+                <span className="px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 font-mono text-xs font-bold border border-white/[0.06]">
                   v1.0.0
                 </span>
                 <span className="text-xs sm:text-sm font-semibold text-slate-300">
                   Bản Khởi Đầu &bull; Độc Lập Quest CLI
                 </span>
               </div>
-              <span className="text-[11px] font-mono text-slate-400">Lịch sử</span>
+              <span className="text-[11px] font-mono text-slate-500">Lịch sử</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
               Phiên bản thử nghiệm đầu tiên thực hiện các gói heartbeat cho nhiệm vụ Discord Quests thông qua dòng lệnh.
@@ -701,11 +703,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </section>
 
-      <section id="section-faq" className="panel p-6 sm:p-8 space-y-4 relative overflow-hidden">
+      <section id="section-faq" className="panel p-6 sm:p-8 space-y-4 border-white/[0.08]">
         <div className="space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <HelpCircle className="w-4 h-4 text-indigo-400 shrink-0" />
-            <h2 className="text-base sm:text-lg font-bold text-slate-100">
+            <h2 className="text-base sm:text-lg font-bold text-white">
               Giải Đáp Kỹ Thuật Chuyên Sâu (FAQ)
             </h2>
             <span className="text-slate-600 font-light select-none text-sm">/</span>
@@ -715,11 +717,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </div>
         </div>
 
-        <div className="space-y-2 pt-2">
+        <div className="space-y-2.5 pt-2">
           {[
             {
               q: 'Tôi có thể tắt tab trình duyệt khi hệ thống đang làm Quest hoặc Stream không?',
-              a: 'Có thể. Các engine xử lý chính (Quest Engine :3001 và StreamBot :3000) chạy dưới dạng tiến trình độc lập trên máy tính của bạn sau khi bạn mở start-all.bat. Bạn hoàn toàn có thể thu nhỏ hoặc đóng tab trình duyệt; các tiến trình vẫn tiếp tục chạy ngầm cho đến khi hoàn thành.',
+              a: 'Có thể. Các engine xử lý chính (Quest Engine :3001 và StreamBot :3000) chạy dưới dạng tiến trình độc lập trên máy tính của bạn sau khi bạn mở start.bat. Bạn hoàn toàn có thể thu nhỏ hoặc đóng tab trình duyệt; các tiến trình vẫn tiếp tục chạy ngầm cho đến khi hoàn thành.',
             },
             {
               q: 'Tại sao việc cày Discord Quest không cần phải tải game nặng?',
@@ -740,12 +742,12 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           ].map((item, idx) => {
             const isOpen = activeFaq === idx;
             return (
-              <div key={idx} className="panel-subtle overflow-hidden rounded-lg">
+              <div key={idx} className="panel-subtle overflow-hidden rounded-xl border-white/[0.06]">
                 <button
                   type="button"
                   aria-expanded={isOpen}
                   onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full p-3.5 text-left flex items-center justify-between text-xs font-semibold text-slate-200 hover:text-white transition-colors"
+                  className="w-full p-4 text-left flex items-center justify-between text-xs font-bold text-slate-200 hover:text-white transition-colors"
                 >
                   <span>{item.q}</span>
                   {isOpen ? (
@@ -755,7 +757,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                   )}
                 </button>
                 {isOpen && (
-                  <div className="px-3.5 pb-3.5 text-xs text-slate-400 leading-relaxed border-t border-white/[0.04] pt-2.5">
+                  <div className="px-4 pb-4 text-xs text-slate-400 leading-relaxed border-t border-white/[0.04] pt-3">
                     {item.a}
                   </div>
                 )}
@@ -765,16 +767,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </section>
 
-      <section className="p-4 rounded-xl border border-white/[0.06] bg-surface-1/50 space-y-2 text-xs text-slate-400">
-        <p className="font-semibold text-slate-300">Tuyên Bố Về Quyền Sở Hữu &amp; Miễn Trừ Trách Nhiệm</p>
+      <section className="p-5 rounded-xl border border-white/[0.08] bg-white/[0.02] space-y-2 text-xs text-slate-400">
+        <p className="font-bold text-slate-300">Tuyên Bố Về Quyền Sở Hữu &amp; Miễn Trừ Trách Nhiệm</p>
         <p className="leading-relaxed text-[11px]">
           Arychi Suite được phát triển với mục đích học tập, nghiên cứu giao thức mạng và phục vụ tiện ích tự động hóa cá nhân trên máy trạm cục bộ. Dự án không liên kết, không được tài trợ hoặc xác nhận bởi Discord Inc. Người dùng tự chịu trách nhiệm về cách thức vận hành tài khoản của mình.
         </p>
       </section>
 
-      <footer className="pt-6 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+      <footer className="pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-400">Arychi Suite v2.0.0</span>
+          <span className="font-bold text-slate-400">Arychi Suite v2.0.0</span>
           <span>&bull;</span>
           <span>Localhost Automation Environment</span>
         </div>

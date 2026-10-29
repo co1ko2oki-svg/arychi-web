@@ -11,6 +11,7 @@ import {
   AlertTriangle,
   Radio,
   Volume2,
+  Activity,
 } from 'lucide-react';
 import { StreamStatus } from '../types';
 import { streamApi } from '../services/api';
@@ -119,20 +120,19 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-surface-1 p-5 sm:p-6 shadow-panel">
-        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.08] via-transparent to-transparent pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0C14] p-5 sm:p-6 shadow-panel">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-500/[0.1] via-transparent to-transparent pointer-events-none" />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
                 StreamBot Voice
               </h1>
               <span className="text-slate-600 font-light select-none text-xl">/</span>
-              <span className="text-sm sm:text-base font-normal text-amber-400">
+              <span className="text-xs sm:text-sm font-semibold text-amber-400">
                 Phát Video Kênh Thoại &amp; Viewer Farm 24/7
               </span>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-surface-2 text-slate-400 border border-white/[0.06] ml-1">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.08] ml-1">
                 Port :3000
               </span>
             </div>
@@ -154,19 +154,20 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         </div>
       </div>
 
-      {/* Non-destructive Offline Notice */}
       {!streamConnected && (
-        <div className="panel p-4 border-amber-500/30 bg-amber-500/[0.04] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+        <div className="panel p-5 border-amber-500/30 bg-amber-500/[0.03] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0 mt-0.5">
+              <AlertTriangle className="w-4 h-4" />
+            </div>
             <div>
-              <p className="text-xs font-semibold text-amber-300">
+              <p className="text-xs font-bold text-amber-300">
                 Dịch Vụ StreamBot Đang Ngoại Tuyến (Cổng :3000)
               </p>
               <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
-                Máy chủ StreamBot chưa được kích hoạt. Hãy khởi động dịch vụ trong terminal bằng lệnh{' '}
-                <code className="text-amber-300 font-mono bg-surface-2 px-1.5 py-0.5 rounded">
-                  cd stream &amp;&amp; npm run start:node
+                Máy chủ StreamBot chưa được kích hoạt. Bạn có thể khởi động dịch vụ bằng file{' '}
+                <code className="text-amber-300 font-mono bg-white/[0.04] px-1.5 py-0.5 rounded">
+                  start.bat
                 </code>
                 . Các điều khiển stream thời gian thực tạm thời bị vô hiệu hoá.
               </p>
@@ -174,7 +175,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           </div>
           <button
             onClick={onRefresh}
-            className="btn-secondary text-xs shrink-0 py-1.5 px-3"
+            className="btn-secondary text-xs shrink-0 py-2 px-3.5"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             <span>Thử Lại</span>
@@ -182,28 +183,29 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         </div>
       )}
 
-      {/* Overview Metric Bento */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="panel p-4 flex flex-col justify-between space-y-3">
+        <div className="panel p-5 flex flex-col justify-between space-y-4 border-white/[0.08]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
               Bot Stream Client
             </span>
             <span
-              className={`text-[10px] font-mono font-semibold px-2 py-0.5 rounded border ${
+              className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border ${
                 status?.stream.playing
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
-                  : 'bg-surface-2 text-slate-400 border-white/[0.06]'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-glow-emerald'
+                  : streamConnected
+                  ? 'bg-white/[0.04] text-slate-300 border-white/[0.08]'
+                  : 'bg-rose-500/10 text-rose-400 border-rose-500/30'
               }`}
             >
               {status?.stream.playing ? 'LIVE STREAM' : streamConnected ? 'NHÀN RỖI' : 'OFFLINE'}
             </span>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-100">
+            <h3 className="text-lg font-extrabold text-white">
               {streamConnected ? status?.bot.tag || 'StreamBot' : 'Chưa Kết Nối'}
             </h3>
-            <p className="text-xs font-mono text-slate-400 mt-0.5">
+            <p className="text-xs font-mono text-slate-400 mt-1">
               WebSocket Ping:{' '}
               <strong className={streamConnected ? 'text-emerald-400' : 'text-slate-500'}>
                 {streamConnected ? `${status?.bot.ping ?? 0}ms` : '--'}
@@ -212,33 +214,33 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           </div>
         </div>
 
-        <div className="panel p-4 flex flex-col justify-between space-y-3">
+        <div className="panel p-5 flex flex-col justify-between space-y-4 border-white/[0.08]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
               Video Đang Phát
             </span>
-            <Film className="w-4 h-4 text-slate-500" />
+            <Film className="w-4 h-4 text-slate-400" />
           </div>
           <div>
-            <h4 className="text-xs font-semibold text-slate-100 line-clamp-1">
+            <h4 className="text-xs font-bold text-white line-clamp-1">
               {status?.stream.currentQueueItem?.title || 'Không có nội dung trong hàng đợi'}
             </h4>
-            <p className="text-xs text-slate-500 mt-0.5 truncate font-mono">
+            <p className="text-xs text-slate-500 mt-1 truncate font-mono">
               Voice: {status?.stream.channelInfo?.channelId || 'Chưa vào phòng thoại'}
             </p>
           </div>
         </div>
 
-        <div className="panel p-4 flex flex-col justify-between space-y-3">
+        <div className="panel p-5 flex flex-col justify-between space-y-4 border-white/[0.08]">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+            <span className="text-[10px] font-mono font-semibold text-slate-400 uppercase tracking-wider">
               Viewer Farm (Xem Kênh)
             </span>
-            <Eye className="w-4 h-4 text-slate-500" />
+            <Eye className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-200">
+              <p className="text-xs font-bold text-slate-200">
                 {status?.farm.autoWatch ? 'Tự Động Xem Kênh' : 'Đang Tắt'}
               </p>
               <p className="text-[11px] text-slate-500 mt-0.5">Mở khóa huy hiệu Stream Viewer</p>
@@ -246,10 +248,10 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             <button
               onClick={handleToggleFarm}
               disabled={actionLoading || !streamConnected}
-              className={`text-xs font-semibold px-3 py-1.5 rounded transition-colors ${
+              className={`text-xs font-bold px-3.5 py-1.5 rounded-lg transition-all ${
                 status?.farm.autoWatch
-                  ? 'btn-danger py-1 px-3 text-xs'
-                  : 'btn-primary py-1 px-3 text-xs'
+                  ? 'btn-danger py-1.5 px-3.5 text-xs'
+                  : 'btn-primary py-1.5 px-3.5 text-xs'
               }`}
             >
               {status?.farm.autoWatch ? 'Tắt' : 'Bật Ngay'}
@@ -258,19 +260,22 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         </div>
       </div>
 
-      {/* Direct Play Control */}
-      <div className="panel p-5 space-y-4">
+      <div className="panel p-6 space-y-4 border-white/[0.08]">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-            <Tv className="w-4 h-4 text-indigo-400" />
-            <span>Phát Video Trực Tiếp Vào Voice Channel</span>
-          </h2>
-          <span className="text-xs font-mono text-slate-500">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center">
+              <Tv className="w-3.5 h-3.5" />
+            </div>
+            <h2 className="text-sm font-bold text-white">
+              Phát Video Trực Tiếp Vào Voice Channel
+            </h2>
+          </div>
+          <span className="text-xs font-mono text-slate-400">
             Codec: {status?.config.videoCodec || 'VP8'} • 720p 30fps
           </span>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-2.5">
           <input
             type="text"
             value={query}
@@ -281,14 +286,14 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
                 ? 'Dán URL YouTube, Twitch hoặc tên file video...'
                 : 'StreamBot offline — Vui lòng khởi động backend để phát stream'
             }
-            className="flex-1 bg-surface-2 border border-white/[0.08] rounded-lg px-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-white/[0.04] border border-white/[0.08] rounded-lg px-3.5 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
             onKeyDown={(e) => e.key === 'Enter' && requestPlay()}
           />
           <div className="flex items-center gap-2">
             <button
               onClick={() => requestPlay()}
               disabled={actionLoading || !streamConnected || !query.trim()}
-              className="btn-primary"
+              className="btn-primary py-2.5 px-4"
             >
               {actionLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
               <span>Phát Trực Tiếp</span>
@@ -296,7 +301,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             <button
               onClick={handleStop}
               disabled={actionLoading || !streamConnected || !status?.stream.playing}
-              className="btn-danger"
+              className="btn-danger py-2.5 px-4"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
               <span>Dừng</span>
@@ -305,19 +310,18 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         </div>
       </div>
 
-      {/* Local Video Library */}
-      <div className="panel p-5 space-y-3">
-        <div className="flex items-center justify-between pb-3 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2">
+      <div className="panel p-6 space-y-4 border-white/[0.08]">
+        <div className="flex items-center justify-between pb-3 border-b border-white/[0.08]">
+          <div className="flex items-center gap-2.5">
             <FolderOpen className="w-4 h-4 text-slate-400" />
             <h2 className="text-xs font-bold text-slate-200 uppercase tracking-wider">
-              Kho Video Local (<code className="text-slate-400 font-mono">stream/videos/</code>)
+              Kho Video Cục Bộ (<code className="text-indigo-400 font-mono">stream/videos/</code>)
             </h2>
           </div>
           <button
             onClick={loadVideoLibrary}
             disabled={loadingVideos || !streamConnected}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1.5 disabled:opacity-50"
+            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 disabled:opacity-50 transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingVideos ? 'animate-spin' : ''}`} />
             <span>Quét Lại Thư Mục</span>
@@ -334,13 +338,13 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
               <div
                 key={vid.name}
                 onClick={() => requestPlay(vid.name)}
-                className={`panel-subtle p-3 flex items-center justify-between cursor-pointer transition-colors group ${
-                  streamConnected ? 'hover:bg-surface-3' : 'opacity-60 cursor-not-allowed'
+                className={`panel-subtle p-3.5 flex items-center justify-between cursor-pointer transition-all duration-200 group ${
+                  streamConnected ? 'hover:border-indigo-500/40 hover:bg-[#141828]' : 'opacity-60 cursor-not-allowed'
                 }`}
                 title={streamConnected ? `Phát ${vid.name}` : 'StreamBot offline'}
               >
                 <div className="truncate mr-2">
-                  <p className="text-xs font-medium text-slate-200 group-hover:text-indigo-300 truncate">
+                  <p className="text-xs font-semibold text-slate-200 group-hover:text-indigo-300 truncate">
                     {vid.name}
                   </p>
                   <p className="text-[10px] text-slate-500 font-mono mt-0.5">{vid.size}</p>
@@ -352,7 +356,6 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         )}
       </div>
 
-      {/* Confirmation Dialog When Stream is Already Playing */}
       <ConfirmDialog
         isOpen={pendingPlayTarget !== null}
         title="Xác Nhận Thay Thế Video Đang Phát"

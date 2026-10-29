@@ -71,39 +71,42 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="panel bg-[#0e1118] border border-white/[0.1] rounded-xl max-w-md w-full overflow-hidden shadow-2xl">
-        <div className="flex items-center justify-between p-4 px-5 border-b border-white/[0.06]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600/20 text-indigo-400 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="panel bg-[#0C0E17] border border-white/[0.1] rounded-2xl max-w-md w-full overflow-hidden shadow-elevated">
+        <div className="flex items-center justify-between p-4 px-5 border-b border-white/[0.08]">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-700 flex items-center justify-center text-white shadow-glow-sm">
               <Key className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-slate-100">Xác Thực Discord Token</h3>
+              <h3 className="font-bold text-sm text-white">Xác Thực Discord Token</h3>
               <p className="text-[11px] text-slate-400">Kết nối tài khoản để tự động làm nhiệm vụ</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-surface-2 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="p-5 space-y-4">
+        <div className="p-6 space-y-4">
           {user && (
-            <div className="flex items-center justify-between p-3 bg-surface-2 rounded-lg border border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src={user.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}
-                  alt={user.username}
-                  className="w-8 h-8 rounded-full border border-emerald-500/40"
-                />
+            <div className="flex items-center justify-between p-3.5 bg-white/[0.03] rounded-xl border border-white/[0.06]">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={user.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}
+                    alt={user.username}
+                    className="w-9 h-9 rounded-full border border-emerald-500/40 object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400 ring-2 ring-[#0C0E17]" />
+                </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="text-xs font-bold text-slate-100">@{user.username}</p>
-                    <span className="text-[10px] uppercase font-mono px-1 rounded bg-indigo-500/20 text-indigo-300">
+                    <p className="text-xs font-bold text-white">@{user.username}</p>
+                    <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-indigo-500/20 text-indigo-300 font-semibold border border-indigo-500/30">
                       DISCORD
                     </span>
                   </div>
@@ -114,7 +117,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
               <button
                 onClick={handleLogout}
-                className="btn-danger py-1 px-2.5 text-xs"
+                className="btn-danger py-1 px-3 text-xs"
                 title="Đăng xuất"
               >
                 <LogOut className="w-3.5 h-3.5" />
@@ -125,14 +128,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
           <div className="space-y-3">
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block text-[11px] font-medium text-slate-400 uppercase">
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                   Discord User Token
                 </label>
                 <button
                   type="button"
                   onClick={() => setShowToken(!showToken)}
-                  className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1"
+                  className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1 transition-colors"
                 >
                   {showToken ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                   <span>{showToken ? 'Ẩn' : 'Hiện'}</span>
@@ -145,7 +148,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => setTokenInput(e.target.value)}
                     placeholder="Dán giá trị header Authorization từ Discord Web (F12 > Network)..."
                     rows={3}
-                    className="w-full bg-surface-2 border border-white/[0.08] rounded-lg p-2.5 text-xs text-slate-100 font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 text-xs text-slate-100 font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500 leading-relaxed"
                   />
                 ) : (
                   <input
@@ -153,14 +156,14 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     value={tokenInput}
                     onChange={(e) => setTokenInput(e.target.value)}
                     placeholder="Dán User Token tại đây..."
-                    className="w-full bg-surface-2 border border-white/[0.08] rounded-lg p-2.5 text-xs text-slate-100 font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 text-xs text-slate-100 font-mono placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                   />
                 )}
               </div>
             </div>
 
             {error && (
-              <div className="p-2.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-start gap-2">
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-300 flex items-start gap-2">
                 <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
@@ -169,17 +172,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <button
               onClick={handleVerifyDiscordToken}
               disabled={loading || !tokenInput.trim()}
-              className="w-full btn-primary py-2.5 text-xs"
+              className="w-full btn-primary py-2.5 text-xs shadow-glow-sm"
             >
               {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ShieldCheck className="w-3.5 h-3.5" />}
               <span>Xác Thực &amp; Kết Nối Tài Khoản</span>
             </button>
           </div>
 
-          <div className="p-3 bg-surface-2/60 rounded-lg border border-white/[0.04] text-[11px] text-slate-400 space-y-1.5 leading-relaxed">
+          <div className="p-3.5 bg-white/[0.02] rounded-xl border border-white/[0.04] text-[11px] text-slate-400 space-y-1.5 leading-relaxed">
             <p className="font-semibold text-slate-300">Cách lấy Discord User Token:</p>
             <ol className="list-decimal list-inside space-y-0.5 text-slate-400">
-              <li>Mở Discord trên trình duyệt Chrome/Edge và ấn <kbd className="font-mono bg-surface-1 px-1 rounded">F12</kbd>.</li>
+              <li>Mở Discord trên trình duyệt Chrome/Edge và ấn <kbd className="font-mono bg-white/[0.06] px-1 rounded">F12</kbd>.</li>
               <li>Chuyển qua tab <strong>Network</strong>, tìm kiếm request <code className="text-indigo-400 font-mono">/users/@me</code>.</li>
               <li>Tại mục <strong>Request Headers</strong>, sao chép giá trị của trường <code className="text-indigo-400 font-mono">Authorization</code>.</li>
             </ol>

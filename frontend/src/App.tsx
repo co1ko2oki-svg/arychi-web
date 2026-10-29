@@ -270,8 +270,7 @@ const AppContent: React.FC = () => {
   }[activeTab];
 
   return (
-    <div className="flex min-h-screen bg-surface-0 bg-grid-subtle text-slate-100">
-      {/* Fixed Collapsible Desktop Sidebar + Mobile Drawer */}
+    <div className="flex min-h-screen bg-[#040508] bg-cosmic-grid text-slate-100">
       <Sidebar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
@@ -285,7 +284,6 @@ const AppContent: React.FC = () => {
         onCloseMobile={() => setMobileOpen(false)}
       />
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <AppHeader
           onOpenMobileMenu={() => setMobileOpen(true)}

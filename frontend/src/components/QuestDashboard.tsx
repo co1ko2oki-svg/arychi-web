@@ -183,19 +183,19 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
 
   if (!token) {
     return (
-      <div className="panel p-10 sm:p-12 text-center max-w-lg mx-auto my-12 space-y-4">
-        <div className="w-12 h-12 rounded-xl bg-surface-2 border border-white/[0.08] flex items-center justify-center mx-auto text-indigo-400">
-          <Lock className="w-6 h-6" />
+      <div className="panel p-10 sm:p-14 text-center max-w-lg mx-auto my-12 space-y-5 bg-[#0A0C14] border-white/[0.08] shadow-panel">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto text-indigo-400 shadow-glow-sm">
+          <Lock className="w-7 h-7" />
         </div>
-        <div>
-          <h2 className="text-base font-bold text-slate-100">Yêu Cầu Kết Nối Token</h2>
-          <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
+        <div className="space-y-1.5">
+          <h2 className="text-lg font-bold text-white tracking-tight">Yêu Cầu Kết Nối Token</h2>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
             Để truy cập và đồng bộ danh sách Discord Quests, vui lòng kết nối tài khoản bằng Discord User Token của bạn.
           </p>
         </div>
         <button
           onClick={onOpenLoginModal}
-          className="btn-primary py-2.5 px-5 text-xs mx-auto"
+          className="btn-primary py-2.5 px-6 text-xs mx-auto shadow-glow-sm"
         >
           <span>Nhập Token Discord</span>
         </button>
@@ -205,19 +205,19 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-xl border border-white/[0.08] bg-surface-1 p-5 sm:p-6 shadow-panel">
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/[0.08] via-transparent to-transparent pointer-events-none" />
+      <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0A0C14] p-5 sm:p-6 shadow-panel">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/[0.1] via-transparent to-transparent pointer-events-none" />
         <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
                 Nhiệm Vụ Discord
               </h1>
               <span className="text-slate-600 font-light select-none text-xl">/</span>
-              <span className="text-sm sm:text-base font-normal text-indigo-400">
+              <span className="text-xs sm:text-sm font-semibold text-indigo-400">
                 Tự Động Nhận Thưởng &amp; Cày Quests Không Cần Game
               </span>
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-surface-2 text-slate-400 border border-white/[0.06] ml-1">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-400 border border-white/[0.08] ml-1">
                 Port :3001
               </span>
             </div>
@@ -265,45 +265,48 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="panel p-4">
+        <div className="panel p-4 border-white/[0.08]">
           <p className="text-[11px] font-medium text-slate-400">Tổng Số Nhiệm Vụ</p>
-          <p className="text-2xl font-bold text-slate-100 mt-1">{totalQuests}</p>
+          <p className="text-2xl font-extrabold text-white mt-1">{totalQuests}</p>
         </div>
 
-        <div className="panel p-4">
+        <div className="panel p-4 border-white/[0.08]">
           <p className="text-[11px] font-medium text-slate-400">Đang Thực Thi</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-2xl font-bold text-indigo-400">{runningJobs.length}</span>
+            <span className="text-2xl font-extrabold text-indigo-400">{runningJobs.length}</span>
             {runningJobs.length > 0 && (
-              <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
+              </span>
             )}
           </div>
         </div>
 
-        <div className="panel p-4">
+        <div className="panel p-4 border-white/[0.08]">
           <p className="text-[11px] font-medium text-slate-400">Đã Hoàn Thành</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{completedQuests}</p>
+          <p className="text-2xl font-extrabold text-emerald-400 mt-1">{completedQuests}</p>
         </div>
 
-        <div className="panel p-4">
+        <div className="panel p-4 border-white/[0.08]">
           <p className="text-[11px] font-medium text-slate-400">Chờ Nhận Thưởng</p>
-          <p className="text-2xl font-bold text-amber-400 mt-1">{claimableQuests}</p>
+          <p className="text-2xl font-extrabold text-amber-400 mt-1">{claimableQuests}</p>
         </div>
       </div>
 
-      <div className="panel p-3.5 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
-        <div className="relative min-w-[240px]">
+      <div className="panel p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 border-white/[0.08]">
+        <div className="relative min-w-[260px]">
           <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Tìm theo tên quest hoặc ứng dụng..."
-            className="w-full bg-surface-2 border border-white/[0.08] rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
           />
         </div>
 
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           {(
             [
               ['all', 'Tất Cả'],
@@ -317,10 +320,10 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
             <button
               key={key}
               onClick={() => setFilterType(key)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
                 filterType === key
-                  ? 'bg-surface-3 text-slate-100 border border-white/[0.1] font-semibold'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white/[0.08] text-white border border-white/[0.12] font-semibold'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
               }`}
             >
               {label}
@@ -330,24 +333,27 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
       </div>
 
       {runningJobs.length > 0 && (
-        <div className="panel p-4 space-y-3 border-indigo-500/30">
+        <div className="panel p-5 space-y-3 border-indigo-500/40 bg-[#0E1222]">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-200 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-ping" />
+            <span className="font-bold text-white flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
+              </span>
               Tiến Độ Tác Vụ Đang Chạy Thời Gian Thực
             </span>
-            <span className="text-slate-500 font-mono">{runningJobs.length} tiến trình</span>
+            <span className="text-slate-400 font-mono">{runningJobs.length} tiến trình</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {runningJobs.map((job) => (
-              <div key={job.questId} className="panel-subtle p-3 flex flex-col justify-between space-y-2">
+              <div key={job.questId} className="panel-subtle p-3.5 flex flex-col justify-between space-y-2 border-indigo-500/20">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-semibold text-slate-100 truncate">{job.questName}</span>
+                  <span className="text-xs font-bold text-white truncate">{job.questName}</span>
                   <button
                     onClick={() => handleStopQuest(job.questId)}
                     disabled={actionLoading[job.questId]}
-                    className="btn-danger py-0.5 px-2 text-[10px]"
+                    className="btn-danger py-1 px-2.5 text-[10px]"
                   >
                     Dừng
                   </button>
@@ -355,11 +361,11 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-slate-400">
                     <span>{job.message}</span>
-                    <span className="text-indigo-400 font-semibold">{job.progressPercent.toFixed(0)}%</span>
+                    <span className="text-indigo-400 font-bold">{job.progressPercent.toFixed(0)}%</span>
                   </div>
-                  <div className="h-1 bg-surface-0 rounded-full overflow-hidden">
+                  <div className="h-1.5 bg-black/40 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                      className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-300 shadow-glow-sm"
                       style={{ width: `${Math.min(100, Math.max(0, job.progressPercent))}%` }}
                     />
                   </div>
@@ -371,14 +377,14 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
       )}
 
       {loading && quests.length === 0 ? (
-        <div className="panel p-12 text-center space-y-3">
-          <Loader2 className="w-6 h-6 text-indigo-400 animate-spin mx-auto" />
-          <p className="text-xs text-slate-400">Đang tải danh sách nhiệm vụ từ Discord API...</p>
+        <div className="panel p-14 text-center space-y-3 border-white/[0.08]">
+          <Loader2 className="w-7 h-7 text-indigo-400 animate-spin mx-auto" />
+          <p className="text-xs text-slate-400 font-mono">Đang tải danh sách nhiệm vụ từ Discord API...</p>
         </div>
       ) : filteredQuests.length === 0 ? (
-        <div className="panel p-12 text-center space-y-2">
-          <CheckCircle2 className="w-8 h-8 text-slate-500 mx-auto" />
-          <h3 className="text-sm font-semibold text-slate-200">Không Tìm Thấy Quest Phù Hợp</h3>
+        <div className="panel p-14 text-center space-y-3 border-white/[0.08]">
+          <CheckCircle2 className="w-9 h-9 text-slate-500 mx-auto" />
+          <h3 className="text-sm font-bold text-slate-200">Không Tìm Thấy Quest Phù Hợp</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
             Không có nhiệm vụ nào khớp với bộ lọc &quot;{filterType}&quot;. Hãy chọn &quot;Tất Cả&quot; hoặc tải lại danh sách.
           </p>
@@ -397,15 +403,15 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
             return (
               <div
                 key={quest.id}
-                className={`panel p-4 flex flex-col justify-between space-y-4 transition-colors ${
+                className={`panel p-5 flex flex-col justify-between space-y-4 transition-all duration-200 ${
                   isRunning
-                    ? 'border-indigo-500/50 bg-[#101422]'
+                    ? 'border-indigo-500/50 bg-[#0E1222] shadow-glow-sm'
                     : isCompleted
                     ? 'border-emerald-500/30'
-                    : 'hover:border-white/[0.12]'
+                    : 'border-white/[0.08] hover:border-indigo-500/30'
                 }`}
               >
-                <div className="space-y-3">
+                <div className="space-y-3.5">
                   <div className="flex items-start gap-3">
                     <img
                       src={
@@ -414,18 +420,18 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                         'https://cdn.discordapp.com/embed/avatars/0.png'
                       }
                       alt={quest.name}
-                      className="w-10 h-10 rounded-lg object-cover bg-surface-2 border border-white/[0.08] shrink-0"
+                      className="w-11 h-11 rounded-xl object-cover bg-white/[0.04] border border-white/[0.08] shrink-0"
                     />
                     <div className="truncate flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-semibold text-slate-100 truncate">{quest.name}</span>
+                        <span className="text-xs font-bold text-white truncate">{quest.name}</span>
                       </div>
                       <p className="text-[11px] text-slate-400 truncate mt-0.5">{quest.application.name}</p>
                     </div>
 
                     <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-2 text-slate-300 border border-white/[0.06] flex items-center gap-1">
-                        {isVideo ? <Video className="w-3 h-3 text-sky-400" /> : <Gamepad2 className="w-3 h-3 text-purple-400" />}
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/[0.04] text-slate-300 border border-white/[0.06] flex items-center gap-1">
+                        {isVideo ? <Video className="w-3 h-3 text-cyan-400" /> : <Gamepad2 className="w-3 h-3 text-violet-400" />}
                         <span>{isVideo ? 'Video' : 'Game'}</span>
                       </span>
 
@@ -436,7 +442,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                               ? 'text-rose-400 bg-rose-500/10 border-rose-500/20'
                               : expiry.isUrgent
                               ? 'text-amber-400 bg-amber-500/10 border-amber-500/20'
-                              : 'text-slate-400 bg-surface-2 border-white/[0.06]'
+                              : 'text-slate-400 bg-white/[0.04] border-white/[0.06]'
                           }`}
                           title={`Hạn chót: ${quest.status.expiresAt}`}
                         >
@@ -447,20 +453,20 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                     </div>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <div className="flex items-center justify-between text-[11px] font-mono">
                       <span className="text-slate-400">Tiến độ</span>
-                      <span className={isRunning ? 'text-indigo-400 font-semibold' : 'text-slate-200 font-medium'}>
+                      <span className={isRunning ? 'text-indigo-400 font-bold' : 'text-slate-200 font-semibold'}>
                         {progress.toFixed(0)}%
                       </span>
                     </div>
-                    <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                       <div
-                        className={`h-full transition-all duration-200 rounded-full ${
+                        className={`h-full transition-all duration-300 rounded-full ${
                           isCompleted
-                            ? 'bg-emerald-400'
+                            ? 'bg-emerald-400 shadow-glow-emerald'
                             : isRunning
-                            ? 'bg-indigo-500'
+                            ? 'bg-gradient-to-r from-indigo-500 to-violet-500 shadow-glow-sm'
                             : 'bg-slate-600'
                         }`}
                         style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
@@ -468,7 +474,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 text-[11px] text-slate-400 truncate">
+                  <div className="flex items-center gap-2 p-2 rounded-lg bg-white/[0.02] border border-white/[0.04] text-[11px] text-slate-300 truncate">
                     <Gift className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                     <span className="truncate">{quest.rewards.name}</span>
                   </div>
@@ -477,14 +483,14 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                 <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
                   {isCompleted ? (
                     quest.status.claimed ? (
-                      <span className="text-xs font-medium text-emerald-400 flex items-center gap-1">
-                        <Check className="w-3.5 h-3.5" /> Đã nhận phần thưởng
+                      <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5 py-1">
+                        <Check className="w-4 h-4" /> Đã nhận phần thưởng
                       </span>
                     ) : (
                       <button
                         onClick={() => handleClaim(quest.id)}
                         disabled={isLoading}
-                        className="w-full btn-primary bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs py-1.5"
+                        className="w-full btn-primary bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs py-2 shadow-sm"
                       >
                         {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Gift className="w-3.5 h-3.5" />}
                         <span>Nhận Thưởng Ngay</span>
@@ -494,7 +500,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                     <button
                       onClick={() => handleStopQuest(quest.id)}
                       disabled={isLoading}
-                      className="w-full btn-danger py-1.5 text-xs"
+                      className="w-full btn-danger py-2 text-xs"
                     >
                       {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Square className="w-3.5 h-3.5 fill-current" />}
                       <span>Dừng Nhiệm Vụ</span>
@@ -503,7 +509,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                     <button
                       onClick={() => handleEnrollQuest(quest.id)}
                       disabled={isLoading}
-                      className="w-full btn-secondary py-1.5 text-xs"
+                      className="w-full btn-secondary py-2 text-xs"
                     >
                       {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                       <span>Nhận &amp; Bắt Đầu</span>
@@ -512,7 +518,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                     <button
                       onClick={() => handleStartQuest(quest.id)}
                       disabled={isLoading}
-                      className="w-full btn-primary py-1.5 text-xs"
+                      className="w-full btn-primary py-2 text-xs"
                     >
                       {isLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
                       <span>Bắt Đầu Làm</span>
