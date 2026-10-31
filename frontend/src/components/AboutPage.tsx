@@ -46,7 +46,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             <span className="text-white">Arychi Suite v2.0.0</span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone="ok" />
-              Gói 50.000đ / 1 tháng (Full tính năng)
+              Gói 20.000đ / 1 tháng (Full tính năng)
             </span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={questConnected ? 'ok' : 'error'} />
@@ -222,7 +222,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <h4 className="text-sm font-semibold text-white">Tầng 01: arychi.xyz</h4>
               <p className="text-xs text-blue-300 font-mono">Cổng Giới thiệu &amp; Thanh toán</p>
               <p className="text-xs text-slate-200 leading-relaxed max-w-[46ch]">
-                Đăng nhập OAuth2 (Bot Discord / Google) và thanh toán gói 50.000đ/tháng qua VietQR
+                Đăng nhập OAuth2 (Bot Discord / Google) và thanh toán gói 20.000đ/tháng qua VietQR
                 &amp; PayOS.
               </p>
             </div>
@@ -286,7 +286,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             </h3>
             <p className="text-[13px] text-slate-300 leading-relaxed">
               Mọi lượt truy cập vào miền phụ dash.arychi.xyz đều phải qua bước xác minh lần 2 trực
-              tiếp với Database để đảm bảo gói 50.000đ/tháng đang còn hạn.
+              tiếp với Database để đảm bảo gói 20.000đ/tháng đang còn hạn.
             </p>
           </div>
 
@@ -307,7 +307,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <span>VietQR &amp; PayOS Tự động</span>
             </h3>
             <p className="text-[13px] text-slate-300 leading-relaxed">
-              Giao dịch mua gói 50.000đ/tháng được xử lý qua chuẩn VietQR và PayOS API, tự động cộng
+              Giao dịch mua gói 20.000đ/tháng được xử lý qua chuẩn VietQR và PayOS API, tự động cộng
               dồn số ngày sử dụng (30 ngày/tháng) vào Database.
             </p>
           </div>
@@ -386,7 +386,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <span className="text-xs text-slate-300 ml-auto">Hiện tại</span>
             </div>
             <ul className="space-y-1 text-[13px] text-slate-300 list-disc list-inside pt-1">
-              <li>Đồng nhất gói duy nhất 50.000đ/tháng mở khóa toàn bộ tính năng.</li>
+              <li>Đồng nhất gói duy nhất 20.000đ/tháng mở khóa toàn bộ tính năng.</li>
               <li>Tích hợp API VietQR &amp; PayOS tự động xác nhận và cộng tháng vào Database.</li>
               <li>Xác minh lần 2 khi chuyển hướng sang dash.arychi.xyz với bố cục Sidebar cột trái.</li>
               <li>Cấu hình 1 Token cho Quest/Giờ chơi và 2 Token (Chính + Phụ) cho Treo Stream.</li>

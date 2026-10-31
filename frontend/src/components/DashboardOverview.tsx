@@ -165,13 +165,13 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
     <div className="space-y-8">
       <PageHeader
         title="Bảng điều khiển — dash.arychi.xyz"
-        description="Đã xác minh gói 50.000đ/tháng lần thứ 2 từ Database. Quản lý Token cho từng module bên cột trái."
+        description="Đã xác minh gói 20.000đ/tháng lần thứ 2 từ Database. Quản lý Token cho từng module bên cột trái."
         meta={
           <>
             <span className="text-white font-semibold">@{user.username}</span>
             <span className="inline-flex items-center gap-1.5 text-blue-300 font-mono">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Gói 50k/tháng (Còn {subscription?.daysRemaining ?? 30} ngày)
+              Gói 20k/tháng (Còn {subscription?.daysRemaining ?? 30} ngày)
             </span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={questConnected ? 'ok' : 'error'} />
@@ -187,11 +187,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <>
             <button
               type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_50k')}
+              onClick={() => onOpenSubscriptionModal('monthly_20k')}
               className="btn-secondary"
             >
               <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-              <span>Gia hạn (+50k/tháng)</span>
+              <span>Gia hạn (+20k/tháng)</span>
             </button>
             <button
               type="button"

@@ -27,12 +27,12 @@ export interface PricingPlan {
   features: string[];
 }
 
-export const SINGLE_PLAN_50K: PricingPlan = {
-  id: 'monthly_50k',
+export const SINGLE_PLAN_20K: PricingPlan = {
+  id: 'monthly_20k',
   name: 'Gói Full Tính Năng',
-  durationLabel: '50.000đ / 1 tháng',
-  price: '50.000đ',
-  pricePerMonth: 50000,
+  durationLabel: '20.000đ / 1 tháng',
+  price: '20.000đ',
+  pricePerMonth: 20000,
   popular: true,
   summary:
     'Một gói duy nhất mở khóa 100% tính năng trên dash.arychi.xyz. Tự động xác nhận qua VietQR & PayOS, cộng dồn thời hạn theo số tháng đăng ký.',
@@ -45,7 +45,8 @@ export const SINGLE_PLAN_50K: PricingPlan = {
   ],
 };
 
-export const PRICING_PLANS: PricingPlan[] = [SINGLE_PLAN_50K];
+export const SINGLE_PLAN_50K = SINGLE_PLAN_20K;
+export const PRICING_PLANS: PricingPlan[] = [SINGLE_PLAN_20K];
 
 interface AccessGateBannerProps {
   user: AuthUser | null;
@@ -75,7 +76,7 @@ export const AccessGateBanner: React.FC<AccessGateBannerProps> = ({
           </span>
           <span className="text-slate-400">•</span>
           <span className="font-mono text-slate-200">
-            GÓI: <strong className="text-white">50.000Đ / THÁNG (FULL TÍNH NĂNG)</strong>
+            GÓI: <strong className="text-white">20.000Đ / THÁNG (FULL TÍNH NĂNG)</strong>
           </span>
           {subscription.daysRemaining !== undefined && (
             <>
@@ -88,10 +89,10 @@ export const AccessGateBanner: React.FC<AccessGateBannerProps> = ({
         </div>
         <button
           type="button"
-          onClick={() => onOpenSubscriptionModal('monthly_50k')}
+          onClick={() => onOpenSubscriptionModal('monthly_20k')}
           className="btn-secondary btn-sm self-start sm:self-auto"
         >
-          Gia hạn thêm tháng (+50k)
+          Gia hạn thêm tháng (+20k)
         </button>
       </div>
     );
@@ -104,11 +105,11 @@ export const AccessGateBanner: React.FC<AccessGateBannerProps> = ({
           <div className="flex items-center gap-2">
             <Lock className="w-4 h-4 text-blue-400 shrink-0" />
             <h2 className="text-base font-bold text-white">
-              Yêu cầu đăng nhập OAuth2 &amp; kích hoạt gói 50.000đ/tháng để dùng {featureName}
+              Yêu cầu đăng nhập OAuth2 &amp; kích hoạt gói 20.000đ/tháng để dùng {featureName}
             </h2>
           </div>
           <p className="text-[13px] text-slate-300 leading-relaxed">
-            Hệ thống sử dụng một gói duy nhất 50.000đ / 1 tháng mở khóa toàn bộ tính năng, tự động xác nhận qua VietQR &amp; PayOS và lưu trực tiếp vào Database.
+            Hệ thống sử dụng một gói duy nhất 20.000đ / 1 tháng mở khóa toàn bộ tính năng, tự động xác nhận qua VietQR &amp; PayOS và lưu trực tiếp vào Database.
           </p>
         </div>
 
@@ -118,8 +119,8 @@ export const AccessGateBanner: React.FC<AccessGateBannerProps> = ({
               <span>Bước 1: Đăng nhập OAuth2</span>
             </button>
           ) : (
-            <button type="button" onClick={() => onOpenSubscriptionModal('monthly_50k')} className="btn-primary">
-              <span>Bước 2: Mua gói 50k/tháng</span>
+            <button type="button" onClick={() => onOpenSubscriptionModal('monthly_20k')} className="btn-primary">
+              <span>Bước 2: Mua gói 20k/tháng</span>
             </button>
           )}
         </div>
@@ -184,10 +185,10 @@ interface SubscriptionModalProps {
 }
 
 const MONTH_OPTIONS = [
-  { months: 1, label: '1 tháng', amount: 50000, badge: 'Cơ bản' },
-  { months: 3, label: '3 tháng', amount: 150000, badge: 'Phổ biến' },
-  { months: 6, label: '6 tháng', amount: 300000, badge: 'Ổn định' },
-  { months: 12, label: '12 tháng', amount: 600000, badge: 'Cả năm' },
+  { months: 1, label: '1 tháng', amount: 20000, badge: 'Cơ bản' },
+  { months: 3, label: '3 tháng', amount: 60000, badge: 'Phổ biến' },
+  { months: 6, label: '6 tháng', amount: 120000, badge: 'Ổn định' },
+  { months: 12, label: '12 tháng', amount: 240000, badge: 'Cả năm' },
 ];
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
@@ -293,7 +294,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         <div className="flex items-start justify-between gap-4 pb-4 border-b border-line">
           <div className="space-y-1">
             <h2 id="sub-modal-title" className="text-lg font-bold text-white">
-              Đăng ký Gói 50.000đ / 1 tháng (VietQR &amp; PayOS)
+              Đăng ký Gói 20.000đ / 1 tháng (VietQR &amp; PayOS)
             </h2>
             <p className="text-xs text-slate-300">
               Một gói duy nhất mở khóa 100% tính năng trên dash.arychi.xyz. Tự động cộng dồn tháng vào Database.
@@ -359,11 +360,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   GÓI DUY NHẤT • FULL TÍNH NĂNG
                 </span>
                 <span className="text-lg font-bold font-mono text-white">
-                  50.000đ / 1 tháng
+                  20.000đ / 1 tháng
                 </span>
               </div>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-200 pt-2 border-t border-line">
-                {SINGLE_PLAN_50K.features.map((feat) => (
+                {SINGLE_PLAN_20K.features.map((feat) => (
                   <li key={feat} className="flex items-start gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
                     <span>{feat}</span>
@@ -410,7 +411,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <div>
                 <span className="text-xs text-slate-300">Tổng thanh toán:</span>
                 <p className="text-xl font-bold font-mono text-white">
-                  {(months * 50000).toLocaleString('vi-VN')} VNĐ{' '}
+                  {(months * 20000).toLocaleString('vi-VN')} VNĐ{' '}
                   <span className="text-xs font-normal text-blue-300">
                     (+{months} tháng sử dụng)
                   </span>

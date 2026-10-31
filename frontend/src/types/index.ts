@@ -127,7 +127,7 @@ export interface StreamStatus {
   };
 }
 
-export type PlanTierId = 'monthly_50k' | 'pro' | 'starter' | 'lifetime';
+export type PlanTierId = 'monthly_20k' | 'monthly_50k' | 'pro' | 'starter' | 'lifetime';
 
 export interface UserSubscription {
   planId: PlanTierId;

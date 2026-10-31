@@ -128,8 +128,8 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
       return false;
     }
     if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng kích hoạt gói 50.000đ/tháng để sử dụng Treo Stream');
-      onOpenSubscriptionModal('monthly_50k');
+      toast.warning('Vui lòng kích hoạt gói 20.000đ/tháng để sử dụng Treo Stream');
+      onOpenSubscriptionModal('monthly_20k');
       return false;
     }
     if (!hasBothStreamTokens) {

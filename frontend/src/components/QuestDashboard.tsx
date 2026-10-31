@@ -138,8 +138,8 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
       return false;
     }
     if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng kích hoạt gói 50.000đ/tháng để sử dụng Discord Quests');
-      onOpenSubscriptionModal('monthly_50k');
+      toast.warning('Vui lòng kích hoạt gói 20.000đ/tháng để sử dụng Discord Quests');
+      onOpenSubscriptionModal('monthly_20k');
       return false;
     }
     if (!token) {

@@ -347,7 +347,7 @@ app.get('/api/subscription/verify', (req: Request, res: Response) => {
 	});
 });
 
-// Create VietQR & PayOS payment order (50.000đ / 1 tháng, stackable by months)
+// Create VietQR & PayOS payment order (20.000đ / 1 tháng, stackable by months)
 app.post('/api/payments/create', async (req: Request, res: Response) => {
 	try {
 		const sessionToken = extractSessionToken(req);
@@ -441,7 +441,7 @@ app.post('/api/payments/confirm/:orderCode', async (req: Request, res: Response)
 
 	addLog(
 		'success',
-		`[Payment Verified] Đã cộng +${result.order.months} tháng gói 50k cho @${result.account.username} (Hết hạn: ${new Date(
+		`[Payment Verified] Đã cộng +${result.order.months} tháng gói 20k cho @${result.account.username} (Hết hạn: ${new Date(
 			result.account.subscriptionExpiresAt!
 		).toLocaleDateString('vi-VN')})`
 	);

@@ -143,7 +143,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={user ? 'Tài khoản Discord đã kết nối' : 'Đăng nhập kết nối Bot Discord (OAuth2)'}
-      description="Kết nối tài khoản Discord như ứng dụng mở rộng (Linked App / Bot Extension) để mua gói 50.000đ/tháng và truy cập hệ thống quản trị dash.arychi.xyz."
+      description="Kết nối tài khoản Discord như ứng dụng mở rộng (Linked App / Bot Extension) để mua gói 20.000đ/tháng và truy cập hệ thống quản trị dash.arychi.xyz."
     >
       {user && (
         <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-line">
@@ -334,7 +334,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <span>Đăng ký / Đăng nhập bằng Tài khoản Google</span>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Sử dụng Gmail để khởi tạo tài khoản Arychi và quản lý gói thuê bao 50.000đ/tháng trên Database.
+                  Sử dụng Gmail để khởi tạo tài khoản Arychi và quản lý gói thuê bao 20.000đ/tháng trên Database.
                 </p>
               </div>
 

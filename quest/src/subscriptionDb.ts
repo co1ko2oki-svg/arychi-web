@@ -2,10 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-export const PLAN_MONTHLY_PRICE = 50000;
+export const PLAN_MONTHLY_PRICE = 20000;
 export const PLAN_DAYS_PER_MONTH = 30;
-export const PLAN_ID = 'monthly_50k';
-export const PLAN_NAME = 'Gói Full Tính Năng (50.000đ / 1 tháng)';
+export const PLAN_ID = 'monthly_20k';
+export const PLAN_NAME = 'Gói Full Tính Năng (20.000đ / 1 tháng)';
 
 export interface AccountTokens {
 	questToken: string;
@@ -64,7 +64,7 @@ interface SubscriptionDatabaseSchema {
 }
 
 export interface SubscriptionStatusDTO {
-	planId: 'monthly_50k';
+	planId: 'monthly_20k' | 'monthly_50k';
 	planName: string;
 	pricePerMonth: number;
 	priceLabel: string;
@@ -198,7 +198,7 @@ export class SubscriptionManager {
 			planId: PLAN_ID,
 			planName: PLAN_NAME,
 			pricePerMonth: PLAN_MONTHLY_PRICE,
-			priceLabel: '50.000đ / 1 tháng',
+			priceLabel: '20.000đ / 1 tháng',
 			isActive,
 			daysRemaining,
 			totalMonthsPurchased: account.totalMonthsPurchased || 1,
@@ -460,7 +460,7 @@ export class SubscriptionManager {
 			account.totalMonthsPurchased = (account.totalMonthsPurchased || 0) + order.months;
 			account.botConnected = true;
 			if (!account.licenseKey) {
-				account.licenseKey = `ARYCHI-50K-${account.id.slice(-4).toUpperCase()}-${crypto
+				account.licenseKey = `ARYCHI-20K-${account.id.slice(-4).toUpperCase()}-${crypto
 					.randomBytes(2)
 					.toString('hex')
 					.toUpperCase()}`;

@@ -19,7 +19,7 @@ export interface CommercialUser {
   subscriptionExpiresAt: string | null; // ISO datetime
   activatedAt: string | null; // ISO datetime
   totalMonthsPurchased: number;
-  licenseKey: string | null; // e.g. "ARYCHI-50K-XXXX-YYYY"
+  licenseKey: string | null; // e.g. "ARYCHI-20K-XXXX-YYYY"
   tokens: {
     questToken: string; // 1 Discord token for Quests & Badges
     streamMainToken: string; // 1 Main token for streaming voice video
@@ -32,9 +32,9 @@ export interface CommercialUser {
 }
 
 export interface CommercialSubscription {
-  planId: 'monthly_50k'; // Single pricing tier: 50.000đ / 1 month
+  planId: 'monthly_20k' | 'monthly_50k'; // Single pricing tier: 20.000đ / 1 month
   planName: string;
-  pricePerMonth: 50000;
+  pricePerMonth: 20000;
   currency: 'VND';
   status: 'active' | 'expired';
   daysRemaining: number;

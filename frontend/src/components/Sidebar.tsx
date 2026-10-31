@@ -142,7 +142,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <ShieldCheck className="w-3.5 h-3.5" />
               ĐÃ XÁC MINH LẦN 2
             </span>
-            <span className="text-slate-200">50K/THÁNG</span>
+            <span className="text-slate-200">20K/THÁNG</span>
           </div>
           <p className="text-xs text-slate-300 font-mono">
             Thời hạn còn: <strong className="text-white">{subscription.daysRemaining ?? 30} ngày</strong>
@@ -207,7 +207,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_50k')}
+              onClick={() => onOpenSubscriptionModal('monthly_20k')}
               className="btn-secondary btn-sm flex-1 text-xs"
             >
               <KeyRound className="w-3 h-3 text-blue-300" />

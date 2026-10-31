@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { AuthUser, PlanTierId, UserSubscription } from '../types';
 import { NavTabId } from './Navbar';
-import { SINGLE_PLAN_50K } from './SubscriptionModal';
+import { SINGLE_PLAN_20K } from './SubscriptionModal';
 import { StatusDot } from './ui';
 
 interface LandingPageProps {
@@ -93,7 +93,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       icon: QrCode,
       tag: 'VIETQR & PAYOS API',
       title: 'Tự động xác nhận & Cộng dồn theo tháng',
-      desc: 'Tích hợp API VietQR và PayOS cho gói duy nhất 50.000đ/tháng. Tự động xác nhận giao dịch, cộng dồn số tháng và lưu trữ vào Database.',
+      desc: 'Tích hợp API VietQR và PayOS cho gói duy nhất 20.000đ/tháng. Tự động xác nhận giao dịch, cộng dồn số tháng và lưu trữ vào Database.',
     },
     {
       icon: ShieldCheck,
@@ -120,11 +120,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       step: 'BƯỚC 02',
-      time: '50.000đ / 1 tháng',
+      time: '20.000đ / 1 tháng',
       title: 'Thanh toán VietQR & PayOS',
-      desc: 'Quét mã VietQR hoặc cổng PayOS cho gói duy nhất 50.000đ/tháng. Hệ thống tự xác nhận và cộng tháng vào Database.',
+      desc: 'Quét mã VietQR hoặc cổng PayOS cho gói duy nhất 20.000đ/tháng. Hệ thống tự xác nhận và cộng tháng vào Database.',
       cmdLabel: 'Trạng thái Gói',
-      cmdValue: hasActivePlan ? `Còn ${subscription?.daysRemaining ?? 30} ngày` : 'Chưa kích hoạt gói 50k',
+      cmdValue: hasActivePlan ? `Còn ${subscription?.daysRemaining ?? 30} ngày` : 'Chưa kích hoạt gói 20k',
     },
     {
       step: 'BƯỚC 03',
@@ -143,11 +143,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       q: 'Hệ thống có bao nhiêu gói dịch vụ và thanh toán như thế nào?',
-      a: 'Arychi loại bỏ toàn bộ các gói phân mảnh và chỉ giữ lại duy nhất 1 gói 50.000đ / 1 tháng mở khóa 100% tính năng. Khi thanh toán qua API VietQR và PayOS, hệ thống tự động xác nhận và cộng dồn số tháng vào Database.',
+      a: 'Arychi loại bỏ toàn bộ các gói phân mảnh và chỉ giữ lại duy nhất 1 gói 20.000đ / 1 tháng mở khóa 100% tính năng. Khi thanh toán qua API VietQR và PayOS, hệ thống tự động xác nhận và cộng dồn số tháng vào Database.',
     },
     {
       q: 'Quá trình chuyển hướng sang dash.arychi.xyz hoạt động ra sao?',
-      a: 'Khi bạn bấm "Vào Dashboard (dash.arychi.xyz)", hệ thống chuyển hướng kèm phiên xác thực và kiểm tra lần thứ 2 đối chiếu với Database để chắc chắn tài khoản đã mua gói 50.000đ/tháng còn hiệu lực.',
+      a: 'Khi bạn bấm "Vào Dashboard (dash.arychi.xyz)", hệ thống chuyển hướng kèm phiên xác thực và kiểm tra lần thứ 2 đối chiếu với Database để chắc chắn tài khoản đã mua gói 20.000đ/tháng còn hiệu lực.',
     },
     {
       q: 'Tại sao tính năng Treo Stream cần nhập 2 Token (1 Chính và 1 Phụ)?',
@@ -179,7 +179,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Hệ thống Tự động hóa Discord — Arychi Suite
             </h1>
             <p className="text-base text-slate-300 leading-relaxed">
-              Đăng nhập bằng Bot Discord (OAuth2) hoặc tài khoản Google, kích hoạt gói duy nhất 50.000đ/tháng qua VietQR &amp; PayOS để truy cập trung tâm điều khiển tại miền phụ dash.arychi.xyz.
+              Đăng nhập bằng Bot Discord (OAuth2) hoặc tài khoản Google, kích hoạt gói duy nhất 20.000đ/tháng qua VietQR &amp; PayOS để truy cập trung tâm điều khiển tại miền phụ dash.arychi.xyz.
             </p>
           </div>
 
@@ -196,11 +196,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             ) : !hasActivePlan ? (
               <button
                 type="button"
-                onClick={() => onOpenSubscriptionModal('monthly_50k')}
+                onClick={() => onOpenSubscriptionModal('monthly_20k')}
                 className="btn-primary h-10 px-5 text-sm"
               >
                 <QrCode className="w-4 h-4" />
-                <span>2. Mua gói 50.000đ / 1 tháng (VietQR)</span>
+                <span>2. Mua gói 20.000đ / 1 tháng (VietQR)</span>
               </button>
             ) : (
               <button
@@ -215,14 +215,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
             <button
               type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_50k')}
+              onClick={() => onOpenSubscriptionModal('monthly_20k')}
               className="btn-secondary h-10 px-4 text-sm"
             >
               <KeyRound className="w-4 h-4 text-blue-400" />
               <span>
                 {hasActivePlan
-                  ? `Gói 50k: Còn ${subscription?.daysRemaining ?? 30} ngày`
-                  : 'Gói Full: 50.000đ / 1 tháng'}
+                  ? `Gói 20k: Còn ${subscription?.daysRemaining ?? 30} ngày`
+                  : 'Gói Full: 20.000đ / 1 tháng'}
               </span>
             </button>
 
@@ -240,7 +240,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
           <div className="pt-3 grid grid-cols-3 gap-4 max-w-md border-t border-line">
             <div>
-              <p className="text-lg font-bold font-mono text-white">50.000đ</p>
+              <p className="text-lg font-bold font-mono text-white">20.000đ</p>
               <p className="text-xs text-slate-300">1 Tháng / Full tính năng</p>
             </div>
             <div>
@@ -265,7 +265,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </span>
             </div>
             <span className="text-xs font-mono text-blue-300">
-              {hasActivePlan ? 'READY FOR DASH' : 'YÊU CẦU GÓI 50K'}
+              {hasActivePlan ? 'READY FOR DASH' : 'YÊU CẦU GÓI 20K'}
             </span>
           </div>
 
@@ -299,7 +299,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-white truncate">
-                    2. Gói 50.000đ / 1 tháng (Database)
+                    2. Gói 20.000đ / 1 tháng (Database)
                   </p>
                   <p className="text-xs font-mono text-slate-300 truncate">
                     {hasActivePlan
@@ -310,7 +310,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </div>
               <span className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-200 shrink-0">
                 <StatusDot tone={hasActivePlan ? 'ok' : 'error'} />
-                {hasActivePlan ? 'ACTIVE' : '50K/MO'}
+                {hasActivePlan ? 'ACTIVE' : '20K/MO'}
               </span>
             </div>
 
@@ -347,7 +347,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 !user
                   ? onOpenLoginModal()
                   : !hasActivePlan
-                  ? onOpenSubscriptionModal('monthly_50k')
+                  ? onOpenSubscriptionModal('monthly_20k')
                   : onEnterDashboard?.()
               }
               className="link text-xs"
@@ -356,7 +356,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {!user
                   ? 'Đăng nhập OAuth2 ngay'
                   : !hasActivePlan
-                  ? 'Mua gói 50k/tháng'
+                  ? 'Mua gói 20k/tháng'
                   : 'Truy cập dash.arychi.xyz'}
               </span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -368,7 +368,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section id="pricing" className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <h2 className="text-2xl font-bold text-white tracking-tight">
-            Một Gói Duy Nhất — 50.000đ / 1 Tháng (Full Tính Năng)
+            Một Gói Duy Nhất — 20.000đ / 1 Tháng (Full Tính Năng)
           </h2>
           <p className="text-xs font-mono text-slate-300">
             Thanh toán tự động qua API VietQR &amp; PayOS • Cộng dồn theo tháng trong Database
@@ -386,11 +386,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </span>
             </div>
 
-            <h3 className="text-2xl font-bold text-white">{SINGLE_PLAN_50K.name}</h3>
-            <p className="text-sm text-slate-300 leading-relaxed">{SINGLE_PLAN_50K.summary}</p>
+            <h3 className="text-2xl font-bold text-white">{SINGLE_PLAN_20K.name}</h3>
+            <p className="text-sm text-slate-300 leading-relaxed">{SINGLE_PLAN_20K.summary}</p>
 
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              {SINGLE_PLAN_50K.features.map((feat) => (
+              {SINGLE_PLAN_20K.features.map((feat) => (
                 <li key={feat} className="flex items-start gap-2 text-xs text-slate-200">
                   <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
                   <span>{feat}</span>
@@ -403,7 +403,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div className="space-y-1">
               <span className="text-xs font-mono text-slate-300">CHI PHÍ THUÊ BAO CỐ ĐỊNH</span>
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold font-mono text-white">50.000đ</span>
+                <span className="text-3xl font-bold font-mono text-white">20.000đ</span>
                 <span className="text-sm text-slate-300">/ 1 tháng (30 ngày)</span>
               </div>
               <p className="text-xs text-blue-300 font-mono">
@@ -415,17 +415,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <button
                 type="button"
                 onClick={() =>
-                  user ? onOpenSubscriptionModal('monthly_50k') : onOpenLoginModal()
+                  user ? onOpenSubscriptionModal('monthly_20k') : onOpenLoginModal()
                 }
                 className="btn-primary w-full h-10"
               >
                 <QrCode className="w-4 h-4" />
                 <span>
                   {!user
-                    ? 'Đăng nhập OAuth2 để mua gói 50k'
+                    ? 'Đăng nhập OAuth2 để mua gói 20k'
                     : hasActivePlan
-                    ? 'Gia hạn thêm tháng (+50.000đ/tháng)'
-                    : 'Mua gói 50.000đ/tháng (VietQR / PayOS)'}
+                    ? 'Gia hạn thêm tháng (+20.000đ/tháng)'
+                    : 'Mua gói 20.000đ/tháng (VietQR / PayOS)'}
                 </span>
               </button>
 
@@ -557,7 +557,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="space-y-3">
           <h2 className="text-2xl font-bold text-white tracking-tight">Câu hỏi thường gặp</h2>
           <p className="text-[13px] text-slate-300 leading-relaxed">
-            Giải đáp về cơ chế đăng nhập OAuth2, gói 50.000đ/tháng qua VietQR &amp; PayOS, xác minh kép tại dash.arychi.xyz và cách nhập Token.
+            Giải đáp về cơ chế đăng nhập OAuth2, gói 20.000đ/tháng qua VietQR &amp; PayOS, xác minh kép tại dash.arychi.xyz và cách nhập Token.
           </p>
         </div>
 

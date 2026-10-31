@@ -101,9 +101,9 @@ const AppContent: React.FC = () => {
   const [loadingStream, setLoadingStream] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [selectedSubPlan, setSelectedSubPlan] = useState<PlanTierId>('monthly_50k');
+  const [selectedSubPlan, setSelectedSubPlan] = useState<PlanTierId>('monthly_20k');
 
-  const handleOpenSubModal = (planId: PlanTierId = 'monthly_50k') => {
+  const handleOpenSubModal = (planId: PlanTierId = 'monthly_20k') => {
     setSelectedSubPlan(planId);
     setIsSubModalOpen(true);
   };
@@ -152,7 +152,7 @@ const AppContent: React.FC = () => {
     }
     setDashVerified(Boolean(sub.isActive !== false));
     toast.success(
-      `Đã xác nhận thanh toán & kích hoạt gói 50.000đ/tháng (Còn ${sub.daysRemaining ?? 30} ngày)`
+      `Đã xác nhận thanh toán & kích hoạt gói 20.000đ/tháng (Còn ${sub.daysRemaining ?? 30} ngày)`
     );
   };
 
@@ -261,7 +261,7 @@ const AppContent: React.FC = () => {
       return;
     }
     if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng mua gói 50.000đ/tháng qua VietQR / PayOS trước khi vào Dashboard');
+      toast.warning('Vui lòng mua gói 20.000đ/tháng qua VietQR / PayOS trước khi vào Dashboard');
       setIsSubModalOpen(true);
       return;
     }
@@ -314,7 +314,7 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (domainMode === 'landing') {
-      document.title = 'Arychi Suite — arychi.xyz (Giới thiệu & Gói 50k/tháng)';
+      document.title = 'Arychi Suite — arychi.xyz (Giới thiệu & Gói 20k/tháng)';
       return;
     }
     const titles: Record<NavTabId, string> = {
@@ -538,7 +538,7 @@ const AppContent: React.FC = () => {
               Đang xác minh lần 2 tại dash.arychi.xyz…
             </h1>
             <p className="text-xs text-slate-300 mx-auto">
-              Hệ thống đang đối chiếu phiên đăng nhập OAuth2 và thời hạn gói 50.000đ/tháng trực tiếp từ Database.
+              Hệ thống đang đối chiếu phiên đăng nhập OAuth2 và thời hạn gói 20.000đ/tháng trực tiếp từ Database.
             </p>
           </div>
         </div>
@@ -558,7 +558,7 @@ const AppContent: React.FC = () => {
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed">
-              Miền phụ <code className="inline-code">dash.arychi.xyz</code> yêu cầu xác minh lần thứ 2 với Database: Tài khoản phải đăng nhập qua Bot Discord OAuth2 / Google và đã kích hoạt gói <strong>50.000đ / 1 tháng</strong>.
+              Miền phụ <code className="inline-code">dash.arychi.xyz</code> yêu cầu xác minh lần thứ 2 với Database: Tài khoản phải đăng nhập qua Bot Discord OAuth2 / Google và đã kích hoạt gói <strong>20.000đ / 1 tháng</strong>.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -575,12 +575,12 @@ const AppContent: React.FC = () => {
               <div className="p-4 rounded-lg bg-[#141722] border border-line space-y-1.5">
                 <div className="flex items-center gap-2 text-xs font-mono text-blue-300">
                   <KeyRound className="w-4 h-4" />
-                  <span>2. GÓI 50.000Đ / THÁNG</span>
+                  <span>2. GÓI 20.000Đ / THÁNG</span>
                 </div>
                 <p className="text-sm font-semibold text-white">
                   {subscription && subscription.isActive !== false
                     ? `Còn ${subscription.daysRemaining ?? 30} ngày`
-                    : 'Chưa mua gói 50k/tháng'}
+                    : 'Chưa mua gói 20k/tháng'}
                 </p>
               </div>
             </div>
@@ -608,11 +608,11 @@ const AppContent: React.FC = () => {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleOpenSubModal('monthly_50k')}
+                    onClick={() => handleOpenSubModal('monthly_20k')}
                     className="btn-primary"
                   >
                     <QrCode className="w-4 h-4" />
-                    <span>Mua gói 50.000đ/tháng (VietQR)</span>
+                    <span>Mua gói 20.000đ/tháng (VietQR)</span>
                   </button>
                 )}
               </div>

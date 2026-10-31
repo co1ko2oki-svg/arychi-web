@@ -88,8 +88,8 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
       return;
     }
     if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng kích hoạt gói 50.000đ/tháng để sử dụng Science Telemetry');
-      onOpenSubscriptionModal('monthly_50k');
+      toast.warning('Vui lòng kích hoạt gói 20.000đ/tháng để sử dụng Science Telemetry');
+      onOpenSubscriptionModal('monthly_20k');
       return;
     }
     if (!token && !tokenInput.trim()) {

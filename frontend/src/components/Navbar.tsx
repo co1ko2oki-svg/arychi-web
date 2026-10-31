@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const sectionLinks = [
     { href: '#intro', label: 'Giới thiệu' },
     { href: '#modules', label: 'Tính năng' },
-    { href: '#pricing', label: 'Gói 50k/tháng' },
+    { href: '#pricing', label: 'Gói 20k/tháng' },
     { href: '#architecture', label: 'Kiến trúc' },
     { href: '#faq', label: 'Hỏi đáp' },
   ];
@@ -96,14 +96,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           {onOpenSubscriptionModal && (
             <button
               type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_50k')}
+              onClick={() => onOpenSubscriptionModal('monthly_20k')}
               className="btn-secondary btn-sm h-8 px-3"
             >
               <KeyRound className="w-3.5 h-3.5 text-blue-400" />
               <span>
                 {hasActivePlan
-                  ? `Gói 50k (${subscription?.daysRemaining ?? 30}d)`
-                  : 'Mua gói 50k/tháng'}
+                  ? `Gói 20k (${subscription?.daysRemaining ?? 30}d)`
+                  : 'Mua gói 20k/tháng'}
               </span>
             </button>
           )}
