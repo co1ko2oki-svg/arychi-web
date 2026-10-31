@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { AuthUser, PlanTierId, UserSubscription } from '../types';
+import { AccessGateBanner } from './SubscriptionModal';
 import { useToast } from './Toast';
 import { PageHeader, SegmentedControl } from './ui';
 
@@ -11,7 +13,19 @@ const modeDescription: Record<Mode, string> = {
   both: 'Cộng giờ chơi và đánh dấu thêm 500 game đã chơi.',
 };
 
-export const BadgeDashboard: React.FC = () => {
+interface BadgeDashboardProps {
+  user?: AuthUser | null;
+  subscription?: UserSubscription | null;
+  onOpenLoginModal?: () => void;
+  onOpenSubscriptionModal?: (planId?: PlanTierId) => void;
+}
+
+export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
+  user = null,
+  subscription = null,
+  onOpenLoginModal = () => {},
+  onOpenSubscriptionModal = () => {},
+}) => {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const [hours, setHours] = useState('50');
@@ -29,6 +43,16 @@ export const BadgeDashboard: React.FC = () => {
   };
 
   const copyCommand = async () => {
+    if (!user) {
+      toast.warning('Vui lòng kết nối tài khoản Discord với Bot trước');
+      onOpenLoginModal();
+      return;
+    }
+    if (!subscription || !subscription.botConnected) {
+      toast.warning('Vui lòng mua và kích hoạt gói dịch vụ để sử dụng Science Telemetry');
+      onOpenSubscriptionModal('pro');
+      return;
+    }
     try {
       await navigator.clipboard.writeText(getCommand());
       setCopied(true);
@@ -57,6 +81,14 @@ export const BadgeDashboard: React.FC = () => {
             </span>
           </>
         }
+      />
+
+      <AccessGateBanner
+        user={user}
+        subscription={subscription}
+        onOpenLoginModal={onOpenLoginModal}
+        onOpenSubscriptionModal={onOpenSubscriptionModal}
+        featureName="Science Telemetry (Giờ chơi)"
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-x-12 gap-y-10">

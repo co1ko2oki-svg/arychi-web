@@ -8,9 +8,10 @@ import { StreamDashboard } from './components/StreamDashboard';
 import { BadgeDashboard } from './components/BadgeDashboard';
 import { TerminalLogs } from './components/TerminalLogs';
 import { LoginModal } from './components/LoginModal';
+import { SubscriptionModal } from './components/SubscriptionModal';
 import { SiteFooter } from './components/SiteFooter';
 import { ToastProvider, useToast } from './components/Toast';
-import { AuthUser, QuestDTO, QuestJob, LogEntry, StreamStatus } from './types';
+import { AuthUser, PlanTierId, QuestDTO, QuestJob, LogEntry, StreamStatus, UserSubscription } from './types';
 import { questApi, streamApi, QUEST_WS_URL, STREAM_WS_URL } from './services/api';
 
 const getTabFromHash = (): NavTabId => {
@@ -52,6 +53,34 @@ const AppContent: React.FC = () => {
   const [loadingQuests, setLoadingQuests] = useState(false);
   const [loadingStream, setLoadingStream] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
+  const [selectedSubPlan, setSelectedSubPlan] = useState<PlanTierId>('pro');
+
+  const [subscription, setSubscription] = useState<UserSubscription | null>(() => {
+    try {
+      const saved = localStorage.getItem('arychi_subscription');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const handleOpenSubModal = (planId: PlanTierId = 'pro') => {
+    setSelectedSubPlan(planId);
+    setIsSubModalOpen(true);
+  };
+
+  const handleActivateSubscription = (sub: UserSubscription) => {
+    setSubscription(sub);
+    localStorage.setItem('arychi_subscription', JSON.stringify(sub));
+    toast.success(`Đã kích hoạt ${sub.planName} cho tài khoản @${user?.username || 'Discord'}`);
+  };
+
+  const handleDeactivateSubscription = () => {
+    setSubscription(null);
+    localStorage.removeItem('arychi_subscription');
+    toast.info('Đã hủy gói dịch vụ hiện tại');
+  };
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -268,18 +297,21 @@ const AppContent: React.FC = () => {
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
         user={user}
+        subscription={subscription}
         questConnected={questConnected}
         streamConnected={streamConnected}
         runningQuestsCount={runningQuestsCount}
         streamPlaying={streamPlaying}
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
+        onOpenSubscriptionModal={handleOpenSubModal}
       />
 
       <main className="page flex-1 pt-8 pb-16">
         {activeTab === 'home' && (
-          user && token ? (
+          user && token && subscription ? (
             <DashboardOverview
               user={user}
+              subscription={subscription}
               token={token}
               questConnected={questConnected}
               streamConnected={streamConnected}
@@ -293,10 +325,14 @@ const AppContent: React.FC = () => {
               logs={logs}
               onNavigateTab={(tab) => handleSelectTab(tab)}
               onOpenLoginModal={() => setIsLoginModalOpen(true)}
+              onOpenSubscriptionModal={handleOpenSubModal}
             />
           ) : (
             <LandingPage
               onOpenLoginModal={() => setIsLoginModalOpen(true)}
+              onOpenSubscriptionModal={handleOpenSubModal}
+              user={user}
+              subscription={subscription}
               questConnected={questConnected}
               streamConnected={streamConnected}
               onNavigateTab={(tab) => handleSelectTab(tab)}
@@ -316,25 +352,39 @@ const AppContent: React.FC = () => {
 
         {activeTab === 'quests' && (
           <QuestDashboard
+            user={user}
+            subscription={subscription}
             token={token}
             quests={quests}
             jobs={jobs}
             loading={loadingQuests}
             onRefresh={loadQuests}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            onOpenSubscriptionModal={handleOpenSubModal}
           />
         )}
 
         {activeTab === 'stream' && (
           <StreamDashboard
+            user={user}
+            subscription={subscription}
             status={streamStatus}
             loading={loadingStream}
             onRefresh={loadStreamStatus}
             streamConnected={streamConnected}
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            onOpenSubscriptionModal={handleOpenSubModal}
           />
         )}
 
-        {activeTab === 'badges' && <BadgeDashboard />}
+        {activeTab === 'badges' && (
+          <BadgeDashboard
+            user={user}
+            subscription={subscription}
+            onOpenLoginModal={() => setIsLoginModalOpen(true)}
+            onOpenSubscriptionModal={handleOpenSubModal}
+          />
+        )}
 
         {activeTab === 'logs' && (
           <TerminalLogs logs={logs} onClear={() => setLogs([])} />
@@ -348,6 +398,17 @@ const AppContent: React.FC = () => {
         onClose={() => setIsLoginModalOpen(false)}
         user={user}
         onSaveUser={handleSaveUser}
+      />
+
+      <SubscriptionModal
+        isOpen={isSubModalOpen}
+        onClose={() => setIsSubModalOpen(false)}
+        user={user}
+        subscription={subscription}
+        initialPlanId={selectedSubPlan}
+        onOpenLoginModal={() => setIsLoginModalOpen(true)}
+        onActivateSubscription={handleActivateSubscription}
+        onDeactivateSubscription={handleDeactivateSubscription}
       />
     </div>
   );

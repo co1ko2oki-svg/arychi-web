@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, X } from 'lucide-react';
-import { AuthUser } from '../types';
+import { KeyRound, Menu, X } from 'lucide-react';
+import { AuthUser, PlanTierId, UserSubscription } from '../types';
 import { StatusDot } from './ui';
 
 export type NavTabId = 'home' | 'about' | 'quests' | 'stream' | 'badges' | 'logs';
@@ -9,11 +9,13 @@ interface NavbarProps {
   activeTab: NavTabId;
   onSelectTab: (tab: NavTabId) => void;
   user: AuthUser | null;
+  subscription?: UserSubscription | null;
   questConnected: boolean;
   streamConnected: boolean;
   runningQuestsCount?: number;
   streamPlaying?: boolean;
   onOpenLoginModal: () => void;
+  onOpenSubscriptionModal?: (planId?: PlanTierId) => void;
 }
 
 interface NavItem {
@@ -26,11 +28,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onSelectTab,
   user,
+  subscription,
   questConnected,
   streamConnected,
   runningQuestsCount = 0,
   streamPlaying = false,
   onOpenLoginModal,
+  onOpenSubscriptionModal,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -45,7 +49,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       label: 'Nhiệm vụ',
       indicator:
         runningQuestsCount > 0 ? (
-          <span className="text-2xs tabular-nums font-medium text-brand-text">{runningQuestsCount}</span>
+          <span className="text-xs tabular-nums font-medium text-blue-300">{runningQuestsCount}</span>
         ) : undefined,
     },
     {
@@ -77,10 +81,10 @@ export const Navbar: React.FC<NavbarProps> = ({
   );
 
   return (
-    <header className="sticky top-0 z-40 bg-[#040407]/85 backdrop-blur-md border-b border-line">
+    <header className="sticky top-0 z-40 bg-[#07080C]/90 backdrop-blur-md border-b border-line">
       <div className="page h-14 flex items-center gap-6">
         <a href="#home" onClick={(e) => go(e, 'home')} className="flex items-center gap-2.5 shrink-0 rounded-md">
-          <span className="grid place-items-center w-7 h-7 rounded-lg bg-gradient-to-b from-[#7C79FF] to-[#5B58EB] text-white text-[13px] font-bold shadow-[0_2px_10px_rgba(109,106,247,0.45)] border border-white/20">
+          <span className="grid place-items-center w-7 h-7 rounded-lg bg-blue-600 text-white text-[13px] font-bold border border-blue-400/30">
             A
           </span>
           <span className="text-[15px] font-bold tracking-tight text-white">Arychi</span>
@@ -96,25 +100,36 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={(e) => go(e, item.id)}
                 aria-current={active ? 'page' : undefined}
                 className={`relative flex items-center gap-1.5 h-full px-3 text-[13px] font-medium transition-colors ${
-                  active ? 'text-white' : 'text-zinc-400 hover:text-zinc-100'
+                  active ? 'text-white' : 'text-slate-400 hover:text-slate-100'
                 }`}
               >
                 {item.label}
                 {item.indicator}
-                {active && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand" />}
+                {active && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-blue-500" />}
               </a>
             );
           })}
         </nav>
 
-        <div className="ml-auto flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-3 text-xs font-mono text-zinc-400">{services}</div>
+        <div className="ml-auto flex items-center gap-2.5">
+          <div className="hidden lg:flex items-center gap-3 text-xs font-mono text-slate-400 mr-1">{services}</div>
+
+          {onOpenSubscriptionModal && (
+            <button
+              type="button"
+              onClick={() => onOpenSubscriptionModal(subscription?.planId || 'pro')}
+              className="btn-secondary btn-sm h-8 px-3"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-blue-400" />
+              <span>{subscription ? subscription.planName : 'Mua gói'}</span>
+            </button>
+          )}
 
           {user ? (
             <button
               type="button"
               onClick={onOpenLoginModal}
-              className="flex items-center gap-2 h-8 pl-1 pr-2.5 rounded-full hover:bg-white/[0.06] transition-colors"
+              className="flex items-center gap-2 h-8 pl-1 pr-2.5 rounded-full bg-[#141722] border border-line hover:border-line-strong transition-colors"
               aria-label={`Tài khoản @${user.username}`}
             >
               <img
@@ -122,11 +137,11 @@ export const Navbar: React.FC<NavbarProps> = ({
                 alt=""
                 className="w-6 h-6 rounded-full object-cover"
               />
-              <span className="hidden sm:block text-[13px] font-medium text-zinc-200 max-w-[120px] truncate">{user.username}</span>
+              <span className="hidden sm:block text-[13px] font-medium text-slate-200 max-w-[110px] truncate">{user.username}</span>
             </button>
           ) : (
-            <button type="button" onClick={onOpenLoginModal} className="btn-primary h-8 px-3">
-              Kết nối Discord
+            <button type="button" onClick={onOpenLoginModal} className="btn-primary h-8 px-3 text-xs">
+              Kết nối Bot
             </button>
           )}
 
@@ -144,7 +159,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       </div>
 
       {mobileMenuOpen && (
-        <div id="mobile-nav" className="md:hidden border-t border-line bg-black">
+        <div id="mobile-nav" className="md:hidden border-t border-line bg-[#07080C]">
           <nav aria-label="Điều hướng chính" className="page py-2">
             {navItems.map((item) => {
               const active = activeTab === item.id;
@@ -155,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={(e) => go(e, item.id)}
                   aria-current={active ? 'page' : undefined}
                   className={`flex items-center justify-between h-11 px-2 -mx-2 rounded-md text-sm font-medium ${
-                    active ? 'text-white bg-white/[0.06]' : 'text-zinc-400 hover:text-white'
+                    active ? 'text-white bg-white/[0.06]' : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   {item.label}
@@ -164,7 +179,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               );
             })}
           </nav>
-          <div className="page py-3 border-t border-line flex items-center gap-4 text-xs text-zinc-500">{services}</div>
+          <div className="page py-3 border-t border-line flex items-center gap-4 text-xs text-slate-400">{services}</div>
         </div>
       )}
     </header>

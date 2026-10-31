@@ -1,17 +1,21 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Gamepad2, Loader2, Play, RefreshCw, Search, Square, Video } from 'lucide-react';
-import { QuestDTO, QuestJob } from '../types';
+import { AuthUser, PlanTierId, QuestDTO, QuestJob, UserSubscription } from '../types';
 import { questApi } from '../services/api';
+import { AccessGateBanner } from './SubscriptionModal';
 import { useToast } from './Toast';
 import { EmptyState, PageHeader, ProgressBar, SegmentedControl } from './ui';
 
 interface QuestDashboardProps {
+  user?: AuthUser | null;
+  subscription?: UserSubscription | null;
   token?: string;
   quests: QuestDTO[];
   jobs: Map<string, QuestJob>;
   loading: boolean;
   onRefresh: () => void;
   onOpenLoginModal: () => void;
+  onOpenSubscriptionModal: (planId?: PlanTierId) => void;
 }
 
 type QuestFilter = 'all' | 'running' | 'enrolled' | 'completed' | 'video' | 'game';
@@ -33,12 +37,15 @@ const formatExpiresAt = (dateStr?: string) => {
 };
 
 export const QuestDashboard: React.FC<QuestDashboardProps> = ({
+  user = null,
+  subscription = null,
   token,
   quests,
   jobs,
   loading,
   onRefresh,
   onOpenLoginModal,
+  onOpenSubscriptionModal,
 }) => {
   const { toast } = useToast();
   const [search, setSearch] = useState('');
@@ -70,10 +77,17 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
   };
 
   const requireToken = (message: string) => {
-    if (token) return true;
-    toast.warning(message);
-    onOpenLoginModal();
-    return false;
+    if (!token || !user) {
+      toast.warning(message);
+      onOpenLoginModal();
+      return false;
+    }
+    if (!subscription || !subscription.botConnected) {
+      toast.warning('Vui lòng mua và kích hoạt gói dịch vụ để sử dụng Bot chạy nhiệm vụ');
+      onOpenSubscriptionModal('pro');
+      return false;
+    }
+    return true;
   };
 
   const handleStartQuest = (questId: string) => {
@@ -175,17 +189,13 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
           title="Nhiệm vụ Discord"
           description="Tự động nhận, mô phỏng heartbeat và nhận thưởng Discord Quests mà không cần cài game."
         />
-        <div className="surface">
-          <EmptyState
-            title="Chưa kết nối tài khoản"
-            description="Danh sách nhiệm vụ được tải trực tiếp từ tài khoản Discord của bạn. Kết nối User Token để bắt đầu."
-            action={
-              <button type="button" onClick={onOpenLoginModal} className="btn-primary">
-                Kết nối Discord
-              </button>
-            }
-          />
-        </div>
+        <AccessGateBanner
+          user={user}
+          subscription={subscription}
+          onOpenLoginModal={onOpenLoginModal}
+          onOpenSubscriptionModal={onOpenSubscriptionModal}
+          featureName="Discord Quests"
+        />
       </div>
     );
   }
@@ -279,6 +289,14 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
             </button>
           </>
         }
+      />
+
+      <AccessGateBanner
+        user={user}
+        subscription={subscription}
+        onOpenLoginModal={onOpenLoginModal}
+        onOpenSubscriptionModal={onOpenSubscriptionModal}
+        featureName="Discord Quests"
       />
 
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">

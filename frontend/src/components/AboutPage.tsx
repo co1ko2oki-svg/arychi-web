@@ -110,92 +110,92 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
       <Section id="sec-modules" title="3 Trụ cột kỹ thuật độc lập" description="Mỗi module chịu trách nhiệm cho một luồng xử lý riêng biệt.">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="surface-interactive card-accent-indigo p-5 flex flex-col justify-between space-y-4">
+          <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand-text">Module 01</span>
-                <span className="text-xs font-mono text-zinc-300">Port :3001</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">Module 01</span>
+                <span className="text-xs font-mono text-slate-300">Port :3001</span>
               </div>
               <h3 className="text-base font-bold text-white">Quest Engine</h3>
-              <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
+              <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
                 Giải pháp cày nhiệm vụ Discord Quests tự động không cần cài đặt game dung lượng lớn. Giả lập heartbeat định kỳ gửi đến Discord theo định dạng desktop client chính thức.
               </p>
-              <ul className="surface-well p-3 space-y-1.5 text-xs text-zinc-300">
+              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-300">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-text shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Mô phỏng Heartbeat 30s</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-text shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Dừng ngay với AbortController</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-brand-text shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Tự động nhận thưởng (Claim)</span>
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-400">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-400">
               Node.js + Fastify + WS
             </div>
           </div>
 
-          <div className="surface-interactive card-accent-amber p-5 flex flex-col justify-between space-y-4">
+          <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-amber-400">Module 02</span>
-                <span className="text-xs font-mono text-zinc-300">Port :3000</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">Module 02</span>
+                <span className="text-xs font-mono text-slate-300">Port :3000</span>
               </div>
               <h3 className="text-base font-bold text-white">StreamBot Voice</h3>
-              <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
+              <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
                 Truyền phát âm thanh Opus và video vào Voice Channel 24/7, tích hợp module Viewer Farm duy trì thời lượng xem stream cho tài khoản mà không bị gián đoạn.
               </p>
-              <ul className="surface-well p-3 space-y-1.5 text-xs text-zinc-300">
+              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-300">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Đa nguồn: YouTube, Twitch, MP4</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>FFmpeg + yt-dlp tối ưu CPU</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Viewer Farm tự động farm phút</span>
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-400">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-400">
               @discordjs/voice + FFmpeg
             </div>
           </div>
 
-          <div className="surface-interactive card-accent-emerald p-5 flex flex-col justify-between space-y-4">
+          <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-400">Module 03</span>
-                <span className="text-xs font-mono text-zinc-300">Python 3</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">Module 03</span>
+                <span className="text-xs font-mono text-slate-300">Python 3</span>
               </div>
               <h3 className="text-base font-bold text-white">Science Telemetry</h3>
-              <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
+              <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
                 Giả lập nhịp độ chơi game gửi trực tiếp lên endpoint phân tích Discord Science API với chữ ký Windows PE nhị phân thực tế để cày huy hiệu và số giờ chơi hồ sơ.
               </p>
-              <ul className="surface-well p-3 space-y-1.5 text-xs text-zinc-300">
+              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-300">
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Trích xuất Windows PE Fingerprint</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Gửi gói tin /api/v9/science</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Cộng dồn số giờ chơi trên Activity</span>
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-400">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-400">
               Python 3 + PE Header Hash
             </div>
           </div>
@@ -400,7 +400,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             return (
               <div
                 key={idx}
-                className={`surface p-5 ${isOpen ? 'card-accent-indigo border-brand/40' : ''}`}
+                className={`surface p-5 ${isOpen ? 'border-blue-500/60' : ''}`}
               >
                 <button
                   type="button"

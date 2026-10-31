@@ -5,18 +5,18 @@ export default {
   theme: {
     extend: {
       colors: {
-        canvas: '#000000',
-        raised: '#0B0B0D',
-        overlay: '#111114',
+        canvas: '#07080C',
+        raised: '#0E1017',
+        overlay: '#141722',
         line: {
-          DEFAULT: 'rgba(255, 255, 255, 0.08)',
-          strong: 'rgba(255, 255, 255, 0.14)',
+          DEFAULT: '#1E2230',
+          strong: '#2E3448',
         },
         brand: {
-          DEFAULT: '#6D6AF7',
-          hover: '#8481FA',
-          muted: 'rgba(109, 106, 247, 0.14)',
-          text: '#A9A7FF',
+          DEFAULT: '#2563EB',
+          hover: '#3B82F6',
+          muted: 'rgba(37, 99, 235, 0.14)',
+          text: '#93C5FD',
         },
       },
       fontFamily: {
@@ -25,10 +25,10 @@ export default {
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },
       fontSize: {
-        '2xs': ['11px', '16px'],
+        '2xs': ['12px', '18px'],
       },
       maxWidth: {
-        page: '1200px',
+        page: '1160px',
       },
     },
   },

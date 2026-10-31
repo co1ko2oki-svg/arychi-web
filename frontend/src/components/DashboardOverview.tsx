@@ -8,8 +8,9 @@ import {
   Terminal,
   Tv,
 } from 'lucide-react';
-import { AuthUser, QuestDTO, QuestJob, LogEntry, StreamStatus } from '../types';
+import { AuthUser, PlanTierId, QuestDTO, QuestJob, LogEntry, StreamStatus, UserSubscription } from '../types';
 import { questApi, streamApi } from '../services/api';
+import { AccessGateBanner } from './SubscriptionModal';
 import { useToast } from './Toast';
 import { NavTabId } from './Navbar';
 import { PageHeader, ProgressBar, Section, StatusDot, Switch } from './ui';
@@ -17,6 +18,7 @@ import { formatPing, levelClass, levelLabel, parseLog } from './format';
 
 interface DashboardOverviewProps {
   user: AuthUser;
+  subscription?: UserSubscription | null;
   token: string;
   questConnected: boolean;
   streamConnected: boolean;
@@ -30,10 +32,12 @@ interface DashboardOverviewProps {
   logs: LogEntry[];
   onNavigateTab: (tab: NavTabId) => void;
   onOpenLoginModal: () => void;
+  onOpenSubscriptionModal?: (planId?: PlanTierId) => void;
 }
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   user,
+  subscription = null,
   token,
   questConnected,
   streamConnected,
@@ -46,8 +50,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   onRefreshStream,
   logs,
   onNavigateTab,
+  onOpenLoginModal,
+  onOpenSubscriptionModal = () => {},
 }) => {
-  const toast = useToast();
+  const { toast } = useToast();
   const [streamInput, setStreamInput] = useState('');
   const [streamActionLoading, setStreamActionLoading] = useState(false);
   const [questActionLoading, setQuestActionLoading] = useState<Record<string, boolean>>({});
@@ -60,8 +66,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const claimableQuests = quests.filter((q) => q.status.completed && !q.status.claimed).length;
   const streamPlaying = Boolean(streamStatus?.stream.playing);
 
+  const requireSubscription = () => {
+    if (!subscription || !subscription.botConnected) {
+      toast.warning('Vui lòng mua và kích hoạt gói dịch vụ để sử dụng Bot');
+      onOpenSubscriptionModal('pro');
+      return false;
+    }
+    return true;
+  };
+
   const handlePlayStream = async (e?: React.FormEvent) => {
     e?.preventDefault();
+    if (!requireSubscription()) return;
     const query = streamInput.trim();
     if (!query) {
       toast.warning('Vui lòng nhập URL YouTube, Twitch hoặc tên file video');
@@ -74,13 +90,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       toast.success('Đã gửi yêu cầu phát video đến Voice Channel');
       onRefreshStream();
     } catch (err: any) {
-      toast.error(err?.message || 'Không thể phát video', 'Lỗi Stream');
+      toast.error(err?.message || 'Không thể phát video');
     } finally {
       setStreamActionLoading(false);
     }
   };
 
   const handleToggleFarm = async () => {
+    if (!requireSubscription()) return;
     if (!streamStatus) return;
     const targetState = !streamStatus.farm.autoWatch;
     setStreamActionLoading(true);
@@ -96,6 +113,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   };
 
   const handleStartAll = async () => {
+    if (!requireSubscription()) return;
     setQuestActionLoading((prev) => ({ ...prev, all: true }));
     try {
       const res = await questApi.startAllQuests(token);
@@ -200,39 +218,47 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         }
       />
 
+      <AccessGateBanner
+        user={user}
+        subscription={subscription}
+        onOpenLoginModal={onOpenLoginModal}
+        onOpenSubscriptionModal={onOpenSubscriptionModal}
+        featureName="Bảng điều khiển Tổng quan"
+      />
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="surface-interactive p-4">
-          <p className="text-xs font-medium text-zinc-400">Nhiệm vụ khả dụng</p>
+          <p className="text-xs font-medium text-slate-400">Nhiệm vụ khả dụng</p>
           <p className="mt-2 text-2xl font-bold text-white tabular-nums">{totalQuests}</p>
-          <p className="mt-1 text-xs font-mono text-zinc-400">Từ Discord API</p>
+          <p className="mt-1 text-xs font-mono text-slate-400">Từ Discord API</p>
         </div>
 
-        <div className="surface-interactive card-accent-indigo p-4">
-          <p className="text-xs font-medium text-zinc-300">Đang thực thi</p>
+        <div className="surface-interactive p-4">
+          <p className="text-xs font-medium text-slate-300">Đang thực thi</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-brand-text tabular-nums">{runningJobs.length}</span>
+            <span className="text-2xl font-bold text-blue-300 tabular-nums">{runningJobs.length}</span>
             {runningJobs.length > 0 && <StatusDot tone="brand" />}
           </div>
-          <p className="mt-1 text-xs font-mono text-zinc-400">Heartbeat 30s</p>
+          <p className="mt-1 text-xs font-mono text-slate-400">Heartbeat 30s</p>
         </div>
 
-        <div className="surface-interactive card-accent-emerald p-4">
-          <p className="text-xs font-medium text-zinc-300">Đã hoàn thành</p>
+        <div className="surface-interactive p-4">
+          <p className="text-xs font-medium text-slate-300">Đã hoàn thành</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-emerald-400 tabular-nums">{completedQuests}</span>
+            <span className="text-2xl font-bold text-white tabular-nums">{completedQuests}</span>
             {claimableQuests > 0 && (
-              <span className="text-xs text-amber-400 tabular-nums">({claimableQuests} chờ claim)</span>
+              <span className="text-xs text-blue-300 tabular-nums">({claimableQuests} chờ claim)</span>
             )}
           </div>
-          <p className="mt-1 text-xs font-mono text-zinc-400">Sẵn sàng nhận thưởng</p>
+          <p className="mt-1 text-xs font-mono text-slate-400">Sẵn sàng nhận thưởng</p>
         </div>
 
-        <div className="surface-interactive card-accent-amber p-4">
-          <p className="text-xs font-medium text-zinc-300">StreamBot Voice</p>
-          <p className="mt-2 text-sm font-bold text-zinc-100 truncate">
+        <div className="surface-interactive p-4">
+          <p className="text-xs font-medium text-slate-300">StreamBot Voice</p>
+          <p className="mt-2 text-sm font-bold text-slate-100 truncate">
             {streamPlaying ? 'Đang phát video' : streamConnected ? 'Đang chờ' : 'Ngoại tuyến'}
           </p>
-          <p className="mt-1 text-xs text-zinc-400 font-mono">
+          <p className="mt-1 text-xs text-slate-400 font-mono">
             Độ trễ {formatPing(streamConnected, streamStatus?.bot.ping)}
           </p>
         </div>

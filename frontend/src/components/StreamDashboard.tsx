@@ -1,20 +1,34 @@
 import React, { useState } from 'react';
 import { FolderOpen, Loader2, Play, RefreshCw, Square } from 'lucide-react';
-import { StreamStatus } from '../types';
+import { AuthUser, PlanTierId, StreamStatus, UserSubscription } from '../types';
 import { streamApi } from '../services/api';
+import { AccessGateBanner } from './SubscriptionModal';
 import { useToast } from './Toast';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyState, PageHeader, Section, StatusDot, Switch } from './ui';
 import { formatPing } from './format';
 
 interface StreamDashboardProps {
+  user?: AuthUser | null;
+  subscription?: UserSubscription | null;
   status: StreamStatus | null;
   loading: boolean;
   onRefresh: () => void;
   streamConnected: boolean;
+  onOpenLoginModal: () => void;
+  onOpenSubscriptionModal: (planId?: PlanTierId) => void;
 }
 
-export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loading, onRefresh, streamConnected }) => {
+export const StreamDashboard: React.FC<StreamDashboardProps> = ({
+  user = null,
+  subscription = null,
+  status,
+  loading,
+  onRefresh,
+  streamConnected,
+  onOpenLoginModal,
+  onOpenSubscriptionModal,
+}) => {
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -25,6 +39,20 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
 
   const playing = Boolean(status?.stream.playing);
   const stateLabel = !streamConnected ? 'Ngoại tuyến' : playing ? 'Đang phát' : 'Đang chờ';
+
+  const requireAccess = () => {
+    if (!user) {
+      toast.warning('Vui lòng kết nối tài khoản Discord với Bot trước khi điều khiển StreamBot');
+      onOpenLoginModal();
+      return false;
+    }
+    if (!subscription || !subscription.botConnected) {
+      toast.warning('Vui lòng mua và kích hoạt gói dịch vụ để sử dụng StreamBot Voice');
+      onOpenSubscriptionModal('pro');
+      return false;
+    }
+    return true;
+  };
 
   const executePlay = async (target: string) => {
     setActionLoading(true);
@@ -42,6 +70,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
   };
 
   const requestPlay = (videoUrl?: string) => {
+    if (!requireAccess()) return;
     if (!streamConnected) {
       toast.warning('Dịch vụ StreamBot (:3000) đang ngoại tuyến');
       return;
@@ -59,6 +88,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
   };
 
   const handleStop = async () => {
+    if (!requireAccess()) return;
     if (!streamConnected) return;
     setActionLoading(true);
     try {
@@ -73,6 +103,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
   };
 
   const handleToggleFarm = async () => {
+    if (!requireAccess()) return;
     if (!streamConnected) {
       toast.warning('Dịch vụ StreamBot (:3000) đang ngoại tuyến');
       return;
@@ -139,6 +170,14 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
             Làm mới
           </button>
         }
+      />
+
+      <AccessGateBanner
+        user={user}
+        subscription={subscription}
+        onOpenLoginModal={onOpenLoginModal}
+        onOpenSubscriptionModal={onOpenSubscriptionModal}
+        featureName="StreamBot Voice"
       />
 
       {!streamConnected && (

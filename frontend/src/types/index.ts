@@ -107,3 +107,15 @@ export interface StreamStatus {
   };
   config: Record<string, any>;
 }
+
+export type PlanTierId = 'starter' | 'pro' | 'lifetime';
+
+export interface UserSubscription {
+  planId: PlanTierId;
+  planName: string;
+  priceLabel: string;
+  activatedAt: string;
+  expiresAt: string | null;
+  botConnected: boolean;
+  licenseKey: string;
+}

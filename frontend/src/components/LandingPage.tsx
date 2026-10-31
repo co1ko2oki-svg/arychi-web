@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   Cpu,
+  KeyRound,
   Lock,
   Radio,
   ShieldCheck,
@@ -12,11 +13,16 @@ import {
   Terminal,
   Tv,
 } from 'lucide-react';
+import { AuthUser, PlanTierId, UserSubscription } from '../types';
 import { NavTabId } from './Navbar';
+import { PRICING_PLANS } from './SubscriptionModal';
 import { StatusDot } from './ui';
 
 interface LandingPageProps {
   onOpenLoginModal: () => void;
+  onOpenSubscriptionModal: (planId?: PlanTierId) => void;
+  user: AuthUser | null;
+  subscription: UserSubscription | null;
   questConnected: boolean;
   streamConnected: boolean;
   onNavigateTab?: (tab: NavTabId) => void;
@@ -24,6 +30,9 @@ interface LandingPageProps {
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenLoginModal,
+  onOpenSubscriptionModal,
+  user,
+  subscription,
   questConnected,
   streamConnected,
   onNavigateTab,
@@ -40,9 +49,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const services: Array<{
     title: string;
     port: string;
-    accentClass: string;
-    badgeClass: string;
-    iconBoxClass: string;
     summary: string;
     specs: string[];
     tech: string;
@@ -53,9 +59,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     {
       title: 'Quest Engine',
       port: 'PORT :3001',
-      accentClass: 'card-accent-indigo',
-      badgeClass: 'text-brand-text bg-brand-muted border border-brand/30',
-      iconBoxClass: 'bg-brand/15 border-brand/35 text-brand-text',
       summary:
         'Mô phỏng gói tin heartbeat 30 giây theo chuẩn Discord Desktop để hoàn thành nhiệm vụ tự động mà không cần tải game.',
       specs: [
@@ -70,9 +73,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     {
       title: 'StreamBot Voice',
       port: 'PORT :3000',
-      accentClass: 'card-accent-amber',
-      badgeClass: 'text-amber-300 bg-amber-500/15 border border-amber-500/30',
-      iconBoxClass: 'bg-amber-500/15 border-amber-500/35 text-amber-300',
       summary:
         'Truyền phát trực tiếp YouTube, Twitch hoặc file MP4 vào kênh thoại bằng FFmpeg, tích hợp sẵn bộ đếm Viewer Farm.',
       specs: [
@@ -87,9 +87,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     {
       title: 'Science Telemetry',
       port: 'PYTHON 3',
-      accentClass: 'card-accent-emerald',
-      badgeClass: 'text-emerald-300 bg-emerald-500/15 border border-emerald-500/30',
-      iconBoxClass: 'bg-emerald-500/15 border-emerald-500/35 text-emerald-300',
       summary:
         'Khởi tạo chữ ký nhị phân Windows PE gửi trực tiếp tới /api/v9/science nhằm cộng giờ chơi và mở khóa huy hiệu hồ sơ.',
       specs: [
@@ -106,9 +103,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const features = [
     {
       icon: Lock,
-      tag: 'LOOPBACK 127.0.0.1',
-      title: 'Vận hành cục bộ, bảo mật tuyệt đối',
-      desc: 'Token xác thực chỉ lưu tại máy trạm cá nhân và giao tiếp trực tiếp với máy chủ Discord qua kết nối TLS, không đi qua bên thứ ba.',
+      tag: 'BOT AUTHENTICATION',
+      title: 'Liên kết tài khoản trực tiếp với Bot',
+      desc: 'Hệ thống xác thực tài khoản Discord của bạn với Bot điều khiển và kiểm tra trạng thái gói dịch vụ trước khi kích hoạt luồng tự động.',
     },
     {
       icon: Terminal,
@@ -124,43 +121,47 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       icon: ShieldCheck,
-      tag: '100% AUDITABLE',
-      title: 'Mã nguồn minh bạch, kiểm tra tùy ý',
-      desc: 'Toàn bộ mã nguồn TypeScript, Fastify backend và Python spoofer nằm ngay trong thư mục dự án, cho phép kiểm chứng mọi gói tin.',
+      tag: 'LICENSE PROTECTION',
+      title: 'Cơ chế cấp quyền theo Gói dịch vụ',
+      desc: 'Mỗi gói bản quyền được định danh theo ID tài khoản Discord của người dùng, đảm bảo tài nguyên xử lý ổn định và riêng biệt.',
     },
   ];
 
   const steps = [
     {
       step: 'BƯỚC 01',
-      time: '~10 giây',
-      title: 'Khởi động các dịch vụ',
-      desc: 'Nhấp đúp file thực thi ở thư mục gốc để bật đồng thời cả 3 dịch vụ Quest Engine, StreamBot và giao diện điều khiển Web.',
-      cmdLabel: 'Launcher Script',
-      cmdValue: '> start.bat',
+      time: 'Bắt buộc',
+      title: 'Kết nối tài khoản với Bot',
+      desc: 'Đăng nhập và liên kết tài khoản Discord của bạn với hệ thống Bot để đồng bộ danh sách nhiệm vụ và kênh thoại.',
+      cmdLabel: 'Trạng thái Bot',
+      cmdValue: user ? `Đã kết nối: @${user.username}` : 'Chưa kết nối tài khoản',
     },
     {
       step: 'BƯỚC 02',
-      time: '~30 giây',
-      title: 'Lấy Discord User Token',
-      desc: 'Mở Discord trên trình duyệt, bật F12 chuyển sang tab Network, lọc tìm request thông tin tài khoản và sao chép mã xác thực.',
-      cmdLabel: 'Header mục tiêu',
-      cmdValue: 'GET /api/v9/users/@me',
+      time: 'Kích hoạt',
+      title: 'Mua & Kích hoạt Gói dịch vụ',
+      desc: 'Lựa chọn gói Khởi Đầu (7 ngày), Chuyên Nghiệp (30 ngày) hoặc Vĩnh Viễn để mở khóa quyền thực thi tác vụ trên hệ thống.',
+      cmdLabel: 'Bản quyền',
+      cmdValue: subscription ? subscription.planName : 'Yêu cầu mua gói',
     },
     {
       step: 'BƯỚC 03',
-      time: 'Tức thì',
-      title: 'Kết nối & Tự động hóa',
-      desc: 'Nhấn nút kết nối trên thanh công cụ, dán token và kích hoạt chế độ chạy đồng loạt hoặc tùy chỉnh từng tiến trình riêng lẻ.',
-      cmdLabel: 'Trạng thái phiên',
-      cmdValue: 'Heartbeat: Active (30s)',
+      time: 'Tự động 24/7',
+      title: 'Vận hành Quest & StreamBot',
+      desc: 'Sau khi tài khoản đã liên kết với Bot và có gói hợp lệ, bạn có thể bấm chạy toàn bộ Discord Quests hoặc phát luồng tự động.',
+      cmdLabel: 'Chu kỳ đồng bộ',
+      cmdValue: 'Heartbeat: 30s Active',
     },
   ];
 
   const faqs = [
     {
-      q: 'Token của tôi có bị gửi ra máy chủ bên ngoài không?',
-      a: 'Tuyệt đối không. Hệ thống hoạt động theo mô hình self-hosted 100% trên máy cá nhân, chỉ giao tiếp nội bộ giữa trình duyệt (port 5173), backend (port 3001/3000) và Discord API.',
+      q: 'Làm thế nào để bắt đầu sử dụng các tính năng trên hệ thống?',
+      a: 'Bạn cần thực hiện 2 bước: Đầu tiên bấm "Kết nối tài khoản với Bot" để xác thực tài khoản Discord, sau đó chọn và kích hoạt một gói dịch vụ (Khởi Đầu, Chuyên Nghiệp hoặc Vĩnh Viễn) để mở khóa bảng điều khiển.',
+    },
+    {
+      q: 'Gói dịch vụ được tính thời hạn và gắn với tài khoản như thế nào?',
+      a: 'Mỗi gói dịch vụ sau khi thanh toán hoặc nhập mã kích hoạt sẽ được gắn trực tiếp với Discord ID bạn đã kết nối với Bot. Bạn có thể chuyển đổi thiết bị mà không mất quyền lợi gói.',
     },
     {
       q: 'Tại sao làm nhiệm vụ Discord Quest không cần phải tải game?',
@@ -168,7 +169,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     },
     {
       q: 'Tôi có thể đóng tab trình duyệt khi nhiệm vụ đang chạy không?',
-      a: 'Hoàn toàn được. Tiến trình Quest Engine và StreamBot chạy độc lập dưới nền hệ điều hành thông qua cửa sổ dòng lệnh start.bat, tab trình duyệt chỉ đóng vai trò bảng điều khiển.',
+      a: 'Hoàn toàn được. Tiến trình Quest Engine và StreamBot chạy độc lập dưới nền hệ thống thông qua dịch vụ Bot, tab trình duyệt chỉ đóng vai trò bảng điều khiển.',
     },
   ];
 
@@ -176,15 +177,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     <div className="space-y-20 py-6">
       <section className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 items-center">
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono text-zinc-300">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-muted border border-brand/30 text-brand-text font-medium">
+          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#141927] border border-line text-blue-300 font-medium">
               Arychi Suite v2.0
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] border border-line">
+            <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={questConnected ? 'ok' : 'error'} />
               Quest :3001 {questConnected ? 'Online' : 'Offline'}
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.04] border border-line">
+            <span className="text-slate-600">•</span>
+            <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={streamConnected ? 'ok' : 'warn'} />
               Stream :3000 {streamConnected ? 'Live' : 'Standby'}
             </span>
@@ -194,8 +196,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.15] [text-wrap:balance]">
               Nền tảng tự động hóa Discord cục&nbsp;bộ
             </h1>
-            <p className="text-base text-zinc-300 leading-relaxed max-w-[52ch]">
-              Hợp nhất 3 công cụ chuyên biệt chạy trực tiếp trên thiết bị của bạn: Hoàn thành Discord Quests không cần cài game, phát video kênh thoại 24/7 và cày giờ chơi hồ sơ.
+            <p className="text-base text-slate-300 leading-relaxed max-w-[52ch]">
+              Kết nối tài khoản Discord với Bot và kích hoạt gói dịch vụ để tự động hoàn thành Discord Quests không cần cài game, phát video kênh thoại 24/7 và cày giờ chơi hồ sơ.
             </p>
           </div>
 
@@ -205,103 +207,194 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               onClick={onOpenLoginModal}
               className="btn-primary h-10 px-5 text-sm"
             >
-              <span>Kết nối tài khoản Discord</span>
+              <span>{user ? `Đã kết nối: @${user.username}` : '1. Kết nối Acc với Bot'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
             <button
               type="button"
-              onClick={() => navigateTo('about')}
+              onClick={() => onOpenSubscriptionModal('pro')}
               className="btn-secondary h-10 px-4 text-sm"
             >
-              Tìm hiểu kiến trúc
+              <KeyRound className="w-4 h-4 text-blue-400" />
+              <span>{subscription ? `Gói: ${subscription.planName}` : '2. Mua gói dịch vụ'}</span>
             </button>
           </div>
 
-          <div className="pt-2 grid grid-cols-3 gap-4 max-w-md border-t border-line">
+          <div className="pt-3 grid grid-cols-3 gap-4 max-w-md border-t border-line">
             <div>
               <p className="text-lg font-bold font-mono text-white">30s</p>
-              <p className="text-xs text-zinc-400">Chu kỳ Heartbeat</p>
+              <p className="text-xs text-slate-400">Chu kỳ Heartbeat</p>
             </div>
             <div>
-              <p className="text-lg font-bold font-mono text-brand-text">127.0.0.1</p>
-              <p className="text-xs text-zinc-400">Mạng nội bộ</p>
+              <p className="text-lg font-bold font-mono text-blue-300">2 Bước</p>
+              <p className="text-xs text-slate-400">Kết nối Bot &amp; Mua gói</p>
             </div>
             <div>
-              <p className="text-lg font-bold font-mono text-emerald-400">0 GB</p>
-              <p className="text-xs text-zinc-400">Dung lượng tải game</p>
+              <p className="text-lg font-bold font-mono text-white">0 GB</p>
+              <p className="text-xs text-slate-400">Dung lượng tải game</p>
             </div>
           </div>
         </div>
 
-        <div className="surface card-accent-indigo p-5 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3.5 border-b border-line">
+        <div className="surface p-6 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-line">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-              <span className="ml-1.5 text-xs font-mono font-medium text-zinc-300">
-                RUNTIME TOPOLOGY
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-slate-600" />
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
+              <span className="ml-1.5 text-xs font-mono font-semibold text-slate-200">
+                TRẠNG THÁI TRUY CẬP &amp; BOT
               </span>
             </div>
-            <span className="text-2xs font-mono px-2 py-0.5 rounded bg-white/[0.06] border border-line text-zinc-300">
-              LOCALHOST
+            <span className="text-xs font-mono text-blue-300">
+              {subscription ? 'ACTIVE LICENSE' : 'YÊU CẦU KÍCH HOẠT'}
             </span>
           </div>
 
-          <div className="space-y-2.5">
-            <div className="surface-well p-3.5 flex items-center justify-between gap-3">
+          <div className="divide-y divide-line">
+            <div className="py-3.5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-brand/15 border border-brand/30 flex items-center justify-center text-brand-text shrink-0">
+                <div className="icon-badge">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-white truncate">Quest Engine Daemon</p>
-                  <p className="text-2xs font-mono text-zinc-400 truncate">Fastify REST &amp; WS · Port 3001</p>
+                  <p className="text-sm font-semibold text-white truncate">1. Liên kết Tài khoản &amp; Bot</p>
+                  <p className="text-xs font-mono text-slate-400 truncate">
+                    {user ? `Đã xác thực @${user.username}` : 'Cần kết nối Discord với Bot'}
+                  </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-2xs font-mono px-2 py-0.5 rounded bg-white/[0.05] text-zinc-200 shrink-0">
-                <StatusDot tone={questConnected ? 'ok' : 'error'} />
-                {questConnected ? 'ONLINE' : 'OFFLINE'}
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-200 shrink-0">
+                <StatusDot tone={user ? 'ok' : 'warn'} />
+                {user ? 'CONNECTED' : 'PENDING'}
               </span>
             </div>
 
-            <div className="surface-well p-3.5 flex items-center justify-between gap-3">
+            <div className="py-3.5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-300 shrink-0">
-                  <Tv className="w-4 h-4" />
+                <div className="icon-badge">
+                  <KeyRound className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-white truncate">StreamBot Media Server</p>
-                  <p className="text-2xs font-mono text-zinc-400 truncate">FFmpeg + Viewer Farm · Port 3000</p>
+                  <p className="text-sm font-semibold text-white truncate">2. Gói bản quyền dịch vụ</p>
+                  <p className="text-xs font-mono text-slate-400 truncate">
+                    {subscription ? `${subscription.planName} (${subscription.priceLabel})` : 'Chưa kích hoạt gói dịch vụ'}
+                  </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-2xs font-mono px-2 py-0.5 rounded bg-white/[0.05] text-zinc-200 shrink-0">
-                <StatusDot tone={streamConnected ? 'ok' : 'warn'} />
-                {streamConnected ? 'READY' : 'STANDBY'}
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-200 shrink-0">
+                <StatusDot tone={subscription ? 'ok' : 'error'} />
+                {subscription ? 'ACTIVE' : 'LOCKED'}
               </span>
             </div>
 
-            <div className="surface-well p-3.5 flex items-center justify-between gap-3">
+            <div className="py-3.5 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-300 shrink-0">
+                <div className="icon-badge">
                   <Cpu className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-white truncate">Science Telemetry CLI</p>
-                  <p className="text-2xs font-mono text-zinc-400 truncate">Windows PE Spoofer · /v9/science</p>
+                  <p className="text-sm font-semibold text-white truncate">3. Hệ thống Engine (:3001 / :3000)</p>
+                  <p className="text-xs font-mono text-slate-400 truncate">
+                    Quest Daemon &amp; StreamBot Voice
+                  </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-2xs font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 shrink-0">
-                PE READY
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-300 shrink-0">
+                <StatusDot tone={questConnected ? 'ok' : 'warn'} />
+                {questConnected ? 'ONLINE' : 'STANDBY'}
               </span>
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-between text-2xs font-mono text-zinc-400">
-            <span>TLS 1.3 Direct to discord.com</span>
-            <span className="text-emerald-400">● Zero Cloud Proxy</span>
+          <div className="pt-3 border-t border-line flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>Bảo mật xác thực theo Discord ID</span>
+            <button
+              type="button"
+              onClick={() => (user ? onOpenSubscriptionModal('pro') : onOpenLoginModal())}
+              className="link text-xs"
+            >
+              <span>{user ? 'Kích hoạt gói ngay' : 'Kết nối ngay'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
           </div>
+        </div>
+      </section>
+
+      <section className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+          <h2 className="text-2xl font-bold text-white tracking-tight">
+            Bảng giá &amp; Gói dịch vụ Bot
+          </h2>
+          <p className="text-xs font-mono text-slate-400">
+            Yêu cầu kết nối tài khoản với Bot và kích hoạt gói để mở khóa tính năng
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {PRICING_PLANS.map((plan) => {
+            const isCurrent = subscription?.planId === plan.id;
+            return (
+              <div
+                key={plan.id}
+                className={`surface-interactive p-6 flex flex-col justify-between space-y-6 ${
+                  plan.popular ? 'border-blue-500' : ''
+                }`}
+              >
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs font-mono font-semibold text-blue-300">
+                      {plan.durationLabel.toUpperCase()}
+                    </span>
+                    {plan.popular && (
+                      <span className="text-xs font-mono font-semibold px-2.5 py-0.5 rounded bg-blue-600 text-white">
+                        PHỔ BIẾN NHẤT
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-bold font-mono text-white">{plan.price}</span>
+                      <span className="text-xs text-slate-400">/ {plan.durationLabel}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[13px] text-slate-300 leading-relaxed max-w-[42ch]">
+                    {plan.summary}
+                  </p>
+
+                  <ul className="pt-4 border-t border-line space-y-2.5 text-xs text-slate-200">
+                    {plan.features.map((feat) => (
+                      <li key={feat} className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="pt-4 border-t border-line">
+                  <button
+                    type="button"
+                    onClick={() => onOpenSubscriptionModal(plan.id)}
+                    className={`w-full ${plan.popular ? 'btn-primary' : 'btn-secondary'}`}
+                  >
+                    <span>
+                      {isCurrent
+                        ? 'Đang sử dụng gói này'
+                        : !user
+                        ? 'Kết nối Bot & Mua gói'
+                        : `Chọn ${plan.name}`}
+                    </span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -310,8 +403,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <h2 className="text-2xl font-bold text-white tracking-tight">
             3 Trụ cột tự động hóa chuyên biệt
           </h2>
-          <p className="text-xs font-mono text-zinc-400">
-            Mỗi dịch vụ hoạt động độc lập, không xung đột tài nguyên
+          <p className="text-xs font-mono text-slate-400">
+            Mỗi dịch vụ hoạt động độc lập, mở khóa ngay sau khi kích hoạt gói
           </p>
         </div>
 
@@ -321,37 +414,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             return (
               <div
                 key={svc.title}
-                className={`surface-interactive ${svc.accentClass} p-6 flex flex-col justify-between space-y-6`}
+                className="surface-interactive p-6 flex flex-col justify-between space-y-6"
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${svc.iconBoxClass}`}>
-                      <Icon className="w-5 h-5" />
+                    <div className="icon-badge">
+                      <Icon className="w-4 h-4" />
                     </div>
-                    <span className={`text-2xs font-mono font-semibold px-2.5 py-1 rounded-md ${svc.badgeClass}`}>
+                    <span className="text-xs font-mono font-semibold text-blue-300">
                       {svc.port}
                     </span>
                   </div>
 
                   <div className="space-y-2">
                     <h3 className="text-lg font-bold text-white">{svc.title}</h3>
-                    <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
+                    <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
                       {svc.summary}
                     </p>
                   </div>
 
-                  <div className="surface-well p-3 space-y-2">
+                  <ul className="pt-3 border-t border-line space-y-2 text-xs text-slate-300">
                     {svc.specs.map((spec) => (
-                      <div key={spec} className="flex items-center gap-2 text-xs text-zinc-300">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-brand-text shrink-0" />
+                      <li key={spec} className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                         <span>{spec}</span>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
 
                 <div className="pt-4 border-t border-line flex items-center justify-between text-xs">
-                  <span className="text-zinc-400 font-mono">{svc.tech}</span>
+                  <span className="text-slate-400 font-mono">{svc.tech}</span>
                   <button
                     type="button"
                     onClick={() => navigateTo(svc.tab)}
@@ -372,7 +465,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <h2 className="text-2xl font-bold text-white tracking-tight">
             Đặc điểm kỹ thuật &amp; Cơ chế an toàn
           </h2>
-          <p className="text-xs font-mono text-zinc-400">
+          <p className="text-xs font-mono text-slate-400">
             Kiến trúc ưu tiên quyền riêng tư và hiệu năng hệ thống
           </p>
         </div>
@@ -384,15 +477,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div key={feat.title} className="surface-interactive p-6 space-y-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="icon-badge">
-                    <Icon className="w-5 h-5" />
+                    <Icon className="w-4 h-4" />
                   </div>
-                  <span className="text-2xs font-mono font-medium px-2.5 py-1 rounded bg-white/[0.04] border border-line text-zinc-300">
+                  <span className="text-xs font-mono font-medium text-slate-400">
                     {feat.tag}
                   </span>
                 </div>
                 <div className="space-y-1.5">
                   <h3 className="text-base font-bold text-white">{feat.title}</h3>
-                  <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[50ch]">
+                  <p className="text-[13px] text-slate-300 leading-relaxed max-w-[50ch]">
                     {feat.desc}
                   </p>
                 </div>
@@ -405,10 +498,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <h2 className="text-2xl font-bold text-white tracking-tight">
-            Vận hành nhanh trong 3 bước
+            Quy trình bắt đầu trong 3 bước
           </h2>
-          <p className="text-xs font-mono text-zinc-400">
-            Thiết lập một lần, tự động khôi phục phiên ở các lần mở sau
+          <p className="text-xs font-mono text-slate-400">
+            Kết nối tài khoản với Bot và kích hoạt gói dịch vụ để mở khóa
           </p>
         </div>
 
@@ -420,20 +513,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-md bg-brand-muted border border-brand/30 text-brand-text">
+                  <span className="text-xs font-mono font-semibold text-blue-300">
                     {item.step}
                   </span>
-                  <span className="text-xs font-mono text-zinc-400">{item.time}</span>
+                  <span className="text-xs font-mono text-slate-400">{item.time}</span>
                 </div>
                 <h3 className="text-base font-bold text-white">{item.title}</h3>
-                <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
+                <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
                   {item.desc}
                 </p>
               </div>
 
-              <div className="surface-well px-3.5 py-2.5 flex items-center justify-between text-xs font-mono">
-                <span className="text-zinc-400">{item.cmdLabel}</span>
-                <span className="text-zinc-200 font-medium">{item.cmdValue}</span>
+              <div className="pt-3 border-t border-line flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400">{item.cmdLabel}</span>
+                <span className="text-slate-200 font-medium">{item.cmdValue}</span>
               </div>
             </div>
           ))}
@@ -445,17 +538,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <h2 className="text-2xl font-bold text-white tracking-tight">
             Câu hỏi thường gặp
           </h2>
-          <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[38ch]">
-            Giải đáp nhanh về cơ chế bảo mật token, cách thức mô phỏng gói tin và vận hành tiến trình ngầm trên máy trạm.
+          <p className="text-[13px] text-slate-300 leading-relaxed max-w-[38ch]">
+            Giải đáp nhanh về quy trình liên kết tài khoản với Bot, kích hoạt gói dịch vụ và cơ chế hoạt động ngầm.
           </p>
 
           <div className="surface p-5 space-y-3">
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-zinc-300 font-semibold">KIỂM CHỨNG BẢO MẬT</span>
-              <span className="text-emerald-400">LOCAL ONLY</span>
+              <span className="text-slate-200 font-semibold">HỖ TRỢ KÍCH HOẠT 24/7</span>
+              <span className="text-blue-300">AUTO VERIFY</span>
             </div>
-            <p className="text-xs text-zinc-300 leading-relaxed max-w-[36ch]">
-              Bạn có thể mở DevTools (F12) bất kỳ lúc nào để kiểm tra toàn bộ lưu lượng mạng chỉ kết nối tới <code className="inline-code">localhost</code>.
+            <p className="text-xs text-slate-300 leading-relaxed max-w-[36ch]">
+              Hệ thống tự động ghi nhận gói ngay sau khi bạn kết nối tài khoản Discord với Bot và xác nhận gói đăng ký.
             </p>
           </div>
         </div>
@@ -466,22 +559,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             return (
               <div
                 key={idx}
-                className={`surface p-5 ${isOpen ? 'card-accent-indigo border-brand/40' : ''}`}
+                className={`surface p-5 ${isOpen ? 'border-blue-500/60' : ''}`}
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(isOpen ? null : idx)}
-                  className="w-full text-left flex items-center justify-between gap-4 text-sm font-semibold text-zinc-100 hover:text-white transition-colors"
+                  className="w-full text-left flex items-center justify-between gap-4 text-sm font-semibold text-slate-100 hover:text-white transition-colors"
                 >
                   <span>{item.q}</span>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-brand-text shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-blue-400 shrink-0" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
                   )}
                 </button>
                 {isOpen && (
-                  <p className="mt-3 pt-3 border-t border-line text-[13px] text-zinc-300 leading-relaxed max-w-[54ch]">
+                  <p className="mt-3 pt-3 border-t border-line text-[13px] text-slate-300 leading-relaxed max-w-[54ch]">
                     {item.a}
                   </p>
                 )}
