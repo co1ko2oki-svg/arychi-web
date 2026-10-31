@@ -35,12 +35,13 @@ export const questApi = {
       discordClientId: string | null;
       discordAuthUrl: string | null;
       discordBotInviteUrl: string | null;
-      googleAuthUrl: string | null;
     };
     bankInfo: { bankId: string; bankName: string; accountNo: string; accountName: string };
     payosConfigured: boolean;
   }> {
-    const res = await fetch(`${QUEST_API_URL}/api/auth/oauth/config`);
+    const res = await fetch(
+      `${QUEST_API_URL}/api/auth/oauth/config?redirectUri=${encodeURIComponent(window.location.origin)}`
+    );
     if (!res.ok) throw new Error('Không thể tải cấu hình OAuth2');
     return res.json();
   },
@@ -52,7 +53,7 @@ export const questApi = {
   },
 
   async oauthLogin(payload: {
-    provider: 'discord' | 'google';
+    provider?: 'discord';
     id?: string;
     username?: string;
     email?: string;
@@ -294,6 +295,9 @@ export const streamApi = {
     viewerToken: string;
     guildId?: string;
     videoChannelId?: string;
+    prefix?: string;
+    cmdChannelId?: string;
+    adminIds?: string;
   }): Promise<{ success: boolean; message: string; status: StreamStatus }> {
     const res = await fetch(`${STREAM_API_URL}/api/config/tokens`, {
       method: 'POST',

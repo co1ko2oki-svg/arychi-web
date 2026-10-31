@@ -86,8 +86,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     {
       icon: Lock,
       tag: 'OAUTH2 AUTHENTICATION',
-      title: 'Đăng nhập qua Bot Discord OAuth2 hoặc Google',
-      desc: 'Tại tên miền chính arychi.xyz, người dùng xác thực định danh qua tính năng OAuth2 của Bot Discord hoặc đăng ký tài khoản bằng Google.',
+      title: 'Đăng nhập qua Bot Discord OAuth2',
+      desc: 'Tại tên miền chính arychi.xyz, người dùng xác thực an toàn qua hệ thống Discord OAuth2 của Astral Bot để liên kết tài khoản với Database.',
     },
     {
       icon: QrCode,
@@ -113,10 +113,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     {
       step: 'BƯỚC 01',
       time: 'arychi.xyz',
-      title: 'Đăng nhập OAuth2 (Discord / Google)',
-      desc: 'Xác thực tài khoản qua tính năng OAuth2 của Bot Discord hoặc đăng ký nhanh bằng tài khoản Google.',
+      title: 'Đăng nhập OAuth2 Discord',
+      desc: 'Xác thực tài khoản an toàn qua hệ thống OAuth2 của Bot Discord mà không cần nhập token cá nhân.',
       cmdLabel: 'Trạng thái OAuth2',
-      cmdValue: user ? `@${user.username} (${user.provider.toUpperCase()})` : 'Chưa đăng nhập',
+      cmdValue: user ? `@${user.username} (DISCORD)` : 'Chưa đăng nhập',
     },
     {
       step: 'BƯỚC 02',
@@ -139,7 +139,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const faqs = [
     {
       q: 'Tại sao arychi.xyz chỉ hiển thị trang giới thiệu và bảng giá?',
-      a: 'Theo kiến trúc bảo mật 2 tên miền của Arychi, tên miền chính arychi.xyz đóng vai trò cổng giới thiệu, đăng nhập OAuth2 (Bot Discord / Google) và thanh toán gói. Toàn bộ chức năng điều khiển backend nằm tại tên miền phụ dash.arychi.xyz.',
+      a: 'Theo kiến trúc bảo mật 2 tên miền của Arychi, tên miền chính arychi.xyz đóng vai trò cổng giới thiệu, đăng nhập Bot Discord OAuth2 và thanh toán gói. Toàn bộ chức năng điều khiển backend nằm tại tên miền phụ dash.arychi.xyz.',
     },
     {
       q: 'Hệ thống có bao nhiêu gói dịch vụ và thanh toán như thế nào?',
@@ -179,7 +179,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               Hệ thống Tự động hóa Discord — Arychi Suite
             </h1>
             <p className="text-base text-slate-300 leading-relaxed">
-              Đăng nhập bằng Bot Discord (OAuth2) hoặc tài khoản Google, kích hoạt gói duy nhất 20.000đ/tháng qua VietQR &amp; PayOS để truy cập trung tâm điều khiển tại miền phụ dash.arychi.xyz.
+              Đăng nhập an toàn bằng Bot Discord (OAuth2), kích hoạt gói duy nhất 20.000đ/tháng qua VietQR &amp; PayOS để truy cập trung tâm điều khiển tại miền phụ dash.arychi.xyz.
             </p>
           </div>
 
@@ -190,7 +190,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onClick={onOpenLoginModal}
                 className="btn-primary h-10 px-5 text-sm"
               >
-                <span>1. Đăng nhập Discord OAuth2 / Google</span>
+                <span>1. Đăng nhập Discord</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             ) : !hasActivePlan ? (
@@ -277,12 +277,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-white truncate">
-                    1. Đăng nhập OAuth2 (Discord / Google)
+                    1. Đăng nhập Discord
                   </p>
                   <p className="text-xs font-mono text-slate-300 truncate">
                     {user
-                      ? `Đã xác thực @${user.username} (${user.provider.toUpperCase()})`
-                      : 'Cần đăng nhập qua Bot Discord hoặc Google'}
+                      ? `Đã xác thực @${user.username} (DISCORD)`
+                      : 'Cần xác thực qua Bot Discord OAuth2'}
                   </p>
                 </div>
               </div>
@@ -354,7 +354,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             >
               <span>
                 {!user
-                  ? 'Đăng nhập OAuth2 ngay'
+                  ? 'Đăng nhập Discord ngay'
                   : !hasActivePlan
                   ? 'Mua gói 20k/tháng'
                   : 'Truy cập dash.arychi.xyz'}
@@ -399,7 +399,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </ul>
           </div>
 
-          <div className="p-6 rounded-xl bg-[#141722] border border-line space-y-5">
+          <div className="lg:border-l border-line lg:pl-8 space-y-5">
             <div className="space-y-1">
               <span className="text-xs font-mono text-slate-300">CHI PHÍ THUÊ BAO CỐ ĐỊNH</span>
               <div className="flex items-baseline gap-2">

@@ -9,8 +9,8 @@
  */
 
 export interface CommercialUser {
-  id: string; // Discord Snowflake ID (e.g. "1216209352852115576") or Google ID
-  provider: 'discord' | 'google';
+  id: string; // Discord Snowflake ID (e.g. "1216209352852115576")
+  provider: 'discord';
   username: string; // Discord username or display name
   email: string;
   avatarUrl: string | null;
@@ -26,6 +26,9 @@ export interface CommercialUser {
     streamViewerToken: string; // 1 Viewer token for farm watch-time
     streamGuildId?: string;
     streamChannelId?: string;
+    prefix?: string;
+    commandChannelId?: string;
+    adminIds?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -48,7 +51,7 @@ export interface CommercialOrder {
   orderCode: number; // Unique numerical code (e.g. 1730384729)
   userId: string;
   username: string;
-  provider: 'discord' | 'google';
+  provider: 'discord';
   months: number; // 1, 3, 6, 12...
   amount: number; // months * 50,000 VND
   description: string; // "ARYCHI <orderCode>"

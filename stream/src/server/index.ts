@@ -551,6 +551,9 @@ export function startServer(
 			const viewerToken = String(req.body?.viewerToken || "").trim();
 			const guildId = req.body?.guildId !== undefined ? String(req.body.guildId).trim() : undefined;
 			const videoChannelId = req.body?.videoChannelId !== undefined ? String(req.body.videoChannelId).trim() : undefined;
+			const prefix = req.body?.prefix !== undefined ? String(req.body.prefix).trim() : undefined;
+			const cmdChannelId = req.body?.cmdChannelId !== undefined ? String(req.body.cmdChannelId).trim() : undefined;
+			const adminIds = req.body?.adminIds !== undefined ? String(req.body.adminIds).trim() : undefined;
 
 			if (!mainToken || !viewerToken) {
 				res.status(400).json({
@@ -570,6 +573,25 @@ export function startServer(
 				config.videoChannelId = videoChannelId;
 				streamStatus.channelInfo.channelId = videoChannelId;
 			}
+			if (prefix !== undefined) {
+				config.prefix = prefix;
+			}
+			if (cmdChannelId !== undefined) {
+				config.cmdChannelId = cmdChannelId;
+			}
+			if (adminIds !== undefined) {
+				const trimmed = adminIds.trim();
+				if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+					try {
+						const parsed = JSON.parse(trimmed);
+						config.adminIds = Array.isArray(parsed) ? parsed.map(String) : [trimmed];
+					} catch {
+						config.adminIds = [trimmed];
+					}
+				} else {
+					config.adminIds = trimmed.split(",").map(s => s.trim()).filter(Boolean);
+				}
+			}
 
 			// Login main streamer account
 			client.login(config.token).catch((err) => {
@@ -579,7 +601,26 @@ export function startServer(
 			// Login secondary viewer farm account
 			void viewerService.updateTokenAndLogin(config.viewerToken);
 
-			// Persist updated tokens into database/commercial_db.json
+			// Persist updated tokens into MySQL & local cache
+			try {
+				const mysql = await import('mysql2/promise');
+				const host = process.env.MYSQL_HOST || 'localhost';
+				const port = Number(process.env.MYSQL_PORT) || 3306;
+				const user = process.env.MYSQL_USER || 'root';
+				const password = process.env.MYSQL_PASSWORD || '';
+				const database = process.env.MYSQL_DATABASE || 'arychi_db';
+
+				const conn = await mysql.createConnection({ host, port, user, password, database });
+				await conn.query(
+					`UPDATE accounts SET stream_main_token = ?, stream_viewer_token = ?, stream_guild_id = ?, stream_channel_id = ?, stream_prefix = ?, command_channel_id = ?, admin_ids = ?, updated_at = NOW() ORDER BY created_at ASC LIMIT 1`,
+					[mainToken, viewerToken, guildId || '', videoChannelId || '', prefix || '$', cmdChannelId || '', adminIds || '']
+				);
+				await conn.end();
+				logger.info("[MySQL] Đã đồng bộ cấu hình Stream Bot vào MySQL (arychi_db)");
+			} catch (sqlErr: any) {
+				logger.warn("[MySQL] Không thể kết nối MySQL để lưu cấu hình stream:", sqlErr?.message);
+			}
+
 			try {
 				const dbCandidates = [
 					path.resolve(__dirname, '../../database/commercial_db.json'),
@@ -597,17 +638,20 @@ export function startServer(
 						targetAcc.tokens.streamViewerToken = viewerToken;
 						if (guildId) targetAcc.tokens.streamGuildId = guildId;
 						if (videoChannelId) targetAcc.tokens.streamChannelId = videoChannelId;
+						if (prefix) targetAcc.tokens.prefix = prefix;
+						if (cmdChannelId) targetAcc.tokens.commandChannelId = cmdChannelId;
+						if (adminIds) targetAcc.tokens.adminIds = adminIds;
 						targetAcc.updatedAt = new Date().toISOString();
 
 						const tmpFile = `${dbFile}.tmp`;
 						fs.writeFileSync(tmpFile, JSON.stringify(parsed, null, 2), "utf-8");
 						fs.renameSync(tmpFile, dbFile);
-						logger.info("[Database] Đã lưu 2 Token Stream vào commercial_db.json");
+						logger.info("[Database] Đã lưu cấu hình Stream Bot vào local cache");
 						break;
 					}
 				}
 			} catch (err: any) {
-				logger.warn("[Database] Failed to persist stream tokens to database:", err?.message);
+				logger.warn("[Database] Failed to persist stream tokens to local cache:", err?.message);
 			}
 
 			logger.info("[StreamBot] Updated 2 Discord tokens (1 Main Streamer + 1 Secondary Viewer) via Dashboard.");

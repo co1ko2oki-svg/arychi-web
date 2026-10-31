@@ -256,7 +256,7 @@ const AppContent: React.FC = () => {
   // Redirect / Navigate to dash.arychi.xyz
   const handleEnterDashboard = () => {
     if (!user || !sessionToken) {
-      toast.warning('Vui lòng đăng nhập bằng Bot Discord OAuth2 hoặc Google trước');
+      toast.warning('Vui lòng đăng nhập bằng Bot Discord OAuth2 trước');
       setIsLoginModalOpen(true);
       return;
     }
@@ -558,7 +558,7 @@ const AppContent: React.FC = () => {
             </div>
 
             <p className="text-sm text-slate-300 leading-relaxed">
-              Miền phụ <code className="inline-code">dash.arychi.xyz</code> yêu cầu xác minh lần thứ 2 với Database: Tài khoản phải đăng nhập qua Bot Discord OAuth2 / Google và đã kích hoạt gói <strong>20.000đ / 1 tháng</strong>.
+              Miền phụ <code className="inline-code">dash.arychi.xyz</code> yêu cầu xác minh lần thứ 2 với Database: Tài khoản phải đăng nhập qua Bot Discord OAuth2 và đã kích hoạt gói <strong>20.000đ / 1 tháng</strong>.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

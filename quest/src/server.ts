@@ -131,7 +131,13 @@ function extractToken(req: Request): string {
 	if (authHeader) {
 		return authHeader.replace(/^Bearer\s+/i, '').replace(/^Bot\s+/i, '').trim();
 	}
-	return (req.body?.token || process.env.TOKEN || '').trim();
+	return (
+		req.body?.token ||
+		process.env.DISCORD_QUEST_TOKEN ||
+		process.env.TOKEN ||
+		process.env.DISCORD_BOT_TOKEN ||
+		''
+	).trim();
 }
 
 // ---------------- REST API ROUTES ----------------
@@ -156,12 +162,41 @@ function extractSessionToken(req: Request): string {
 }
 
 // Get OAuth2 & Pricing configuration
-app.get('/api/auth/oauth/config', (req: Request, res: Response) => {
+const getAllowedRedirectUris = (): string[] =>
+	(process.env.DISCORD_REDIRECT_URIS || process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz')
+		.split(',')
+		.map((uri) => uri.trim().replace(/\/+$/, ''))
+		.filter(Boolean);
+
+// Discord requires the exact same redirect_uri for authorize and token exchange,
+// and it must be registered in Developer Portal > OAuth2 > Redirects.
+const resolveRedirectUri = (candidate?: unknown): string => {
+	const allowed = getAllowedRedirectUris();
+	const normalized = typeof candidate === 'string' ? candidate.trim().replace(/\/+$/, '') : '';
+	return normalized && allowed.includes(normalized) ? normalized : allowed[0];
+};
+
+app.get('/api/auth/oauth/config', async (req: Request, res: Response) => {
 	const discordClientId = process.env.DISCORD_CLIENT_ID || '';
-	const currentOrigin = req.headers.origin || (req.headers.host ? `${req.protocol}://${req.headers.host}` : 'https://arychi.xyz');
-	const discordRedirectUri = process.env.DISCORD_REDIRECT_URI || currentOrigin;
-	const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
-	const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI || currentOrigin;
+	const discordBotToken = process.env.DISCORD_BOT_TOKEN || '';
+	const discordRedirectUri = resolveRedirectUri(req.query.redirectUri || req.headers.origin);
+
+	let botInfo: { id: string; username: string; avatarUrl: string | null } | null = null;
+	if (discordBotToken) {
+		try {
+			const bRes = await fetch('https://discord.com/api/v10/users/@me', {
+				headers: { Authorization: `Bot ${discordBotToken}` },
+			});
+			const bData: any = await bRes.json();
+			if (bData && bData.id) {
+				botInfo = {
+					id: bData.id,
+					username: bData.username,
+					avatarUrl: bData.avatar ? `https://cdn.discordapp.com/avatars/${bData.id}/${bData.avatar}.png` : null,
+				};
+			}
+		} catch {}
+	}
 
 	res.json({
 		plan: {
@@ -171,26 +206,21 @@ app.get('/api/auth/oauth/config', (req: Request, res: Response) => {
 			currency: 'VND',
 		},
 		oauth: {
-			discordConfigured: Boolean(discordClientId),
+			discordConfigured: Boolean(discordClientId || discordBotToken),
 			discordClientId: discordClientId || null,
+			discordBotConfigured: Boolean(discordBotToken),
+			botInfo,
 			discordAuthUrl: discordClientId
 				? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(
 						discordClientId
 				  )}&response_type=code&redirect_uri=${encodeURIComponent(
 						discordRedirectUri
-				  )}&scope=identify+email+guilds`
+				  )}&scope=identify+guilds+guilds.join+email`
 				: null,
 			discordBotInviteUrl: discordClientId
 				? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(
 						discordClientId
 				  )}&permissions=8&scope=bot+applications.commands`
-				: null,
-			googleAuthUrl: googleClientId
-				? `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
-						googleClientId
-				  )}&response_type=token&redirect_uri=${encodeURIComponent(
-						googleRedirectUri
-				  )}&scope=openid+email+profile`
 				: null,
 		},
 		bankInfo: subscriptionManager.getBankInfo(),
@@ -200,10 +230,10 @@ app.get('/api/auth/oauth/config', (req: Request, res: Response) => {
 	});
 });
 
-// Login or Register via Discord Bot OAuth2 or Google Account OAuth2
+// Login or Register via Discord Bot OAuth2
 app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
 	try {
-		const provider = (req.body?.provider === 'google' ? 'google' : 'discord') as 'discord' | 'google';
+		const provider = 'discord';
 		const code = req.body?.code as string | undefined;
 		const accessToken = req.body?.accessToken as string | undefined;
 
@@ -212,69 +242,87 @@ app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
 		let email = String(req.body?.email || '').trim();
 		let avatarUrl: string | null = req.body?.avatarUrl || null;
 
-		if (provider === 'discord') {
-			if (code && process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
-				const redirectUri = String(req.body?.redirectUri || process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz');
-				const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-					body: new URLSearchParams({
-						client_id: process.env.DISCORD_CLIENT_ID,
-						client_secret: process.env.DISCORD_CLIENT_SECRET,
-						grant_type: 'authorization_code',
-						code,
-						redirect_uri: redirectUri,
-					}).toString(),
+		if (code && (!process.env.DISCORD_CLIENT_ID || !process.env.DISCORD_CLIENT_SECRET)) {
+			addLog('error', '[OAuth2] Thiếu DISCORD_CLIENT_ID hoặc DISCORD_CLIENT_SECRET trong .env');
+			res.status(500).json({
+				error: 'Máy chủ chưa cấu hình DISCORD_CLIENT_SECRET nên không thể hoàn tất đăng nhập Discord.',
+			});
+			return;
+		}
+
+		if (code && process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
+			const redirectUri = resolveRedirectUri(req.body?.redirectUri);
+			const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({
+					client_id: process.env.DISCORD_CLIENT_ID,
+					client_secret: process.env.DISCORD_CLIENT_SECRET,
+					grant_type: 'authorization_code',
+					code,
+					redirect_uri: redirectUri,
+				}).toString(),
+			});
+			const tokenData: any = await tokenRes.json();
+			if (!tokenData?.access_token) {
+				res.status(400).json({
+					error: tokenData?.error_description || tokenData?.error || 'Mã xác thực Discord OAuth2 không hợp lệ hoặc đã hết hạn',
 				});
-				const tokenData: any = await tokenRes.json();
-				if (!tokenData?.access_token) {
-					res.status(400).json({
-						error: tokenData?.error_description || tokenData?.error || 'Mã xác thực Discord OAuth2 không hợp lệ hoặc đã hết hạn',
+				return;
+			}
+			const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+				headers: { Authorization: `Bearer ${tokenData.access_token}` },
+			});
+			const userData: any = await userRes.json();
+			if (!userData?.id) {
+				res.status(400).json({ error: 'Không thể truy xuất thông tin tài khoản từ Discord API' });
+				return;
+			}
+			id = userData.id;
+			username = userData.global_name || userData.username;
+			email = userData.email || `${userData.username}@discord.oauth`;
+			avatarUrl = userData.avatar
+				? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
+				: null;
+
+			// Auto-join member to Guild using Bot Token (Scope: guilds.join)
+			const botToken = process.env.DISCORD_BOT_TOKEN;
+			const guildId = process.env.GUILD_ID;
+			if (botToken && guildId && tokenData?.access_token) {
+				try {
+					await fetch(`https://discord.com/api/v10/guilds/${guildId}/members/${id}`, {
+						method: 'PUT',
+						headers: {
+							Authorization: `Bot ${botToken}`,
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							access_token: tokenData.access_token,
+						}),
 					});
-					return;
+					addLog('info', `[Bot OAuth2] Đã kết nạp user @${username} (${id}) vào Guild ${guildId} qua Bot Token`);
+				} catch (joinErr: any) {
+					addLog('warn', `[Bot OAuth2] Không thể tự động thêm user vào server: ${joinErr?.message || joinErr}`);
 				}
-				const userRes = await fetch('https://discord.com/api/v10/users/@me', {
-					headers: { Authorization: `Bearer ${tokenData.access_token}` },
-				});
-				const userData: any = await userRes.json();
-				if (!userData?.id) {
-					res.status(400).json({ error: 'Không thể truy xuất thông tin tài khoản từ Discord API' });
-					return;
-				}
+			}
+		} else if (accessToken) {
+			// Direct Discord token validation (User Token or Bearer Token)
+			const authHeader = accessToken.startsWith('Bearer ') || accessToken.startsWith('Bot ') ? accessToken : accessToken;
+			const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+				headers: { Authorization: authHeader },
+			});
+			const userData: any = await userRes.json();
+			if (userData && userData.id) {
 				id = userData.id;
 				username = userData.global_name || userData.username;
 				email = userData.email || `${userData.username}@discord.oauth`;
 				avatarUrl = userData.avatar
 					? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
 					: null;
-			} else if (accessToken) {
-				// Direct Discord token validation (User Token or Bearer Token)
-				const authHeader = accessToken.startsWith('Bearer ') || accessToken.startsWith('Bot ') ? accessToken : accessToken;
-				const userRes = await fetch('https://discord.com/api/v10/users/@me', {
-					headers: { Authorization: authHeader },
-				});
-				const userData: any = await userRes.json();
-				if (userData && userData.id) {
-					id = userData.id;
-					username = userData.global_name || userData.username;
-					email = userData.email || `${userData.username}@discord.oauth`;
-					avatarUrl = userData.avatar
-						? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
-						: null;
-				} else {
-					res.status(400).json({ error: 'Token tài khoản Discord không hợp lệ hoặc đã hết hạn' });
-					return;
-				}
+			} else {
+				res.status(400).json({ error: 'Token tài khoản Discord không hợp lệ hoặc đã hết hạn' });
+				return;
 			}
-		} else if (provider === 'google' && accessToken) {
-			const gRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-				headers: { Authorization: `Bearer ${accessToken}` },
-			});
-			const gData: any = await gRes.json();
-			id = `gg_${gData.sub}`;
-			username = gData.name || gData.email?.split('@')[0] || 'GoogleUser';
-			email = gData.email || '';
-			avatarUrl = gData.picture || null;
 		}
 
 		if (!username && email) {
@@ -286,7 +334,7 @@ app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
 		}
 		if (!id) {
 			const cleanSlug = (email || username).toLowerCase().replace(/[^a-z0-9]/g, '');
-			id = provider === 'discord' ? `dc_${cleanSlug}` : `gg_${cleanSlug}`;
+			id = `dc_${cleanSlug}`;
 		}
 
 		const account = subscriptionManager.upsertOAuthAccount({
@@ -295,6 +343,7 @@ app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
 			username,
 			email: email || `${username}@${provider}.oauth`,
 			avatarUrl,
+			token: accessToken,
 		});
 
 		const subscription = subscriptionManager.computeSubscriptionStatus(account);
@@ -356,7 +405,7 @@ app.post('/api/payments/create', async (req: Request, res: Response) => {
 			(req.body?.userId ? subscriptionManager.getAccountById(String(req.body.userId)) : null);
 
 		if (!account) {
-			res.status(401).json({ error: 'Vui lòng đăng nhập qua Bot Discord OAuth2 hoặc Google trước khi mua gói' });
+			res.status(401).json({ error: 'Vui lòng đăng nhập qua Bot Discord OAuth2 trước khi mua gói' });
 			return;
 		}
 
@@ -464,7 +513,16 @@ app.post('/api/account/tokens', async (req: Request, res: Response) => {
 		return;
 	}
 
-	const { questToken, streamMainToken, streamViewerToken, streamGuildId, streamChannelId } = req.body || {};
+	const {
+		questToken,
+		streamMainToken,
+		streamViewerToken,
+		streamGuildId,
+		streamChannelId,
+		prefix,
+		commandChannelId,
+		adminIds,
+	} = req.body || {};
 
 	// If questToken is provided and non-empty, verify it with Discord API
 	let verifiedDiscordUser = null;
@@ -485,6 +543,9 @@ app.post('/api/account/tokens', async (req: Request, res: Response) => {
 		streamViewerToken: typeof streamViewerToken === 'string' ? streamViewerToken : undefined,
 		streamGuildId: typeof streamGuildId === 'string' ? streamGuildId : undefined,
 		streamChannelId: typeof streamChannelId === 'string' ? streamChannelId : undefined,
+		prefix: typeof prefix === 'string' ? prefix : undefined,
+		commandChannelId: typeof commandChannelId === 'string' ? commandChannelId : undefined,
+		adminIds: typeof adminIds === 'string' ? adminIds : undefined,
 	});
 
 	// Forward stream tokens to StreamBot (:3000) for real-time activation
@@ -497,6 +558,9 @@ app.post('/api/account/tokens', async (req: Request, res: Response) => {
 				viewerToken: streamViewerToken,
 				guildId: streamGuildId,
 				videoChannelId: streamChannelId,
+				prefix,
+				cmdChannelId: commandChannelId,
+				adminIds,
 			}),
 		}).catch(() => {});
 	}

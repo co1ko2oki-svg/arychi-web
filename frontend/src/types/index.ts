@@ -1,4 +1,4 @@
-export type AuthProvider = 'discord' | 'google' | 'token';
+export type AuthProvider = 'discord' | 'token';
 
 export interface DiscordUser {
   id: string;
@@ -15,6 +15,9 @@ export interface AccountTokens {
   streamViewerToken: string;
   streamGuildId?: string;
   streamChannelId?: string;
+  prefix?: string;
+  commandChannelId?: string;
+  adminIds?: string;
 }
 
 export interface AuthUser {
@@ -154,7 +157,7 @@ export interface PaymentOrderDTO {
   orderCode: number;
   userId: string;
   username: string;
-  provider: 'discord' | 'google';
+  provider: 'discord';
   months: number;
   amount: number;
   description: string;

@@ -51,6 +51,13 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
   const [videoChannelId, setVideoChannelId] = useState(
     user?.tokens?.streamChannelId || status?.config?.videoChannelId || ''
   );
+  const [prefix, setPrefix] = useState(user?.tokens?.prefix || status?.config?.prefix || '$');
+  const [cmdChannelId, setCmdChannelId] = useState(
+    user?.tokens?.commandChannelId || status?.config?.cmdChannelId || ''
+  );
+  const [adminIds, setAdminIds] = useState(
+    user?.tokens?.adminIds || (status?.config?.adminIds ? status.config.adminIds.join(', ') : '')
+  );
   const [showTokens, setShowTokens] = useState(false);
   const [savingTokens, setSavingTokens] = useState(false);
 
@@ -67,6 +74,9 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
       if (user.tokens.streamViewerToken) setViewerToken(user.tokens.streamViewerToken);
       if (user.tokens.streamGuildId) setGuildId(user.tokens.streamGuildId);
       if (user.tokens.streamChannelId) setVideoChannelId(user.tokens.streamChannelId);
+      if (user.tokens.prefix) setPrefix(user.tokens.prefix);
+      if (user.tokens.commandChannelId) setCmdChannelId(user.tokens.commandChannelId);
+      if (user.tokens.adminIds) setAdminIds(user.tokens.adminIds);
     }
   }, [user?.tokens]);
 
@@ -93,6 +103,9 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           streamViewerToken: viewerToken.trim(),
           streamGuildId: guildId.trim(),
           streamChannelId: videoChannelId.trim(),
+          prefix: prefix.trim(),
+          commandChannelId: cmdChannelId.trim(),
+          adminIds: adminIds.trim(),
         });
       }
 
@@ -102,6 +115,9 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           viewerToken: viewerToken.trim(),
           guildId: guildId.trim() || undefined,
           videoChannelId: videoChannelId.trim() || undefined,
+          prefix: prefix.trim() || undefined,
+          cmdChannelId: cmdChannelId.trim() || undefined,
+          adminIds: adminIds.trim() || undefined,
         });
       }
 
@@ -110,9 +126,12 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         streamViewerToken: viewerToken.trim(),
         streamGuildId: guildId.trim(),
         streamChannelId: videoChannelId.trim(),
+        prefix: prefix.trim(),
+        commandChannelId: cmdChannelId.trim(),
+        adminIds: adminIds.trim(),
       });
 
-      toast.success('Đã lưu 2 Token Stream (1 Chính + 1 Phụ) vào Database & kích hoạt StreamBot');
+      toast.success('Đã lưu cấu hình Stream Bot vào Database & kích hoạt StreamBot');
       onRefresh();
     } catch (err: any) {
       toast.error(err?.message || 'Lỗi khi lưu 2 Token cho Treo Stream');
@@ -335,31 +354,75 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 items-end pt-2 border-t border-line">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-line">
           <div>
             <label htmlFor="stream-guild-id" className="field-label">
-              Server ID (Guild ID)
+              Server ID (GUILD_ID)
             </label>
             <input
               id="stream-guild-id"
               type="text"
               value={guildId}
               onChange={(e) => setGuildId(e.target.value)}
-              placeholder="ID máy chủ Discord (Tùy chọn)"
+              placeholder="ID máy chủ Discord"
               className="input font-mono"
             />
           </div>
 
           <div>
             <label htmlFor="stream-channel-id" className="field-label">
-              Voice Channel ID (Kênh thoại phát Stream)
+              Voice Channel ID (VIDEO_CHANNEL_ID)
             </label>
             <input
               id="stream-channel-id"
               type="text"
               value={videoChannelId}
               onChange={(e) => setVideoChannelId(e.target.value)}
-              placeholder="ID kênh thoại Discord"
+              placeholder="ID kênh thoại phát Stream"
+              className="input font-mono"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="stream-cmd-channel-id" className="field-label">
+              Command Channel ID (COMMAND_CHANNEL_ID)
+            </label>
+            <input
+              id="stream-cmd-channel-id"
+              type="text"
+              value={cmdChannelId}
+              onChange={(e) => setCmdChannelId(e.target.value)}
+              placeholder="ID kênh nhận lệnh bot (Tùy chọn)"
+              className="input font-mono"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_auto] gap-4 items-end pt-2">
+          <div>
+            <label htmlFor="stream-prefix" className="field-label">
+              Prefix lệnh (PREFIX)
+            </label>
+            <input
+              id="stream-prefix"
+              type="text"
+              value={prefix}
+              onChange={(e) => setPrefix(e.target.value)}
+              placeholder="$"
+              className="input font-mono"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="stream-admin-ids" className="field-label">
+              Admin IDs (ADMIN_IDS)
+            </label>
+            <input
+              id="stream-admin-ids"
+              type="text"
+              value={adminIds}
+              onChange={(e) => setAdminIds(e.target.value)}
+              placeholder="Discord ID admin (cách nhau dấu phẩy hoặc JSON [])"
               className="input font-mono"
             />
           </div>
@@ -374,7 +437,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             ) : (
               <CheckCircle2 className="w-4 h-4" />
             )}
-            <span>Lưu &amp; Kết nối 2 Token</span>
+            <span>Lưu cấu hình vào Database</span>
           </button>
         </div>
       </form>

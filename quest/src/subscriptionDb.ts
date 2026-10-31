@@ -13,11 +13,14 @@ export interface AccountTokens {
 	streamViewerToken: string;
 	streamGuildId?: string;
 	streamChannelId?: string;
+	prefix?: string;
+	commandChannelId?: string;
+	adminIds?: string;
 }
 
 export interface AccountRecord {
 	id: string;
-	provider: 'discord' | 'google';
+	provider: 'discord';
 	username: string;
 	email: string;
 	avatarUrl: string | null;
@@ -43,7 +46,7 @@ export interface PaymentOrderRecord {
 	orderCode: number;
 	userId: string;
 	username: string;
-	provider: 'discord' | 'google';
+	provider: 'discord';
 	months: number;
 	amount: number;
 	description: string;
@@ -57,16 +60,23 @@ export interface PaymentOrderRecord {
 	paidAt?: string;
 }
 
-interface SubscriptionDatabaseSchema {
+export interface SubscriptionDatabaseSchema {
 	accounts: AccountRecord[];
 	orders: PaymentOrderRecord[];
-	transactions?: any[];
+	transactions: Array<{
+		id: string;
+		orderCode: number;
+		userId: string;
+		amount: number;
+		gateway: 'VIETQR' | 'PAYOS';
+		reference?: string;
+		createdAt: string;
+	}>;
 }
 
 export interface SubscriptionStatusDTO {
-	planId: 'monthly_20k' | 'monthly_50k';
+	planId: string;
 	planName: string;
-	pricePerMonth: number;
 	priceLabel: string;
 	isActive: boolean;
 	daysRemaining: number;
@@ -81,6 +91,8 @@ export class SubscriptionManager {
 	private dataDir: string;
 	private dbFile: string;
 	private bakFile: string;
+	private pool: any = null;
+	private mysqlConnected: boolean = false;
 	private db: SubscriptionDatabaseSchema = {
 		accounts: [],
 		orders: [],
@@ -88,7 +100,6 @@ export class SubscriptionManager {
 	};
 
 	constructor() {
-		// Commercial database is placed at repo root "database/commercial_db.json"
 		const isSubdir = process.cwd().endsWith('quest') || process.cwd().endsWith('stream');
 		this.dataDir = path.resolve(process.cwd(), isSubdir ? '../database' : 'database');
 		if (!fs.existsSync(this.dataDir)) {
@@ -97,10 +108,219 @@ export class SubscriptionManager {
 
 		this.dbFile = path.join(this.dataDir, 'commercial_db.json');
 		this.bakFile = path.join(this.dataDir, 'commercial_db.json.bak');
-		this.load();
+
+		this.loadLocalBackup();
+		void this.initMySql();
 	}
 
-	private load(): void {
+	private async initMySql(): Promise<void> {
+		const host = process.env.MYSQL_HOST || 'localhost';
+		const port = parseInt(process.env.MYSQL_PORT || '3306', 10);
+		const user = process.env.MYSQL_USER || 'root';
+		const password = process.env.MYSQL_PASSWORD || '';
+		const database = process.env.MYSQL_DATABASE || 'arychi_db';
+
+		try {
+			const mysql = await import('mysql2/promise');
+
+			// Auto create database if not exists
+			const initConn = await mysql.createConnection({
+				host,
+				port,
+				user,
+				password,
+			});
+			await initConn.query(
+				`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+			);
+			await initConn.end();
+
+			this.pool = mysql.createPool({
+				host,
+				port,
+				user,
+				password,
+				database,
+				waitForConnections: true,
+				connectionLimit: 10,
+				queueLimit: 0,
+			});
+
+			await this.pool.query('SELECT 1');
+			this.mysqlConnected = true;
+			console.log(`[MySQL] Connected to database: ${database}@${host}:${port}`);
+
+			await this.ensureTables();
+			await this.syncWithMySql();
+		} catch (err: any) {
+			this.mysqlConnected = false;
+			console.warn(
+				`[MySQL] Connection skipped or failed (${err?.message || err}). Using local cache database.`
+			);
+		}
+	}
+
+	private async ensureTables(): Promise<void> {
+		if (!this.pool) return;
+		try {
+			await this.pool.query(`
+				CREATE TABLE IF NOT EXISTS \`accounts\` (
+					\`id\` VARCHAR(64) NOT NULL PRIMARY KEY,
+					\`provider\` VARCHAR(32) NOT NULL DEFAULT 'discord',
+					\`username\` VARCHAR(128) NOT NULL,
+					\`email\` VARCHAR(255) DEFAULT NULL,
+					\`avatar_url\` TEXT DEFAULT NULL,
+					\`bot_connected\` TINYINT(1) NOT NULL DEFAULT 0,
+					\`session_token\` VARCHAR(128) NOT NULL UNIQUE,
+					\`subscription_expires_at\` DATETIME DEFAULT NULL,
+					\`activated_at\` DATETIME DEFAULT NULL,
+					\`total_months_purchased\` INT NOT NULL DEFAULT 0,
+					\`license_key\` VARCHAR(64) DEFAULT NULL,
+					\`quest_token\` TEXT DEFAULT NULL,
+					\`stream_main_token\` TEXT DEFAULT NULL,
+					\`stream_viewer_token\` TEXT DEFAULT NULL,
+					\`stream_guild_id\` VARCHAR(64) DEFAULT NULL,
+					\`stream_channel_id\` VARCHAR(64) DEFAULT NULL,
+					\`stream_prefix\` VARCHAR(16) DEFAULT '$',
+					\`command_channel_id\` VARCHAR(64) DEFAULT NULL,
+					\`admin_ids\` TEXT DEFAULT NULL,
+					\`created_at\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					\`updated_at\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+					INDEX \`idx_accounts_session\` (\`session_token\`),
+					INDEX \`idx_accounts_username\` (\`username\`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+			`);
+
+			// Safe auto-migration for existing accounts table
+			try { await this.pool.query('ALTER TABLE `accounts` ADD COLUMN `stream_prefix` VARCHAR(16) DEFAULT "$"'); } catch {}
+			try { await this.pool.query('ALTER TABLE `accounts` ADD COLUMN `command_channel_id` VARCHAR(64) DEFAULT NULL'); } catch {}
+			try { await this.pool.query('ALTER TABLE `accounts` ADD COLUMN `admin_ids` TEXT DEFAULT NULL'); } catch {}
+
+			await this.pool.query(`
+				CREATE TABLE IF NOT EXISTS \`orders\` (
+					\`order_code\` BIGINT NOT NULL PRIMARY KEY,
+					\`user_id\` VARCHAR(64) NOT NULL,
+					\`username\` VARCHAR(128) NOT NULL,
+					\`provider\` VARCHAR(32) NOT NULL DEFAULT 'discord',
+					\`months\` INT NOT NULL DEFAULT 1,
+					\`amount\` INT NOT NULL,
+					\`description\` VARCHAR(255) NOT NULL,
+					\`status\` ENUM('PENDING', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'PENDING',
+					\`vietqr_url\` TEXT DEFAULT NULL,
+					\`bank_id\` VARCHAR(64) DEFAULT NULL,
+					\`bank_name\` VARCHAR(128) DEFAULT NULL,
+					\`account_no\` VARCHAR(64) DEFAULT NULL,
+					\`account_name\` VARCHAR(128) DEFAULT NULL,
+					\`payos_checkout_url\` TEXT DEFAULT NULL,
+					\`payos_payment_link_id\` VARCHAR(128) DEFAULT NULL,
+					\`payos_qr_code\` TEXT DEFAULT NULL,
+					\`created_at\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					\`paid_at\` DATETIME DEFAULT NULL,
+					INDEX \`idx_orders_user\` (\`user_id\`),
+					INDEX \`idx_orders_status\` (\`status\`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+			`);
+
+			await this.pool.query(`
+				CREATE TABLE IF NOT EXISTS \`transactions\` (
+					\`id\` VARCHAR(64) NOT NULL PRIMARY KEY,
+					\`order_code\` BIGINT NOT NULL,
+					\`user_id\` VARCHAR(64) NOT NULL,
+					\`amount\` INT NOT NULL,
+					\`gateway\` VARCHAR(32) NOT NULL,
+					\`reference\` VARCHAR(255) DEFAULT NULL,
+					\`created_at\` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+					INDEX \`idx_transactions_order\` (\`order_code\`)
+				) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+			`);
+		} catch (err: any) {
+			console.warn('[MySQL] Failed to ensure tables:', err?.message || err);
+		}
+	}
+
+	private async syncWithMySql(): Promise<void> {
+		if (!this.pool) return;
+		try {
+			const [accRows]: [any[], any] = await this.pool.query('SELECT * FROM accounts');
+			if (accRows.length > 0) {
+				const accounts: AccountRecord[] = accRows.map((r) => ({
+					id: r.id,
+					provider: 'discord',
+					username: r.username,
+					email: r.email,
+					avatarUrl: r.avatar_url,
+					botConnected: Boolean(r.bot_connected),
+					sessionToken: r.session_token,
+					subscriptionExpiresAt: r.subscription_expires_at
+						? new Date(r.subscription_expires_at).toISOString()
+						: null,
+					activatedAt: r.activated_at ? new Date(r.activated_at).toISOString() : null,
+					totalMonthsPurchased: Number(r.total_months_purchased) || 0,
+					licenseKey: r.license_key,
+					tokens: {
+						questToken: r.quest_token || '',
+						streamMainToken: r.stream_main_token || '',
+						streamViewerToken: r.stream_viewer_token || '',
+						streamGuildId: r.stream_guild_id || '',
+						streamChannelId: r.stream_channel_id || '',
+						prefix: r.stream_prefix || '$',
+						commandChannelId: r.command_channel_id || '',
+						adminIds: r.admin_ids || '',
+					},
+					createdAt: new Date(r.created_at).toISOString(),
+					updatedAt: new Date(r.updated_at).toISOString(),
+				}));
+
+				const [orderRows]: [any[], any] = await this.pool.query(
+					'SELECT * FROM orders ORDER BY created_at DESC LIMIT 500'
+				);
+				const orders: PaymentOrderRecord[] = orderRows.map((o) => ({
+					orderCode: Number(o.order_code),
+					userId: o.user_id,
+					username: o.username,
+					provider: 'discord',
+					months: Number(o.months),
+					amount: Number(o.amount),
+					description: o.description,
+					status: o.status,
+					vietqrUrl: o.vietqr_url,
+					bankInfo: {
+						bankId: o.bank_id || 'MB',
+						bankName: o.bank_name || 'MBBank',
+						accountNo: o.account_no || '0388889999',
+						accountName: o.account_name || 'ARYCHI SUITE SYSTEM',
+					},
+					payosCheckoutUrl: o.payos_checkout_url,
+					payosPaymentLinkId: o.payos_payment_link_id,
+					payosQrCode: o.payos_qr_code,
+					createdAt: new Date(o.created_at).toISOString(),
+					paidAt: o.paid_at ? new Date(o.paid_at).toISOString() : undefined,
+				}));
+
+				this.db.accounts = accounts;
+				this.db.orders = orders;
+				this.saveLocalBackup();
+				console.log(
+					`[MySQL] Loaded ${accounts.length} accounts and ${orders.length} orders from MySQL.`
+				);
+			} else if (this.db.accounts.length > 0) {
+				console.log(
+					`[MySQL] Migrating ${this.db.accounts.length} existing accounts into MySQL database...`
+				);
+				for (const acc of this.db.accounts) {
+					await this.sqlSaveAccount(acc);
+				}
+				for (const order of this.db.orders) {
+					await this.sqlSaveOrder(order);
+				}
+				console.log('[MySQL] Migration to MySQL completed.');
+			}
+		} catch (err: any) {
+			console.error('[MySQL] Error syncing with MySQL:', err?.message || err);
+		}
+	}
+
+	private loadLocalBackup(): void {
 		try {
 			if (fs.existsSync(this.dbFile)) {
 				const raw = fs.readFileSync(this.dbFile, 'utf-8');
@@ -111,57 +331,150 @@ export class SubscriptionManager {
 						orders: parsed.orders,
 						transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
 					};
-					return;
 				}
 			}
-
-			// Automatic migration from legacy quest/data/subscriptions.json if present
-			const legacyFile = path.resolve(process.cwd(), 'data', 'subscriptions.json');
-			if (fs.existsSync(legacyFile)) {
-				try {
-					const rawLegacy = fs.readFileSync(legacyFile, 'utf-8');
-					const parsedLegacy = JSON.parse(rawLegacy);
-					if (parsedLegacy && Array.isArray(parsedLegacy.accounts)) {
-						this.db = {
-							accounts: parsedLegacy.accounts,
-							orders: Array.isArray(parsedLegacy.orders) ? parsedLegacy.orders : [],
-							transactions: [],
-						};
-						this.save();
-						return;
-					}
-				} catch {}
-			}
-
-			// If neither exists, initialize commercial database
-			this.save();
 		} catch (err) {
-			console.error('[CommercialDatabase] Failed to load commercial_db.json:', err);
+			console.error('[Database] Failed to read backup cache:', err);
 		}
 	}
 
-	private save(): void {
+	private saveLocalBackup(): void {
 		try {
-			if (!fs.existsSync(this.dataDir)) {
-				fs.mkdirSync(this.dataDir, { recursive: true });
-			}
 			const jsonStr = JSON.stringify(this.db, null, 2);
 			const tmpFile = `${this.dbFile}.tmp`;
-
-			// Atomic write: write to tmp file first
 			fs.writeFileSync(tmpFile, jsonStr, 'utf-8');
-
-			// Create backup if dbFile exists
 			if (fs.existsSync(this.dbFile)) {
 				try {
 					fs.copyFileSync(this.dbFile, this.bakFile);
 				} catch {}
 			}
-
-			// Rename tmp to live database file
 			fs.renameSync(tmpFile, this.dbFile);
 		} catch (err) {
-			console.error('[CommercialDatabase] Failed to save commercial_db.json:', err);
+			console.error('[Database] Failed to save backup cache:', err);
+		}
+	}
+
+	private async sqlSaveAccount(account: AccountRecord): Promise<void> {
+		if (!this.pool || !this.mysqlConnected) return;
+		try {
+			const query = `
+				INSERT INTO accounts (
+					id, provider, username, email, avatar_url, bot_connected, session_token,
+					subscription_expires_at, activated_at, total_months_purchased, license_key,
+					quest_token, stream_main_token, stream_viewer_token, stream_guild_id, stream_channel_id,
+					stream_prefix, command_channel_id, admin_ids,
+					created_at, updated_at
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE
+					provider = VALUES(provider),
+					username = VALUES(username),
+					email = VALUES(email),
+					avatar_url = VALUES(avatar_url),
+					bot_connected = VALUES(bot_connected),
+					session_token = VALUES(session_token),
+					subscription_expires_at = VALUES(subscription_expires_at),
+					activated_at = VALUES(activated_at),
+					total_months_purchased = VALUES(total_months_purchased),
+					license_key = VALUES(license_key),
+					quest_token = VALUES(quest_token),
+					stream_main_token = VALUES(stream_main_token),
+					stream_viewer_token = VALUES(stream_viewer_token),
+					stream_guild_id = VALUES(stream_guild_id),
+					stream_channel_id = VALUES(stream_channel_id),
+					stream_prefix = VALUES(stream_prefix),
+					command_channel_id = VALUES(command_channel_id),
+					admin_ids = VALUES(admin_ids),
+					updated_at = NOW()
+			`;
+
+			const createdAtSql = account.createdAt
+				? new Date(account.createdAt).toISOString().slice(0, 19).replace('T', ' ')
+				: new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+			const updatedAtSql = account.updatedAt
+				? new Date(account.updatedAt).toISOString().slice(0, 19).replace('T', ' ')
+				: new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+			const expiresSql = account.subscriptionExpiresAt
+				? new Date(account.subscriptionExpiresAt).toISOString().slice(0, 19).replace('T', ' ')
+				: null;
+
+			const activatedSql = account.activatedAt
+				? new Date(account.activatedAt).toISOString().slice(0, 19).replace('T', ' ')
+				: null;
+
+			await this.pool.query(query, [
+				account.id,
+				'discord',
+				account.username,
+				account.email || null,
+				account.avatarUrl || null,
+				account.botConnected ? 1 : 0,
+				account.sessionToken,
+				expiresSql,
+				activatedSql,
+				account.totalMonthsPurchased || 0,
+				account.licenseKey || null,
+				account.tokens?.questToken || null,
+				account.tokens?.streamMainToken || null,
+				account.tokens?.streamViewerToken || null,
+				account.tokens?.streamGuildId || null,
+				account.tokens?.streamChannelId || null,
+				account.tokens?.prefix || '$',
+				account.tokens?.commandChannelId || null,
+				account.tokens?.adminIds || null,
+				createdAtSql,
+				updatedAtSql,
+			]);
+		} catch (err: any) {
+			console.warn('[MySQL] Failed to save account:', err?.message || err);
+		}
+	}
+
+	private async sqlSaveOrder(order: PaymentOrderRecord): Promise<void> {
+		if (!this.pool || !this.mysqlConnected) return;
+		try {
+			const query = `
+				INSERT INTO orders (
+					order_code, user_id, username, provider, months, amount, description, status,
+					vietqr_url, bank_id, bank_name, account_no, account_name,
+					payos_checkout_url, payos_payment_link_id, payos_qr_code, created_at, paid_at
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE
+					status = VALUES(status),
+					paid_at = VALUES(paid_at)
+			`;
+
+			const createdAtSql = order.createdAt
+				? new Date(order.createdAt).toISOString().slice(0, 19).replace('T', ' ')
+				: new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+			const paidAtSql = order.paidAt
+				? new Date(order.paidAt).toISOString().slice(0, 19).replace('T', ' ')
+				: null;
+
+			await this.pool.query(query, [
+				order.orderCode,
+				order.userId,
+				order.username,
+				'discord',
+				order.months,
+				order.amount,
+				order.description,
+				order.status,
+				order.vietqrUrl || null,
+				order.bankInfo.bankId || 'MB',
+				order.bankInfo.bankName || 'MBBank',
+				order.bankInfo.accountNo || '0388889999',
+				order.bankInfo.accountName || 'ARYCHI SUITE SYSTEM',
+				order.payosCheckoutUrl || null,
+				order.payosPaymentLinkId || null,
+				order.payosQrCode || null,
+				createdAtSql,
+				paidAtSql,
+			]);
+		} catch (err: any) {
+			console.warn('[MySQL] Failed to save order:', err?.message || err);
 		}
 	}
 
@@ -177,27 +490,30 @@ export class SubscriptionManager {
 	public buildVietQrUrl(amount: number, description: string): string {
 		const bank = this.getBankInfo();
 		const template = process.env.VIETQR_TEMPLATE || 'compact2';
-		return `https://img.vietqr.io/image/${encodeURIComponent(bank.bankId)}-${encodeURIComponent(
-			bank.accountNo
-		)}-${template}.png?amount=${amount}&addInfo=${encodeURIComponent(description)}&accountName=${encodeURIComponent(
-			bank.accountName
-		)}`;
+		const cleanAccountName = encodeURIComponent(bank.accountName);
+		const cleanDescription = encodeURIComponent(description);
+		return `https://img.vietqr.io/image/${bank.bankId}-${bank.accountNo}-${template}.png?amount=${amount}&addInfo=${cleanDescription}&accountName=${cleanAccountName}`;
 	}
 
-	public computeSubscriptionStatus(account: AccountRecord | null): SubscriptionStatusDTO | null {
-		if (!account || !account.subscriptionExpiresAt) {
-			return null;
+	public computeSubscriptionStatus(
+		account: AccountRecord | null | undefined
+	): SubscriptionStatusDTO | null {
+		if (!account) return null;
+		const now = Date.now();
+		let isActive = false;
+		let daysRemaining = 0;
+
+		if (account.subscriptionExpiresAt) {
+			const expiryMs = new Date(account.subscriptionExpiresAt).getTime();
+			if (expiryMs > now) {
+				isActive = true;
+				daysRemaining = Math.max(0, Math.ceil((expiryMs - now) / (1000 * 60 * 60 * 24)));
+			}
 		}
-		const expiresMs = new Date(account.subscriptionExpiresAt).getTime();
-		const nowMs = Date.now();
-		const diffMs = expiresMs - nowMs;
-		const isActive = diffMs > 0;
-		const daysRemaining = isActive ? Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24))) : 0;
 
 		return {
 			planId: PLAN_ID,
 			planName: PLAN_NAME,
-			pricePerMonth: PLAN_MONTHLY_PRICE,
 			priceLabel: '20.000đ / 1 tháng',
 			isActive,
 			daysRemaining,
@@ -211,14 +527,19 @@ export class SubscriptionManager {
 
 	public upsertOAuthAccount(input: {
 		id: string;
-		provider: 'discord' | 'google';
+		provider: 'discord';
 		username: string;
 		email?: string;
 		avatarUrl?: string | null;
+		token?: string;
 	}): AccountRecord {
 		const now = new Date().toISOString();
 		const existingIndex = this.db.accounts.findIndex(
-			(a) => a.id === input.id || (input.email && a.email.toLowerCase() === input.email.toLowerCase() && a.provider === input.provider)
+			(a) =>
+				a.id === input.id ||
+				(input.email &&
+					a.email.toLowerCase() === input.email.toLowerCase() &&
+					a.provider === input.provider)
 		);
 
 		if (existingIndex >= 0) {
@@ -228,13 +549,23 @@ export class SubscriptionManager {
 			if (input.avatarUrl !== undefined) {
 				existing.avatarUrl = input.avatarUrl;
 			}
+			if (input.token) {
+				existing.tokens = existing.tokens || {
+					questToken: '',
+					streamMainToken: '',
+					streamViewerToken: '',
+				};
+				existing.tokens.questToken = input.token;
+			}
 			existing.botConnected = true;
 			if (!existing.sessionToken) {
 				existing.sessionToken = crypto.randomBytes(24).toString('hex');
 			}
 			existing.updatedAt = now;
 			this.db.accounts[existingIndex] = existing;
-			this.save();
+
+			this.saveLocalBackup();
+			void this.sqlSaveAccount(existing);
 			return existing;
 		}
 
@@ -251,18 +582,22 @@ export class SubscriptionManager {
 			totalMonthsPurchased: 0,
 			licenseKey: null,
 			tokens: {
-				questToken: '',
+				questToken: input.token || '',
 				streamMainToken: '',
 				streamViewerToken: '',
 				streamGuildId: '',
 				streamChannelId: '',
+				prefix: '$',
+				commandChannelId: '',
+				adminIds: '',
 			},
 			createdAt: now,
 			updatedAt: now,
 		};
 
 		this.db.accounts.push(newAccount);
-		this.save();
+		this.saveLocalBackup();
+		void this.sqlSaveAccount(newAccount);
 		return newAccount;
 	}
 
@@ -299,9 +634,19 @@ export class SubscriptionManager {
 		if (tokens.streamChannelId !== undefined) {
 			account.tokens.streamChannelId = tokens.streamChannelId.trim();
 		}
+		if (tokens.prefix !== undefined) {
+			account.tokens.prefix = tokens.prefix.trim();
+		}
+		if (tokens.commandChannelId !== undefined) {
+			account.tokens.commandChannelId = tokens.commandChannelId.trim();
+		}
+		if (tokens.adminIds !== undefined) {
+			account.tokens.adminIds = tokens.adminIds.trim();
+		}
 
 		account.updatedAt = new Date().toISOString();
-		this.save();
+		this.saveLocalBackup();
+		void this.sqlSaveAccount(account);
 		return account;
 	}
 
@@ -327,13 +672,10 @@ export class SubscriptionManager {
 
 		if (payosClientId && payosApiKey && payosChecksumKey) {
 			try {
-				const cancelUrl = `${returnOrigin}?payment=cancelled&orderCode=${orderCode}`;
-				const returnUrl = `${returnOrigin}?payment=success&orderCode=${orderCode}`;
+				const cancelUrl = `${returnOrigin}/?payment=cancel&orderCode=${orderCode}`;
+				const returnUrl = `${returnOrigin}/?payment=success&orderCode=${orderCode}`;
 				const signData = `amount=${amount}&cancelUrl=${cancelUrl}&description=${description}&orderCode=${orderCode}&returnUrl=${returnUrl}`;
-				const signature = crypto
-					.createHmac('sha256', payosChecksumKey)
-					.update(signData)
-					.digest('hex');
+				const signature = crypto.createHmac('sha256', payosChecksumKey).update(signData).digest('hex');
 
 				const response = await fetch('https://api-merchant.payos.vn/v2/payment-requests', {
 					method: 'POST',
@@ -374,7 +716,7 @@ export class SubscriptionManager {
 			orderCode,
 			userId: account.id,
 			username: account.username,
-			provider: account.provider,
+			provider: 'discord',
 			months,
 			amount,
 			description,
@@ -391,7 +733,8 @@ export class SubscriptionManager {
 		if (this.db.orders.length > 500) {
 			this.db.orders = this.db.orders.slice(0, 500);
 		}
-		this.save();
+		this.saveLocalBackup();
+		void this.sqlSaveOrder(order);
 		return order;
 	}
 
@@ -423,9 +766,7 @@ export class SubscriptionManager {
 					const confirmed = this.markOrderPaidAndExtendSubscription(orderCode);
 					return confirmed?.order || order;
 				}
-			} catch {
-				// Ignore transient polling errors
-			}
+			} catch {}
 		}
 		return order;
 	}
@@ -466,7 +807,10 @@ export class SubscriptionManager {
 					.toUpperCase()}`;
 			}
 			account.updatedAt = new Date(nowMs).toISOString();
-			this.save();
+
+			this.saveLocalBackup();
+			void this.sqlSaveAccount(account);
+			void this.sqlSaveOrder(order);
 		}
 
 		const subscription = this.computeSubscriptionStatus(account)!;

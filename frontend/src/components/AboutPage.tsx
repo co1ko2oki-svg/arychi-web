@@ -222,7 +222,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               <h4 className="text-sm font-semibold text-white">Tầng 01: arychi.xyz</h4>
               <p className="text-xs text-blue-300 font-mono">Cổng Giới thiệu &amp; Thanh toán</p>
               <p className="text-xs text-slate-200 leading-relaxed max-w-[46ch]">
-                Đăng nhập OAuth2 (Bot Discord / Google) và thanh toán gói 20.000đ/tháng qua VietQR
+                Đăng nhập Bot Discord OAuth2 và thanh toán gói 20.000đ/tháng qua VietQR
                 &amp; PayOS.
               </p>
             </div>

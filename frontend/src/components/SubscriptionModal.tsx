@@ -139,12 +139,12 @@ export const AccessGateBanner: React.FC<AccessGateBannerProps> = ({
               </span>
             </div>
             <h3 className="text-sm font-semibold text-white">
-              {isConnected ? `Đã đăng nhập: @${user?.username}` : 'Đăng nhập Bot Discord OAuth2 / Google'}
+              {isConnected ? `Đã đăng nhập: @${user?.username}` : 'Đăng nhập Bot Discord OAuth2'}
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
               {isConnected
-                ? `Tài khoản ${user?.provider.toUpperCase()} đã được lưu trong Database.`
-                : 'Đăng nhập qua tính năng OAuth2 của Bot Discord hoặc đăng ký bằng tài khoản Google.'}
+                ? `Tài khoản Discord @${user?.username} đã được lưu trong Database.`
+                : 'Đăng nhập trực tiếp qua tính năng ủy quyền OAuth2 của Bot Discord.'}
             </p>
           </div>
         </div>
@@ -317,7 +317,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <p className="text-sm font-semibold text-white">
                 @{user.username}{' '}
                 <span className="font-mono text-xs text-blue-300">
-                  ({user.provider === 'google' ? 'Google OAuth2' : 'Discord Bot OAuth2'})
+                  (Discord Bot OAuth2)
                 </span>
               </p>
             ) : (

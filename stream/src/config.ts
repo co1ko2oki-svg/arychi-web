@@ -85,7 +85,15 @@ function parseAdminIds(value: string | undefined): string[] {
 	return [trimmed];
 }
 
-function loadTokensFromDatabase(): { token: string; viewerToken: string; guildId?: string; videoChannelId?: string } {
+function loadTokensFromDatabase(): {
+	token: string;
+	viewerToken: string;
+	guildId?: string;
+	videoChannelId?: string;
+	prefix?: string;
+	cmdChannelId?: string;
+	adminIds?: string[];
+} {
 	try {
 		const dbCandidates = [
 			path.resolve(__dirname, '../../database/commercial_db.json'),
@@ -108,6 +116,9 @@ function loadTokensFromDatabase(): { token: string; viewerToken: string; guildId
 							viewerToken: accountWithTokens.tokens.streamViewerToken || "",
 							guildId: accountWithTokens.tokens.streamGuildId || undefined,
 							videoChannelId: accountWithTokens.tokens.streamChannelId || undefined,
+							prefix: accountWithTokens.tokens.prefix || undefined,
+							cmdChannelId: accountWithTokens.tokens.commandChannelId || undefined,
+							adminIds: accountWithTokens.tokens.adminIds ? parseAdminIds(accountWithTokens.tokens.adminIds) : undefined,
 						};
 					}
 				}
@@ -120,12 +131,12 @@ function loadTokensFromDatabase(): { token: string; viewerToken: string; guildId
 const dbTokens = loadTokensFromDatabase();
 
 const config = {
-	token: dbTokens.token || process.env.TOKEN || "",
-	prefix: process.env.PREFIX || "$",
+	token: dbTokens.token || process.env.STREAM_MAIN_TOKEN || process.env.TOKEN || process.env.DISCORD_BOT_TOKEN || "",
+	prefix: dbTokens.prefix || process.env.PREFIX || "$",
 	guildId: dbTokens.guildId || process.env.GUILD_ID || "",
-	cmdChannelId: process.env.COMMAND_CHANNEL_ID || "",
+	cmdChannelId: dbTokens.cmdChannelId || process.env.COMMAND_CHANNEL_ID || "",
 	videoChannelId: dbTokens.videoChannelId || process.env.VIDEO_CHANNEL_ID || "",
-	adminIds: parseAdminIds(process.env.ADMIN_IDS),
+	adminIds: dbTokens.adminIds && dbTokens.adminIds.length > 0 ? dbTokens.adminIds : parseAdminIds(process.env.ADMIN_IDS),
 
 	videosDir: process.env.VIDEOS_DIR || "./videos",
 	previewCacheDir: process.env.PREVIEW_CACHE_DIR || "./tmp/preview-cache",
@@ -145,7 +156,7 @@ const config = {
 	h26xPreset: parsePreset(process.env.STREAM_H26X_PRESET),
 	videoCodec: parseVideoCodec(process.env.STREAM_VIDEO_CODEC),
 
-	viewerToken: dbTokens.viewerToken || process.env.VIEWER_TOKEN || "",
+	viewerToken: dbTokens.viewerToken || process.env.STREAM_VIEWER_TOKEN || process.env.VIEWER_TOKEN || "",
 	viewerAutoWatch: process.env.VIEWER_AUTO_WATCH !== undefined ? parseBoolean(process.env.VIEWER_AUTO_WATCH) : true,
 	streamLoop: process.env.STREAM_LOOP !== undefined ? parseBoolean(process.env.STREAM_LOOP) : true,
 
