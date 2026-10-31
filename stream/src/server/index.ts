@@ -1,7 +1,11 @@
 import http from "http";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "node:url";
 import express, { Request, Response, NextFunction } from "express";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import multer from "multer";
 import { WebSocketServer, WebSocket } from "ws";
 import { Client } from "discord.js-selfbot-v13";
@@ -574,6 +578,37 @@ export function startServer(
 
 			// Login secondary viewer farm account
 			void viewerService.updateTokenAndLogin(config.viewerToken);
+
+			// Persist updated tokens into database/commercial_db.json
+			try {
+				const dbCandidates = [
+					path.resolve(__dirname, '../../database/commercial_db.json'),
+					path.resolve(process.cwd(), 'database/commercial_db.json'),
+					path.resolve(process.cwd(), '../database/commercial_db.json'),
+				];
+				for (const dbFile of dbCandidates) {
+					if (!fs.existsSync(dbFile)) continue;
+					const content = fs.readFileSync(dbFile, "utf-8");
+					const parsed = JSON.parse(content);
+					if (Array.isArray(parsed?.accounts) && parsed.accounts.length > 0) {
+						const targetAcc = parsed.accounts[0];
+						if (!targetAcc.tokens) targetAcc.tokens = {};
+						targetAcc.tokens.streamMainToken = mainToken;
+						targetAcc.tokens.streamViewerToken = viewerToken;
+						if (guildId) targetAcc.tokens.streamGuildId = guildId;
+						if (videoChannelId) targetAcc.tokens.streamChannelId = videoChannelId;
+						targetAcc.updatedAt = new Date().toISOString();
+
+						const tmpFile = `${dbFile}.tmp`;
+						fs.writeFileSync(tmpFile, JSON.stringify(parsed, null, 2), "utf-8");
+						fs.renameSync(tmpFile, dbFile);
+						logger.info("[Database] Đã lưu 2 Token Stream vào commercial_db.json");
+						break;
+					}
+				}
+			} catch (err: any) {
+				logger.warn("[Database] Failed to persist stream tokens to database:", err?.message);
+			}
 
 			logger.info("[StreamBot] Updated 2 Discord tokens (1 Main Streamer + 1 Secondary Viewer) via Dashboard.");
 			broadcast({ type: "status", data: getFullStatus() });

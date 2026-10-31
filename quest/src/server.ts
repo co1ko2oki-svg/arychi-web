@@ -487,7 +487,21 @@ app.post('/api/account/tokens', async (req: Request, res: Response) => {
 		streamChannelId: typeof streamChannelId === 'string' ? streamChannelId : undefined,
 	});
 
-	addLog('info', `[Database] Đã lưu cấu hình Token cho tài khoản @${account.username}.`);
+	// Forward stream tokens to StreamBot (:3000) for real-time activation
+	if (streamMainToken || streamViewerToken) {
+		fetch('http://localhost:3000/api/config/tokens', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				mainToken: streamMainToken,
+				viewerToken: streamViewerToken,
+				guildId: streamGuildId,
+				videoChannelId: streamChannelId,
+			}),
+		}).catch(() => {});
+	}
+
+	addLog('info', `[Database] Đã lưu cấu hình Token vào commercial_db.json cho tài khoản @${account.username}.`);
 
 	res.json({
 		success: true,

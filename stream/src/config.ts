@@ -1,7 +1,11 @@
 import dotenv from "dotenv";
 import path from "node:path";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 import { SupportedVideoCodec, H26xPreset } from "./types/index.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Always locate and load the single root .env file
 const rootEnvCandidates = [
@@ -81,12 +85,46 @@ function parseAdminIds(value: string | undefined): string[] {
 	return [trimmed];
 }
 
+function loadTokensFromDatabase(): { token: string; viewerToken: string; guildId?: string; videoChannelId?: string } {
+	try {
+		const dbCandidates = [
+			path.resolve(__dirname, '../../database/commercial_db.json'),
+			path.resolve(process.cwd(), 'database/commercial_db.json'),
+			path.resolve(process.cwd(), '../database/commercial_db.json'),
+		];
+		for (const dbFile of dbCandidates) {
+			if (!fs.existsSync(dbFile)) continue;
+			try {
+				const content = fs.readFileSync(dbFile, "utf-8");
+				const parsed = JSON.parse(content);
+				if (Array.isArray(parsed?.accounts)) {
+					const accountWithTokens = parsed.accounts.find(
+						(a: any) => (a?.tokens?.streamMainToken && a.tokens.streamMainToken.trim().length > 0) ||
+						            (a?.tokens?.streamViewerToken && a.tokens.streamViewerToken.trim().length > 0)
+					);
+					if (accountWithTokens?.tokens) {
+						return {
+							token: accountWithTokens.tokens.streamMainToken || "",
+							viewerToken: accountWithTokens.tokens.streamViewerToken || "",
+							guildId: accountWithTokens.tokens.streamGuildId || undefined,
+							videoChannelId: accountWithTokens.tokens.streamChannelId || undefined,
+						};
+					}
+				}
+			} catch {}
+		}
+	} catch {}
+	return { token: "", viewerToken: "" };
+}
+
+const dbTokens = loadTokensFromDatabase();
+
 const config = {
-	token: process.env.TOKEN || "",
-	prefix: process.env.PREFIX || "!",
-	guildId: process.env.GUILD_ID || "",
+	token: dbTokens.token || process.env.TOKEN || "",
+	prefix: process.env.PREFIX || "$",
+	guildId: dbTokens.guildId || process.env.GUILD_ID || "",
 	cmdChannelId: process.env.COMMAND_CHANNEL_ID || "",
-	videoChannelId: process.env.VIDEO_CHANNEL_ID || "",
+	videoChannelId: dbTokens.videoChannelId || process.env.VIDEO_CHANNEL_ID || "",
 	adminIds: parseAdminIds(process.env.ADMIN_IDS),
 
 	videosDir: process.env.VIDEOS_DIR || "./videos",
@@ -107,7 +145,7 @@ const config = {
 	h26xPreset: parsePreset(process.env.STREAM_H26X_PRESET),
 	videoCodec: parseVideoCodec(process.env.STREAM_VIDEO_CODEC),
 
-	viewerToken: process.env.VIEWER_TOKEN || "",
+	viewerToken: dbTokens.viewerToken || process.env.VIEWER_TOKEN || "",
 	viewerAutoWatch: process.env.VIEWER_AUTO_WATCH !== undefined ? parseBoolean(process.env.VIEWER_AUTO_WATCH) : true,
 	streamLoop: process.env.STREAM_LOOP !== undefined ? parseBoolean(process.env.STREAM_LOOP) : true,
 
