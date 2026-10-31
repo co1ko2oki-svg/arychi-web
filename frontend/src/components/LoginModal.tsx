@@ -58,7 +58,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     if (oauthConfig?.discordAuthUrl) {
       window.location.href = oauthConfig.discordAuthUrl;
     } else {
-      const clientId = oauthConfig?.discordClientId || '1555259942192283678';
+      const clientId = oauthConfig?.discordClientId || '1566061523636330497';
       const redirectUri = window.location.origin;
       window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(
         redirectUri
