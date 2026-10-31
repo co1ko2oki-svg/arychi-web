@@ -54,8 +54,8 @@ export const PageHeader: React.FC<PageHeaderProps> = ({ title, description, meta
   <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between pb-6 border-b border-line">
     <div className="min-w-0 space-y-1.5">
       <h1 className="text-[22px] sm:text-2xl font-semibold tracking-tight text-white">{title}</h1>
-      {description && <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">{description}</p>}
-      {meta && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-zinc-500">{meta}</div>}
+      {description && <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">{description}</p>}
+      {meta && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-zinc-400">{meta}</div>}
     </div>
     {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
   </header>
@@ -75,7 +75,7 @@ export const Section: React.FC<SectionProps> = ({ id, title, description, action
     <div className="flex items-baseline justify-between gap-4 mb-3">
       <div className="min-w-0">
         <h2 className="text-[15px] font-semibold text-white">{title}</h2>
-        {description && <p className="mt-0.5 text-[13px] text-zinc-500">{description}</p>}
+        {description && <p className="mt-0.5 text-[13px] text-zinc-400">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -161,7 +161,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, acti
   <div className="py-14 px-6 text-center">
     {icon && <div className="mx-auto mb-3 flex justify-center text-zinc-600">{icon}</div>}
     <p className="text-sm font-medium text-zinc-200">{title}</p>
-    {description && <p className="mt-1 text-[13px] text-zinc-500 max-w-sm mx-auto leading-relaxed">{description}</p>}
+    {description && <p className="mt-1 text-[13px] text-zinc-400 max-w-sm mx-auto leading-relaxed">{description}</p>}
     {action && <div className="mt-5 flex justify-center">{action}</div>}
   </div>
 );

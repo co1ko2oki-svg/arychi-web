@@ -158,15 +158,15 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
           <div className="surface p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="min-w-0 space-y-1.5">
-                <p className="eyebrow flex items-center gap-2">
+                <p className="text-xs font-medium text-zinc-400 flex items-center gap-2">
                   {playing && <StatusDot tone="error" />}
                   {playing ? 'Đang phát' : 'Không có nội dung đang phát'}
                 </p>
-                <p className={`text-lg font-semibold tracking-tight break-words ${playing ? 'text-white' : 'text-zinc-500'}`}>
+                <p className={`text-lg font-semibold tracking-tight break-words ${playing ? 'text-white' : 'text-zinc-400'}`}>
                   {playing ? status?.stream.currentQueueItem?.title || 'Đang truyền phát media' : 'Kênh thoại đang trống'}
                 </p>
                 {playing && status?.stream.currentQueueItem?.url && (
-                  <p className="text-xs text-zinc-500 font-mono truncate">{status.stream.currentQueueItem.url}</p>
+                  <p className="text-xs text-zinc-400 font-mono truncate">{status.stream.currentQueueItem.url}</p>
                 )}
               </div>
               <button
@@ -279,11 +279,11 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
           </div>
 
           <div>
-            <h2 className="eyebrow mb-2">Thông tin dịch vụ</h2>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-2">Thông tin dịch vụ</h2>
             <dl className="divide-y divide-line border-y border-line text-[13px]">
               {details.map(([k, v]) => (
                 <div key={k} className="flex items-center justify-between gap-4 py-2.5">
-                  <dt className="text-zinc-500">{k}</dt>
+                  <dt className="text-zinc-400">{k}</dt>
                   <dd className="text-zinc-200 font-mono text-xs truncate text-right">{v}</dd>
                 </div>
               ))}

@@ -113,8 +113,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="surface p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="eyebrow text-brand-text">Module 01</span>
-                <span className="text-xs font-mono text-zinc-500">Port :3001</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-brand-text">Module 01</span>
+                <span className="text-xs font-mono text-zinc-400">Port :3001</span>
               </div>
               <h3 className="text-base font-semibold text-white">Quest Engine</h3>
               <p className="text-[13px] text-zinc-400 leading-relaxed">
@@ -143,8 +143,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="surface p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="eyebrow text-amber-400">Module 02</span>
-                <span className="text-xs font-mono text-zinc-500">Port :3000</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 02</span>
+                <span className="text-xs font-mono text-zinc-400">Port :3000</span>
               </div>
               <h3 className="text-base font-semibold text-white">StreamBot Voice</h3>
               <p className="text-[13px] text-zinc-400 leading-relaxed">
@@ -173,8 +173,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="surface p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="eyebrow text-emerald-400">Module 03</span>
-                <span className="text-xs font-mono text-zinc-500">Python 3</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Module 03</span>
+                <span className="text-xs font-mono text-zinc-400">Python 3</span>
               </div>
               <h3 className="text-base font-semibold text-white">Science Telemetry</h3>
               <p className="text-[13px] text-zinc-400 leading-relaxed">
@@ -206,23 +206,23 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         <div className="surface divide-y divide-line">
           <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-1">
-              <p className="eyebrow text-brand-text">Tầng 01: Frontend</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-brand-text">Tầng 01: Frontend</p>
               <p className="text-sm font-semibold text-white">Web UI (:5173)</p>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-300 leading-relaxed">
                 React 18 + Vite SPA, lưu trữ token trong LocalStorage trình duyệt người dùng.
               </p>
             </div>
             <div className="space-y-1">
-              <p className="eyebrow text-amber-400">Tầng 02: Cục bộ</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">Tầng 02: Cục bộ</p>
               <p className="text-sm font-semibold text-white">Local Services (127.0.0.1)</p>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-300 leading-relaxed">
                 Quest Engine (:3001), StreamBot (:3000) và Python Spoofer xử lý tác vụ không trung gian.
               </p>
             </div>
             <div className="space-y-1">
-              <p className="eyebrow text-emerald-400">Tầng 03: Đích đến</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Tầng 03: Đích đến</p>
               <p className="text-sm font-semibold text-white">Discord API Endpoints</p>
-              <p className="text-xs text-zinc-400 leading-relaxed">
+              <p className="text-xs text-zinc-300 leading-relaxed">
                 HTTPS TLS 1.3 kết nối trực tiếp đến các endpoint chính thức: /quests, /science, Voice RTC.
               </p>
             </div>

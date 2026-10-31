@@ -93,9 +93,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   return (
     <div className="space-y-20 py-8">
-      <section className="space-y-6 max-w-3xl">
-        <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.05] border border-line text-zinc-300 font-medium">
+      <section className="space-y-6 max-w-2xl">
+        <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-300">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.05] border border-line text-zinc-200 font-medium">
             Arychi Suite v2.0
           </span>
           <span className="inline-flex items-center gap-1.5">
@@ -109,10 +109,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
 
         <div className="space-y-3">
-          <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight text-white leading-[1.15]">
-            Nền tảng tự động hóa Discord cục bộ
+          <h1 className="text-3xl sm:text-5xl font-semibold tracking-tight text-white leading-[1.18] [text-wrap:balance]">
+            Nền tảng tự động hóa Discord cục&nbsp;bộ
           </h1>
-          <p className="text-base sm:text-lg text-zinc-400 leading-relaxed font-normal">
+          <p className="text-base sm:text-lg text-zinc-300 leading-relaxed font-normal max-w-xl">
             Hợp nhất 3 giải pháp độc lập chạy trực tiếp trên thiết bị của bạn: Hoàn thành Discord Quests tự động không cần cài đặt game, truyền phát video vào kênh thoại và cày giờ chơi hồ sơ qua Discord Science API.
           </p>
         </div>
@@ -138,10 +138,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       <section className="space-y-5">
-        <div className="space-y-1">
-          <p className="eyebrow">Cấu trúc module</p>
-          <h2 className="text-xl font-semibold text-white tracking-tight">3 Trụ cột tự động hóa chuyên biệt</h2>
-        </div>
+        <h2 className="text-xl font-semibold text-white tracking-tight">3 Trụ cột tự động hóa chuyên biệt</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {services.map((svc) => {
@@ -156,14 +153,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <span className="text-2xs font-mono font-medium text-brand-text bg-brand-muted px-2 py-0.5 rounded">
                       {svc.port}
                     </span>
-                    <Icon className="w-4 h-4 text-zinc-500" />
+                    <Icon className="w-4 h-4 text-zinc-400" />
                   </div>
                   <h3 className="text-base font-semibold text-white">{svc.title}</h3>
-                  <p className="text-[13px] text-zinc-400 leading-relaxed">{svc.summary}</p>
+                  <p className="text-[13px] text-zinc-300 leading-relaxed">{svc.summary}</p>
                 </div>
 
                 <div className="pt-3 border-t border-line flex items-center justify-between text-xs">
-                  <span className="text-zinc-500 font-mono">{svc.tech}</span>
+                  <span className="text-zinc-400 font-mono">{svc.tech}</span>
                   <button
                     type="button"
                     onClick={() => navigateTo(svc.tab)}
@@ -180,10 +177,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       <section className="space-y-5">
-        <div className="space-y-1">
-          <p className="eyebrow">Bảo mật &amp; Cơ chế</p>
-          <h2 className="text-xl font-semibold text-white tracking-tight">Đặc điểm kỹ thuật</h2>
-        </div>
+        <h2 className="text-xl font-semibold text-white tracking-tight">Đặc điểm kỹ thuật &amp; Cơ chế an toàn</h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {features.map((feat) => {
@@ -194,7 +188,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <Icon className="w-4 h-4 text-brand-text" />
                   <h3 className="text-sm font-semibold text-white">{feat.title}</h3>
                 </div>
-                <p className="text-[13px] text-zinc-400 leading-relaxed">{feat.desc}</p>
+                <p className="text-[13px] text-zinc-300 leading-relaxed">{feat.desc}</p>
               </div>
             );
           })}
@@ -202,32 +196,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       <section className="space-y-5">
-        <div className="space-y-1">
-          <p className="eyebrow">Bắt đầu nhanh</p>
-          <h2 className="text-xl font-semibold text-white tracking-tight">Vận hành trong 3 bước</h2>
-        </div>
+        <h2 className="text-xl font-semibold text-white tracking-tight">Vận hành nhanh trong 3 bước</h2>
 
         <div className="surface divide-y sm:divide-y-0 sm:divide-x divide-line grid grid-cols-1 sm:grid-cols-3">
           <div className="p-5 space-y-2">
-            <span className="text-2xs font-mono font-semibold text-zinc-500 uppercase">Bước 01</span>
+            <span className="text-2xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Bước 01</span>
             <p className="text-sm font-semibold text-white">Khởi động các dịch vụ</p>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
+            <p className="text-[13px] text-zinc-300 leading-relaxed">
               Nhấp đúp file <code className="inline-code">start.bat</code> để mở đồng thời cả Quest Engine (:3001), StreamBot (:3000) và Web UI (:5173).
             </p>
           </div>
 
           <div className="p-5 space-y-2">
-            <span className="text-2xs font-mono font-semibold text-zinc-500 uppercase">Bước 02</span>
+            <span className="text-2xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Bước 02</span>
             <p className="text-sm font-semibold text-white">Lấy Discord User Token</p>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
+            <p className="text-[13px] text-zinc-300 leading-relaxed">
               Mở Discord trên trình duyệt, ấn <kbd className="inline-code">F12</kbd> &gt; tab Network &gt; tìm request <code className="inline-code">/users/@me</code> và sao chép header Authorization.
             </p>
           </div>
 
           <div className="p-5 space-y-2">
-            <span className="text-2xs font-mono font-semibold text-zinc-500 uppercase">Bước 03</span>
+            <span className="text-2xs font-mono font-semibold text-zinc-400 uppercase tracking-wider">Bước 03</span>
             <p className="text-sm font-semibold text-white">Kết nối &amp; Điều khiển</p>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
+            <p className="text-[13px] text-zinc-300 leading-relaxed">
               Bấm &quot;Kết nối Discord&quot; ở góc trên, dán token vào và chọn &quot;Chạy tất cả&quot; hoặc chọn từng nhiệm vụ mong muốn.
             </p>
           </div>
@@ -235,10 +226,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </section>
 
       <section className="space-y-5">
-        <div className="space-y-1">
-          <p className="eyebrow">Giải đáp thắc mắc</p>
-          <h2 className="text-xl font-semibold text-white tracking-tight">Câu hỏi thường gặp (FAQ)</h2>
-        </div>
+        <h2 className="text-xl font-semibold text-white tracking-tight">Câu hỏi thường gặp (FAQ)</h2>
 
         <div className="surface divide-y divide-line">
           {[
@@ -267,11 +255,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {isOpen ? (
                     <ChevronUp className="w-4 h-4 text-brand-text shrink-0 ml-4" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-zinc-500 shrink-0 ml-4" />
+                    <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0 ml-4" />
                   )}
                 </button>
                 {isOpen && (
-                  <p className="mt-2.5 text-[13px] text-zinc-400 leading-relaxed max-w-3xl">
+                  <p className="mt-2.5 text-[13px] text-zinc-300 leading-relaxed max-w-xl">
                     {item.a}
                   </p>
                 )}
