@@ -85,9 +85,35 @@ const printBanner = () => {
   console.log('\x1b[36m===============================================================\x1b[0m\n');
 };
 
+const parseEnvFile = (filePath) => {
+  if (!fs.existsSync(filePath)) return {};
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    const env = {};
+    for (const line of content.split(/\r?\n/)) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const match = trimmed.match(/^([^=]+)=(.*)$/);
+      if (match) {
+        const key = match[1].trim();
+        let val = match[2].trim();
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        env[key] = val;
+      }
+    }
+    return env;
+  } catch {
+    return {};
+  }
+};
+
 const startServices = () => {
   preflightPortCheck();
   printBanner();
+
+  const rootEnv = parseEnvFile(path.join(rootDir, '.env'));
 
   const streamDistIndex = path.join(rootDir, 'stream', 'dist', 'index.js');
   if (!fs.existsSync(streamDistIndex)) {
@@ -128,7 +154,7 @@ const startServices = () => {
   services.forEach((service) => {
     const child = spawn(service.cmd, service.args, {
       cwd: service.cwd,
-      env: { ...process.env, FORCE_COLOR: '1' },
+      env: { ...process.env, ...rootEnv, FORCE_COLOR: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
