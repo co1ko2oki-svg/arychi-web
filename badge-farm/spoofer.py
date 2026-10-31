@@ -24,6 +24,7 @@ this breaks discord tos. your account, your problem.
 
 from __future__ import annotations
 
+import argparse
 import base64
 import concurrent.futures
 import json
@@ -679,13 +680,20 @@ class App:
 
     # startup
 
-    def start(self) -> None:
+    def start(self, args: argparse.Namespace | None = None) -> None:
         self.console.banner()
         time.sleep(0.8)
         print()
 
-        # step 1: token
         C = self.console
+        if args and args.token:
+            self.state.token = args.token
+            self.state.save()
+        if args and args.cookie:
+            self.state.cookie = args.cookie
+            self.state.save()
+
+        # step 1: token
         if not self.state.has_token:
             self._prompt_token()
         else:
@@ -737,6 +745,17 @@ class App:
             return
         C.ok("auth", "ready")
         time.sleep(0.5)
+
+        # CLI execution or Interactive Menu
+        if args and (args.hours is not None or args.mark_played is not None):
+            workers = max(1, args.threads)
+            if args.hours is not None and args.mark_played is not None:
+                self.claim_both(workers=workers, count=args.games, hours=args.hours, mark_count=args.mark_played, interactive=False)
+            elif args.hours is not None:
+                self.claim_games(workers=workers, count=args.games, hours=args.hours, interactive=False)
+            elif args.mark_played is not None:
+                self.mark_games_played(workers=workers, count=args.mark_played, interactive=False)
+            return
 
         print()
         self.menu()
@@ -804,30 +823,32 @@ class App:
 
     # modules
 
-    def claim_games(self, workers: int = 2) -> None:
-        """claim playtime on selected games. prompts for count and hours."""
+    def claim_games(self, workers: int = 2, count: int | None = None, hours: float | None = None, interactive: bool = True) -> None:
+        """claim playtime on selected games. prompts for count and hours if not provided."""
         if not self._require_ready():
             return
         C = self.console
         print()
         C.info(f"loaded {C.GREEN}{len(self.games)}{C.WHITE} games available")
 
-        # prompt for game count
-        raw_count = input(f"  {C.GREY}how many games? [all]:{C.RESET} ").strip()
-        try:
-            count = int(raw_count) if raw_count else len(self.games)
-        except ValueError:
-            C.err("input", "invalid count")
-            return
+        # count
+        if count is None:
+            raw_count = input(f"  {C.GREY}how many games? [all]:{C.RESET} ").strip()
+            try:
+                count = int(raw_count) if raw_count else len(self.games)
+            except ValueError:
+                C.err("input", "invalid count")
+                return
         count = min(count, len(self.games))
 
-        # prompt for hours
-        raw_hours = input(f"  {C.GREY}hours per game? [1]:{C.RESET} ").strip()
-        try:
-            hours = float(raw_hours) if raw_hours else 1.0
-        except ValueError:
-            C.err("input", "invalid hours")
-            return
+        # hours
+        if hours is None:
+            raw_hours = input(f"  {C.GREY}hours per game? [1]:{C.RESET} ").strip()
+            try:
+                hours = float(raw_hours) if raw_hours else 1.0
+            except ValueError:
+                C.err("input", "invalid hours")
+                return
 
         # select games: prefer unused, rotate through used if necessary
         selected = self._select_games(count)
@@ -856,26 +877,28 @@ class App:
         self.state.save()
         
         C.rule()
-        input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
-        C.rule()
+        if interactive:
+            input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
+            C.rule()
 
-    def mark_games_played(self, workers: int = 2) -> None:
-        """mark every game as played (1 minute each)."""
+    def mark_games_played(self, workers: int = 2, count: int | None = None, interactive: bool = True) -> None:
+        """mark games as played (1 minute each)."""
         if not self._require_ready():
             return
         C = self.console
         print()
-        C.info(f"marking {C.ORANGE}{len(self.games)}{C.WHITE} games as played ({workers} luồng)")
+        target_games = self.games[:count] if (count and count > 0) else self.games
+        C.info(f"marking {C.ORANGE}{len(target_games)}{C.WHITE} games as played ({workers} luồng)")
         C.rule()
         
         duration_ms = 60000  # 1 minute
         
         ok = Spoofer(self.client, self.console, workers=workers).run(
-            self.games,
+            target_games,
             lambda g: self.client.build_session(g, duration_ms),
         )
         print()
-        C.ok("complete", f"{ok}/{len(self.games)} games marked as played")
+        C.ok("complete", f"{ok}/{len(target_games)} games marked as played")
         
         # update stats
         self.state.total_games_claimed += ok
@@ -883,43 +906,47 @@ class App:
         self.state.save()
         
         C.rule()
-        input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
-        C.rule()
+        if interactive:
+            input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
+            C.rule()
 
-    def claim_both(self, workers: int = 2) -> None:
-        """run both: claim playtime and mark all games as played."""
+    def claim_both(self, workers: int = 2, count: int | None = None, hours: float | None = None, mark_count: int | None = None, interactive: bool = True) -> None:
+        """run both: claim playtime and mark games as played."""
         if not self._require_ready():
             return
         C = self.console
         print()
-        C.info(f"chạy cả 2: Treo giờ chơi + Đánh dấu toàn bộ game ({workers} luồng)")
-        raw_hours = input(f"  {C.GREY}hours per game? [1]:{C.RESET} ").strip()
-        try:
-            hours = float(raw_hours) if raw_hours else 1.0
-        except ValueError:
-            C.err("input", "invalid hours")
-            return
+        C.info(f"chạy cả 2: Treo giờ chơi + Đánh dấu game ({workers} luồng)")
+        if hours is None:
+            raw_hours = input(f"  {C.GREY}hours per game? [1]:{C.RESET} ").strip()
+            try:
+                hours = float(raw_hours) if raw_hours else 1.0
+            except ValueError:
+                C.err("input", "invalid hours")
+                return
 
+        play_games = self._select_games(count) if count else self.games
         duration_ms = int(hours * 3600 * 1000)
-        total_hours = len(self.games) * hours
+        total_hours = len(play_games) * hours
         print()
-        C.info(f"[1/2] Đang treo giờ chơi ({hours:g}h/game trên {len(self.games)} games) · {total_hours:,.0f}h total")
+        C.info(f"[1/2] Đang treo giờ chơi ({hours:g}h/game trên {len(play_games)} games) · {total_hours:,.0f}h total")
         C.rule()
         ok1 = Spoofer(self.client, self.console, workers=workers).run(
-            self.games,
+            play_games,
             lambda g: self.client.build_session(g, duration_ms),
         )
         self.state.total_games_claimed += ok1
         self.state.total_hours_claimed += ok1 * hours
         self.state.save()
         print()
-        C.ok("playtime", f"{ok1}/{len(self.games)} games · {ok1 * hours:,.0f}h claimed")
+        C.ok("playtime", f"{ok1}/{len(play_games)} games · {ok1 * hours:,.0f}h claimed")
 
+        target_mark = self.games[:mark_count] if (mark_count and mark_count > 0) else self.games
         print()
-        C.info(f"[2/2] Đang đánh dấu toàn bộ {len(self.games)} game là đã chơi (1 min each)")
+        C.info(f"[2/2] Đang đánh dấu {len(target_mark)} game là đã chơi (1 min each)")
         C.rule()
         ok2 = Spoofer(self.client, self.console, workers=workers).run(
-            self.games,
+            target_mark,
             lambda g: self.client.build_session(g, 60000),
         )
         self.state.total_games_claimed += ok2
@@ -928,7 +955,9 @@ class App:
         print()
         C.ok("complete", f"Hoàn thành cả 2 tác vụ! (Playtime: {ok1} games, Played: {ok2} games)")
         C.rule()
-        input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
+        if interactive:
+            input(f"  {C.ORANGE}›{C.RESET} press enter to continue")
+            C.rule()
         C.rule()
 
     def _select_games(self, count: int) -> list[Game]:
@@ -1030,8 +1059,17 @@ class App:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Discord Science Telemetry Spoofer for Game Playtime & Badges")
+    parser.add_argument("--hours", type=float, default=None, help="Hours of playtime per game to claim")
+    parser.add_argument("--threads", type=int, default=2, help="Worker threads (concurrency)")
+    parser.add_argument("--games", type=int, default=None, help="Number of games to claim playtime for (default: all)")
+    parser.add_argument("--mark-played", type=int, nargs="?", const=1000, default=None, help="Mark N games as played (default: 1000)")
+    parser.add_argument("--token", type=str, default=None, help="Discord user token to save/use")
+    parser.add_argument("--cookie", type=str, default=None, help="cf_clearance cookie to save/use")
+    args = parser.parse_args()
+
     try:
-        App().start()
+        App().start(args)
     except KeyboardInterrupt:
         print()
         Console().warn("exit", "interrupted")

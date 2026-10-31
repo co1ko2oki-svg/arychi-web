@@ -21,6 +21,13 @@ const getTabFromHash = (): NavTabId => {
   return 'home';
 };
 
+const mergeLogs = (existing: LogEntry[], incoming: LogEntry[]): LogEntry[] => {
+  const seen = new Set(existing.map((l) => `${l.timestamp}_${l.message}`));
+  const newLogs = incoming.filter((l) => !seen.has(`${l.timestamp}_${l.message}`));
+  const combined = [...existing, ...newLogs];
+  return combined.length > 500 ? combined.slice(-500) : combined;
+};
+
 const AppContent: React.FC = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<NavTabId>(getTabFromHash);
@@ -135,7 +142,7 @@ const AppContent: React.FC = () => {
           try {
             const msg = JSON.parse(event.data);
             if (msg.type === 'init') {
-              if (msg.data?.logs) setLogs((prev) => [...prev, ...msg.data.logs]);
+              if (msg.data?.logs) setLogs((prev) => mergeLogs(prev, msg.data.logs));
               if (msg.data?.jobs) {
                 const map = new Map<string, QuestJob>();
                 msg.data.jobs.forEach((j: QuestJob) => map.set(j.questId, j));
@@ -207,7 +214,7 @@ const AppContent: React.FC = () => {
                   level: l.level || 'info',
                   message: `[StreamBot] ${l.message || ''}`,
                 }));
-                setLogs((prev) => [...prev, ...formatted]);
+                setLogs((prev) => mergeLogs(prev, formatted));
               }
             } else if (msg.type === 'log') {
               setLogs((prev) => [

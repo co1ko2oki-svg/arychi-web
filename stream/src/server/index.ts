@@ -148,7 +148,8 @@ export function startServer(
 	});
 
 	app.post("/api/player/play", async (req: Request, res: Response) => {
-		const { source, title } = req.body;
+		const source = (req.body?.source || req.body?.query || "") as string;
+		const title = (req.body?.title || req.body?.resolvedTitle) as string | undefined;
 		if (!source || typeof source !== "string") {
 			res.status(400).json({ success: false, message: "Missing video source parameter" });
 			return;
@@ -295,12 +296,15 @@ export function startServer(
 		res.json({ success: true, message: "Viewer stopped watching" });
 	});
 
-	app.post("/api/farm/toggle-auto", (req: Request, res: Response) => {
+	const handleToggleAutoWatch = (req: Request, res: Response) => {
 		const { autoWatch } = req.body;
 		config.viewerAutoWatch = typeof autoWatch === "boolean" ? autoWatch : !config.viewerAutoWatch;
 		broadcast({ type: "status", data: getFullStatus() });
-		res.json({ success: true, viewerAutoWatch: config.viewerAutoWatch });
-	});
+		res.json({ success: true, viewerAutoWatch: config.viewerAutoWatch, autoWatch: config.viewerAutoWatch });
+	};
+
+	app.post("/api/farm/toggle-auto", handleToggleAutoWatch);
+	app.post("/api/farm", handleToggleAutoWatch);
 
 	app.get("/api/videos", (_req: Request, res: Response) => {
 		try {

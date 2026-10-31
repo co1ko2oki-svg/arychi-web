@@ -124,7 +124,7 @@ export const streamApi = {
     const res = await fetch(`${STREAM_API_URL}/api/player/play`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: urlOrTitle }),
+      body: JSON.stringify({ source: urlOrTitle, query: urlOrTitle }),
     });
     return res.json();
   },
@@ -136,13 +136,13 @@ export const streamApi = {
     return res.json();
   },
 
-  async getVideos(): Promise<{ videos: Array<{ name: string; size: string; duration?: number }> }> {
+  async getVideos(): Promise<{ videos: Array<{ name: string; size: string | number; formattedSize?: string; duration?: number }> }> {
     const res = await fetch(`${STREAM_API_URL}/api/videos`);
     return res.json();
   },
 
   async toggleFarm(enable: boolean): Promise<{ success: boolean }> {
-    const res = await fetch(`${STREAM_API_URL}/api/farm`, {
+    const res = await fetch(`${STREAM_API_URL}/api/farm/toggle-auto`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ autoWatch: enable }),

@@ -18,7 +18,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  const [videos, setVideos] = useState<Array<{ name: string; size: string }>>([]);
+  const [videos, setVideos] = useState<Array<{ name: string; size: string | number; formattedSize?: string }>>([]);
   const [scanned, setScanned] = useState(false);
   const [loadingVideos, setLoadingVideos] = useState(false);
   const [pendingPlayTarget, setPendingPlayTarget] = useState<string | null>(null);
@@ -241,7 +241,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({ status, loadin
                   <li key={vid.name} className="flex items-center justify-between gap-4 py-2.5">
                     <div className="min-w-0">
                       <p className="text-[13px] text-zinc-200 truncate">{vid.name}</p>
-                      <p className="text-xs text-zinc-500 tabular-nums">{vid.size}</p>
+                      <p className="text-xs text-zinc-500 tabular-nums">{vid.formattedSize || String(vid.size)}</p>
                     </div>
                     <button
                       type="button"

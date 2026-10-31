@@ -1,5 +1,6 @@
 import { spawn, execSync } from 'node:child_process';
 import path from 'node:path';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -87,6 +88,16 @@ const printBanner = () => {
 const startServices = () => {
   preflightPortCheck();
   printBanner();
+
+  const streamDistIndex = path.join(rootDir, 'stream', 'dist', 'index.js');
+  if (!fs.existsSync(streamDistIndex)) {
+    console.log('\x1b[33m[Launcher] Bien dich StreamBot TypeScript lan dau...\x1b[0m');
+    try {
+      execSync('npm run build', { cwd: path.join(rootDir, 'stream'), stdio: 'inherit' });
+    } catch (err) {
+      console.warn('\x1b[31m[Launcher] Khong the build StreamBot tu dong:\x1b[0m', err?.message);
+    }
+  }
 
   const services = [
     {
