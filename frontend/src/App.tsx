@@ -224,6 +224,35 @@ const AppContent: React.FC = () => {
     }
   }, [sessionToken, domainMode, verifySubscriptionFromDb]);
 
+  // Capture Discord Bot Application OAuth2 code redirect
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const oauthCode = urlParams.get('code');
+    if (oauthCode) {
+      toast.info('Đang kết nối tài khoản Discord qua Bot OAuth2…');
+      questApi
+        .oauthLogin({
+          provider: 'discord',
+          code: oauthCode,
+          redirectUri: window.location.origin,
+        })
+        .then((res) => {
+          handleSaveAuth(res.account, res.sessionToken, res.subscription);
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete('code');
+          cleanUrl.searchParams.delete('state');
+          cleanUrl.searchParams.delete('guild_id');
+          cleanUrl.searchParams.delete('permissions');
+          window.history.replaceState({}, '', cleanUrl.toString());
+          toast.success(`Đã kết nối tài khoản Discord: @${res.account.username}`);
+        })
+        .catch((err) => {
+          toast.error(`Xác thực Discord Bot OAuth2 thất bại: ${err?.message || 'Mã code hết hạn'}`);
+        });
+    }
+  }, []);
+
   // Redirect / Navigate to dash.arychi.xyz
   const handleEnterDashboard = () => {
     if (!user || !sessionToken) {

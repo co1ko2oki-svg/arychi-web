@@ -11,6 +11,10 @@ node_modules/
 *.local
 science_state.json
 science_state.json.bak
+database/commercial_db.json
+database/*.bak
+database/*.tmp
+database/users.json
 quest/data/users.json
 **/data/users.json
 quest/data/subscriptions.json

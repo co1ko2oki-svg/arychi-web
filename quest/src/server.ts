@@ -1,4 +1,19 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import path from 'node:path';
+import fs from 'node:fs';
+
+// Always locate and load the single master root .env file
+const rootEnvCandidates = [
+	path.resolve(process.cwd(), '../.env'),
+	path.resolve(process.cwd(), '.env'),
+	path.resolve(process.cwd(), '../../.env'),
+];
+const foundEnv = rootEnvCandidates.find((p) => fs.existsSync(p));
+if (foundEnv) {
+	dotenv.config({ path: foundEnv });
+} else {
+	dotenv.config();
+}
 import http from 'node:http';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
@@ -141,11 +156,12 @@ function extractSessionToken(req: Request): string {
 }
 
 // Get OAuth2 & Pricing configuration
-app.get('/api/auth/oauth/config', (_req: Request, res: Response) => {
+app.get('/api/auth/oauth/config', (req: Request, res: Response) => {
 	const discordClientId = process.env.DISCORD_CLIENT_ID || '';
-	const discordRedirectUri = process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz/oauth/discord';
+	const currentOrigin = req.headers.origin || (req.headers.host ? `${req.protocol}://${req.headers.host}` : 'https://arychi.xyz');
+	const discordRedirectUri = process.env.DISCORD_REDIRECT_URI || currentOrigin;
 	const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
-	const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI || 'https://arychi.xyz/oauth/google';
+	const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI || currentOrigin;
 
 	res.json({
 		plan: {
@@ -155,12 +171,19 @@ app.get('/api/auth/oauth/config', (_req: Request, res: Response) => {
 			currency: 'VND',
 		},
 		oauth: {
+			discordConfigured: Boolean(discordClientId),
+			discordClientId: discordClientId || null,
 			discordAuthUrl: discordClientId
 				? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(
 						discordClientId
 				  )}&response_type=code&redirect_uri=${encodeURIComponent(
 						discordRedirectUri
-				  )}&scope=identify+email+guilds.join`
+				  )}&scope=identify+email+guilds`
+				: null,
+			discordBotInviteUrl: discordClientId
+				? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(
+						discordClientId
+				  )}&permissions=8&scope=bot+applications.commands`
 				: null,
 			googleAuthUrl: googleClientId
 				? `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
@@ -191,6 +214,7 @@ app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
 
 		if (provider === 'discord') {
 			if (code && process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
+				const redirectUri = String(req.body?.redirectUri || process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz');
 				const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -199,31 +223,48 @@ app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
 						client_secret: process.env.DISCORD_CLIENT_SECRET,
 						grant_type: 'authorization_code',
 						code,
-						redirect_uri: process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz',
+						redirect_uri: redirectUri,
 					}).toString(),
 				});
 				const tokenData: any = await tokenRes.json();
+				if (!tokenData?.access_token) {
+					res.status(400).json({
+						error: tokenData?.error_description || tokenData?.error || 'Mã xác thực Discord OAuth2 không hợp lệ hoặc đã hết hạn',
+					});
+					return;
+				}
 				const userRes = await fetch('https://discord.com/api/v10/users/@me', {
 					headers: { Authorization: `Bearer ${tokenData.access_token}` },
 				});
 				const userData: any = await userRes.json();
+				if (!userData?.id) {
+					res.status(400).json({ error: 'Không thể truy xuất thông tin tài khoản từ Discord API' });
+					return;
+				}
 				id = userData.id;
-				username = userData.username;
-				email = userData.email || `${username}@discord.oauth`;
+				username = userData.global_name || userData.username;
+				email = userData.email || `${userData.username}@discord.oauth`;
 				avatarUrl = userData.avatar
 					? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
 					: null;
 			} else if (accessToken) {
+				// Direct Discord token validation (User Token or Bearer Token)
+				const authHeader = accessToken.startsWith('Bearer ') || accessToken.startsWith('Bot ') ? accessToken : accessToken;
 				const userRes = await fetch('https://discord.com/api/v10/users/@me', {
-					headers: { Authorization: `Bearer ${accessToken}` },
+					headers: { Authorization: authHeader },
 				});
 				const userData: any = await userRes.json();
-				id = userData.id;
-				username = userData.username;
-				email = userData.email || `${username}@discord.oauth`;
-				avatarUrl = userData.avatar
-					? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
-					: null;
+				if (userData && userData.id) {
+					id = userData.id;
+					username = userData.global_name || userData.username;
+					email = userData.email || `${userData.username}@discord.oauth`;
+					avatarUrl = userData.avatar
+						? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
+						: null;
+				} else {
+					res.status(400).json({ error: 'Token tài khoản Discord không hợp lệ hoặc đã hết hạn' });
+					return;
+				}
 			}
 		} else if (provider === 'google' && accessToken) {
 			const gRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {

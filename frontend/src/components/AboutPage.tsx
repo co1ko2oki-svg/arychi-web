@@ -113,13 +113,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">
+                <span className="text-xs font-mono font-medium text-blue-300">
                   Module 01
                 </span>
                 <span className="text-xs font-mono text-slate-200">1 Token • :3001</span>
               </div>
               <h3 className="text-base font-bold text-white">Quest Engine</h3>
-              <p className="text-[13px] text-slate-300 leading-relaxed">
+              <p className="text-[13px] text-slate-200 leading-relaxed max-w-[46ch]">
                 Giải pháp cày nhiệm vụ Discord Quests tự động không cần cài đặt game dung lượng lớn.
                 Giả lập heartbeat định kỳ gửi đến Discord theo định dạng desktop client chính thức.
               </p>
@@ -138,7 +138,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-slate-300">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-200">
               Node.js + Express + WS
             </div>
           </div>
@@ -146,13 +146,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">
+                <span className="text-xs font-mono font-medium text-blue-300">
                   Module 02
                 </span>
                 <span className="text-xs font-mono text-slate-200">2 Token • :3000</span>
               </div>
               <h3 className="text-base font-bold text-white">StreamBot Voice</h3>
-              <p className="text-[13px] text-slate-300 leading-relaxed">
+              <p className="text-[13px] text-slate-200 leading-relaxed max-w-[46ch]">
                 Truyền phát âm thanh Opus và video vào Voice Channel 24/7, tích hợp Viewer Farm duy
                 trì thời lượng xem stream bằng tài khoản phụ.
               </p>
@@ -171,7 +171,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-slate-300">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-200">
               discord.js-selfbot-v13 + FFmpeg
             </div>
           </div>
@@ -179,13 +179,13 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">
+                <span className="text-xs font-mono font-medium text-blue-300">
                   Module 03
                 </span>
                 <span className="text-xs font-mono text-slate-200">1 Token • Python 3</span>
               </div>
               <h3 className="text-base font-bold text-white">Science Telemetry</h3>
-              <p className="text-[13px] text-slate-300 leading-relaxed">
+              <p className="text-[13px] text-slate-200 leading-relaxed max-w-[46ch]">
                 Giả lập nhịp độ chơi game gửi trực tiếp lên endpoint phân tích Discord Science API
                 với chữ ký Windows PE nhị phân thực tế để cày huy hiệu hồ sơ.
               </p>
@@ -204,7 +204,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-slate-300">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-200">
               Python 3 + PE Header Hash
             </div>
           </div>
@@ -218,32 +218,26 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       >
         <div className="surface divide-y divide-line">
           <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
-                Tầng 01: arychi.xyz
-              </p>
-              <p className="text-sm font-semibold text-white">Cổng Giới thiệu &amp; Thanh toán</p>
-              <p className="text-xs text-slate-300 leading-relaxed">
+            <div className="space-y-1.5">
+              <h4 className="text-sm font-semibold text-white">Tầng 01: arychi.xyz</h4>
+              <p className="text-xs text-blue-300 font-mono">Cổng Giới thiệu &amp; Thanh toán</p>
+              <p className="text-xs text-slate-200 leading-relaxed max-w-[46ch]">
                 Đăng nhập OAuth2 (Bot Discord / Google) và thanh toán gói 50.000đ/tháng qua VietQR
                 &amp; PayOS.
               </p>
             </div>
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
-                Tầng 02: dash.arychi.xyz
-              </p>
-              <p className="text-sm font-semibold text-white">Xác minh Lần 2 &amp; Sidebar</p>
-              <p className="text-xs text-slate-300 leading-relaxed">
+            <div className="space-y-1.5">
+              <h4 className="text-sm font-semibold text-white">Tầng 02: dash.arychi.xyz</h4>
+              <p className="text-xs text-blue-300 font-mono">Xác minh Lần 2 &amp; Sidebar</p>
+              <p className="text-xs text-slate-200 leading-relaxed max-w-[46ch]">
                 Kiểm tra lại trạng thái gói trong Database trước khi mở giao diện điều khiển cột
                 trái.
               </p>
             </div>
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
-                Tầng 03: Backend &amp; Database
-              </p>
-              <p className="text-sm font-semibold text-white">Port :3001 &amp; :3000</p>
-              <p className="text-xs text-slate-300 leading-relaxed">
+            <div className="space-y-1.5">
+              <h4 className="text-sm font-semibold text-white">Tầng 03: Backend &amp; Database</h4>
+              <p className="text-xs text-blue-300 font-mono">Port :3001 &amp; :3000</p>
+              <p className="text-xs text-slate-200 leading-relaxed max-w-[46ch]">
                 Lưu trữ tài khoản, thời hạn gói thuê bao và cấu hình Token vào Database.
               </p>
             </div>

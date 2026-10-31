@@ -1,7 +1,20 @@
 import dotenv from "dotenv";
+import path from "node:path";
+import fs from "node:fs";
 import { SupportedVideoCodec, H26xPreset } from "./types/index.js";
 
-dotenv.config({ quiet: true });
+// Always locate and load the single root .env file
+const rootEnvCandidates = [
+	path.resolve(process.cwd(), ".env"),
+	path.resolve(process.cwd(), "../.env"),
+	path.resolve(process.cwd(), "../../.env"),
+];
+const foundEnv = rootEnvCandidates.find((p) => fs.existsSync(p));
+if (foundEnv) {
+	dotenv.config({ path: foundEnv, quiet: true });
+} else {
+	dotenv.config({ quiet: true });
+}
 
 const VALID_VIDEO_CODECS: readonly SupportedVideoCodec[] = ["H264", "H265", "VP8", "VP9", "AV1"];
 const VALID_PRESETS: readonly H26xPreset[] = [

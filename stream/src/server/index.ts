@@ -501,7 +501,11 @@ export function startServer(
 				streamingService.setLoop(config.streamLoop);
 			}
 
-			const envPath = path.resolve(process.cwd(), ".env");
+			const rootEnvCandidates = [
+				path.resolve(process.cwd(), "../.env"),
+				path.resolve(process.cwd(), ".env"),
+			];
+			const envPath = rootEnvCandidates.find((p) => fs.existsSync(p)) || rootEnvCandidates[0];
 			if (fs.existsSync(envPath)) {
 				let envContent = fs.readFileSync(envPath, "utf-8");
 				const updateEnv = (key: string, val: string) => {

@@ -28,6 +28,23 @@ export const STREAM_API_URL = import.meta.env.VITE_STREAM_API_URL || `http://${h
 export const STREAM_WS_URL = import.meta.env.VITE_STREAM_WS_URL || `ws://${host}:3000/ws`;
 
 export const questApi = {
+  async getOAuthConfig(): Promise<{
+    plan: { id: string; name: string; pricePerMonth: number; currency: string };
+    oauth: {
+      discordConfigured: boolean;
+      discordClientId: string | null;
+      discordAuthUrl: string | null;
+      discordBotInviteUrl: string | null;
+      googleAuthUrl: string | null;
+    };
+    bankInfo: { bankId: string; bankName: string; accountNo: string; accountName: string };
+    payosConfigured: boolean;
+  }> {
+    const res = await fetch(`${QUEST_API_URL}/api/auth/oauth/config`);
+    if (!res.ok) throw new Error('Không thể tải cấu hình OAuth2');
+    return res.json();
+  },
+
   async checkHealth(): Promise<{ status: string; uptime: number }> {
     const res = await fetch(`${QUEST_API_URL}/api/health`);
     if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
@@ -37,11 +54,12 @@ export const questApi = {
   async oauthLogin(payload: {
     provider: 'discord' | 'google';
     id?: string;
-    username: string;
+    username?: string;
     email?: string;
     avatarUrl?: string | null;
     code?: string;
     accessToken?: string;
+    redirectUri?: string;
   }): Promise<{
     success: boolean;
     sessionToken: string;

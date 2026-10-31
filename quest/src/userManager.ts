@@ -20,7 +20,8 @@ export interface UsersDatabase {
 	users: StoredUser[];
 }
 
-const DATA_DIR = path.resolve(process.cwd(), 'data');
+const isSubdir = process.cwd().endsWith('quest') || process.cwd().endsWith('stream');
+const DATA_DIR = path.resolve(process.cwd(), isSubdir ? '../database' : 'database');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 
 export class UserManager {

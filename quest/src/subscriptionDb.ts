@@ -60,6 +60,7 @@ export interface PaymentOrderRecord {
 interface SubscriptionDatabaseSchema {
 	accounts: AccountRecord[];
 	orders: PaymentOrderRecord[];
+	transactions?: any[];
 }
 
 export interface SubscriptionStatusDTO {
@@ -79,33 +80,63 @@ export interface SubscriptionStatusDTO {
 export class SubscriptionManager {
 	private dataDir: string;
 	private dbFile: string;
+	private bakFile: string;
 	private db: SubscriptionDatabaseSchema = {
 		accounts: [],
 		orders: [],
+		transactions: [],
 	};
 
 	constructor() {
-		this.dataDir = path.resolve(process.cwd(), 'data');
-		this.dbFile = path.join(this.dataDir, 'subscriptions.json');
+		// Commercial database is placed at repo root "database/commercial_db.json"
+		const isSubdir = process.cwd().endsWith('quest') || process.cwd().endsWith('stream');
+		this.dataDir = path.resolve(process.cwd(), isSubdir ? '../database' : 'database');
+		if (!fs.existsSync(this.dataDir)) {
+			fs.mkdirSync(this.dataDir, { recursive: true });
+		}
+
+		this.dbFile = path.join(this.dataDir, 'commercial_db.json');
+		this.bakFile = path.join(this.dataDir, 'commercial_db.json.bak');
 		this.load();
 	}
 
 	private load(): void {
 		try {
-			if (!fs.existsSync(this.dataDir)) {
-				fs.mkdirSync(this.dataDir, { recursive: true });
-			}
 			if (fs.existsSync(this.dbFile)) {
 				const raw = fs.readFileSync(this.dbFile, 'utf-8');
 				const parsed = JSON.parse(raw);
 				if (parsed && Array.isArray(parsed.accounts) && Array.isArray(parsed.orders)) {
-					this.db = parsed;
+					this.db = {
+						accounts: parsed.accounts,
+						orders: parsed.orders,
+						transactions: Array.isArray(parsed.transactions) ? parsed.transactions : [],
+					};
+					return;
 				}
-			} else {
-				this.save();
 			}
+
+			// Automatic migration from legacy quest/data/subscriptions.json if present
+			const legacyFile = path.resolve(process.cwd(), 'data', 'subscriptions.json');
+			if (fs.existsSync(legacyFile)) {
+				try {
+					const rawLegacy = fs.readFileSync(legacyFile, 'utf-8');
+					const parsedLegacy = JSON.parse(rawLegacy);
+					if (parsedLegacy && Array.isArray(parsedLegacy.accounts)) {
+						this.db = {
+							accounts: parsedLegacy.accounts,
+							orders: Array.isArray(parsedLegacy.orders) ? parsedLegacy.orders : [],
+							transactions: [],
+						};
+						this.save();
+						return;
+					}
+				} catch {}
+			}
+
+			// If neither exists, initialize commercial database
+			this.save();
 		} catch (err) {
-			console.error('[SubscriptionManager] Failed to load subscriptions.json:', err);
+			console.error('[CommercialDatabase] Failed to load commercial_db.json:', err);
 		}
 	}
 
@@ -114,9 +145,23 @@ export class SubscriptionManager {
 			if (!fs.existsSync(this.dataDir)) {
 				fs.mkdirSync(this.dataDir, { recursive: true });
 			}
-			fs.writeFileSync(this.dbFile, JSON.stringify(this.db, null, 2), 'utf-8');
+			const jsonStr = JSON.stringify(this.db, null, 2);
+			const tmpFile = `${this.dbFile}.tmp`;
+
+			// Atomic write: write to tmp file first
+			fs.writeFileSync(tmpFile, jsonStr, 'utf-8');
+
+			// Create backup if dbFile exists
+			if (fs.existsSync(this.dbFile)) {
+				try {
+					fs.copyFileSync(this.dbFile, this.bakFile);
+				} catch {}
+			}
+
+			// Rename tmp to live database file
+			fs.renameSync(tmpFile, this.dbFile);
 		} catch (err) {
-			console.error('[SubscriptionManager] Failed to save subscriptions.json:', err);
+			console.error('[CommercialDatabase] Failed to save commercial_db.json:', err);
 		}
 	}
 
