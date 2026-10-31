@@ -396,6 +396,35 @@ app.get('/api/subscription/verify', (req: Request, res: Response) => {
 	});
 });
 
+// Admin or direct grant subscription for a user account
+app.post('/api/subscription/grant', (req: Request, res: Response) => {
+	const userId = String(req.body?.userId || '').trim();
+	const months = Math.max(1, parseInt(String(req.body?.months || 12), 10));
+	const customKey = req.body?.licenseKey ? String(req.body.licenseKey).trim() : undefined;
+
+	if (!userId) {
+		res.status(400).json({ error: 'Missing userId' });
+		return;
+	}
+
+	const result = subscriptionManager.grantSubscription(userId, months, customKey);
+	if (!result) {
+		res.status(404).json({ error: `Account with ID ${userId} not found in database` });
+		return;
+	}
+
+	addLog(
+		'success',
+		`[VIP Grant] Đã cấp gói Premium (+${months} tháng) cho tài khoản @${result.account.username} (ID: ${userId})`
+	);
+
+	res.json({
+		success: true,
+		account: result.account,
+		subscription: result.subscription,
+	});
+});
+
 // Create VietQR & PayOS payment order (20.000đ / 1 tháng, stackable by months)
 app.post('/api/payments/create', async (req: Request, res: Response) => {
 	try {

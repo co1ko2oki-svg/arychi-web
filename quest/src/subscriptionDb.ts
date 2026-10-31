@@ -816,4 +816,55 @@ export class SubscriptionManager {
 		const subscription = this.computeSubscriptionStatus(account)!;
 		return { order, account, subscription };
 	}
+
+	public grantSubscription(
+		userId: string,
+		months: number = 12,
+		customLicenseKey?: string
+	): {
+		account: AccountRecord;
+		subscription: SubscriptionStatusDTO;
+	} | null {
+		const account = this.getAccountById(userId);
+		if (!account) return null;
+
+		const nowMs = Date.now();
+		const currentExpiryMs = account.subscriptionExpiresAt
+			? new Date(account.subscriptionExpiresAt).getTime()
+			: 0;
+		const baseMs = currentExpiryMs > nowMs ? currentExpiryMs : nowMs;
+		const addedMs = months * PLAN_DAYS_PER_MONTH * 24 * 60 * 60 * 1000;
+		const newExpiry = new Date(baseMs + addedMs).toISOString();
+
+		if (!account.activatedAt) {
+			account.activatedAt = new Date(nowMs).toISOString();
+		}
+		account.subscriptionExpiresAt = newExpiry;
+		account.totalMonthsPurchased = (account.totalMonthsPurchased || 0) + months;
+		account.botConnected = true;
+		if (!account.licenseKey || customLicenseKey) {
+			account.licenseKey =
+				customLicenseKey ||
+				`ARYCHI-20K-${account.id.slice(-4).toUpperCase()}-${crypto
+					.randomBytes(2)
+					.toString('hex')
+					.toUpperCase()}`;
+		}
+		account.updatedAt = new Date(nowMs).toISOString();
+
+		// Mark any pending orders of this user as PAID
+		for (const order of this.db.orders) {
+			if (order.userId === userId && order.status === 'PENDING') {
+				order.status = 'PAID';
+				order.paidAt = new Date(nowMs).toISOString();
+				void this.sqlSaveOrder(order);
+			}
+		}
+
+		this.saveLocalBackup();
+		void this.sqlSaveAccount(account);
+
+		const subscription = this.computeSubscriptionStatus(account)!;
+		return { account, subscription };
+	}
 }
