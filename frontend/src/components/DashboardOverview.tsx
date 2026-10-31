@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import {
   ArrowRight,
+  KeyRound,
   Loader2,
   Play,
   RefreshCw,
+  ShieldCheck,
   Square,
   Terminal,
-  Tv,
 } from 'lucide-react';
 import { AuthUser, PlanTierId, QuestDTO, QuestJob, LogEntry, StreamStatus, UserSubscription } from '../types';
 import { questApi, streamApi } from '../services/api';
-import { AccessGateBanner } from './SubscriptionModal';
 import { useToast } from './Toast';
 import { NavTabId } from './Navbar';
 import { PageHeader, ProgressBar, Section, StatusDot, Switch } from './ui';
@@ -46,11 +46,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   loadingQuests,
   onRefreshQuests,
   streamStatus,
-  loadingStream: _loadingStream,
   onRefreshStream,
   logs,
   onNavigateTab,
-  onOpenLoginModal,
   onOpenSubscriptionModal = () => {},
 }) => {
   const { toast } = useToast();
@@ -66,18 +64,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const claimableQuests = quests.filter((q) => q.status.completed && !q.status.claimed).length;
   const streamPlaying = Boolean(streamStatus?.stream.playing);
 
-  const requireSubscription = () => {
-    if (!subscription || !subscription.botConnected) {
-      toast.warning('Vui lòng mua và kích hoạt gói dịch vụ để sử dụng Bot');
-      onOpenSubscriptionModal('pro');
-      return false;
-    }
-    return true;
-  };
+  const hasQuestToken = Boolean(token || user.tokens?.questToken);
+  const hasStreamTokens = Boolean(
+    (user.tokens?.streamMainToken && user.tokens?.streamViewerToken) ||
+      (streamStatus?.config?.hasMainToken && streamStatus?.config?.hasViewerToken)
+  );
 
   const handlePlayStream = async (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!requireSubscription()) return;
+    if (!hasStreamTokens) {
+      toast.warning('Vui lòng vào mục Treo Stream Voice để nhập đủ 2 Token (1 Chính + 1 Phụ)');
+      onNavigateTab('stream');
+      return;
+    }
     const query = streamInput.trim();
     if (!query) {
       toast.warning('Vui lòng nhập URL YouTube, Twitch hoặc tên file video');
@@ -97,7 +96,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   };
 
   const handleToggleFarm = async () => {
-    if (!requireSubscription()) return;
+    if (!hasStreamTokens) {
+      toast.warning('Vui lòng nhập 2 Token (1 Chính + 1 Phụ) trong mục Treo Stream trước');
+      onNavigateTab('stream');
+      return;
+    }
     if (!streamStatus) return;
     const targetState = !streamStatus.farm.autoWatch;
     setStreamActionLoading(true);
@@ -113,7 +116,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   };
 
   const handleStartAll = async () => {
-    if (!requireSubscription()) return;
+    if (!token) {
+      toast.warning('Vui lòng nhập 1 Token Acc Discord trong mục Discord Quests');
+      onNavigateTab('quests');
+      return;
+    }
     setQuestActionLoading((prev) => ({ ...prev, all: true }));
     try {
       const res = await questApi.startAllQuests(token);
@@ -157,23 +164,35 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   return (
     <div className="space-y-8">
       <PageHeader
-        title="Tổng quan hệ thống"
-        description="Giám sát vận hành 3 module: Discord Quests (:3001), StreamBot Voice (:3000) và Science Telemetry."
+        title="Bảng điều khiển — dash.arychi.xyz"
+        description="Đã xác minh gói 50.000đ/tháng lần thứ 2 từ Database. Quản lý Token cho từng module bên cột trái."
         meta={
           <>
-            <span className="text-zinc-200">@{user.username}</span>
+            <span className="text-white font-semibold">@{user.username}</span>
+            <span className="inline-flex items-center gap-1.5 text-blue-300 font-mono">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              Gói 50k/tháng (Còn {subscription?.daysRemaining ?? 30} ngày)
+            </span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={questConnected ? 'ok' : 'error'} />
-              Quest {questConnected ? 'Online' : 'Offline'}
+              Quest :3001 {questConnected ? 'Online' : 'Offline'}
             </span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={streamConnected ? (streamPlaying ? 'error' : 'ok') : 'warn'} />
-              Stream {streamConnected ? (streamPlaying ? 'Live' : 'Standby') : 'Offline'}
+              Stream :3000 {streamConnected ? (streamPlaying ? 'Live' : 'Standby') : 'Offline'}
             </span>
           </>
         }
         actions={
           <>
+            <button
+              type="button"
+              onClick={() => onOpenSubscriptionModal('monthly_50k')}
+              className="btn-secondary"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-blue-400" />
+              <span>Gia hạn (+50k/tháng)</span>
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -183,54 +202,87 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               }}
               disabled={loadingQuests}
               className="btn-ghost"
-              title="Đồng bộ dữ liệu"
             >
               <RefreshCw className={`w-4 h-4 ${loadingQuests ? 'animate-spin' : ''}`} />
               Đồng bộ
             </button>
-
-            {runningJobs.length > 0 ? (
-              <button
-                type="button"
-                onClick={handleStopAll}
-                disabled={questActionLoading.all}
-                className="btn-danger"
-              >
-                <Square className="w-3.5 h-3.5 fill-current" />
-                Dừng tất cả ({runningJobs.length})
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleStartAll}
-                disabled={questActionLoading.all || quests.length === 0}
-                className="btn-primary"
-              >
-                {questActionLoading.all ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                )}
-                Chạy toàn bộ Quests
-              </button>
-            )}
           </>
         }
       />
 
-      <AccessGateBanner
-        user={user}
-        subscription={subscription}
-        onOpenLoginModal={onOpenLoginModal}
-        onOpenSubscriptionModal={onOpenSubscriptionModal}
-        featureName="Bảng điều khiển Tổng quan"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="surface p-5 flex flex-col justify-between space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-semibold text-blue-300">
+                CẤU HÌNH TOKEN 01 • QUESTS &amp; GIỜ CHƠI
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-white">
+                <StatusDot tone={hasQuestToken ? 'ok' : 'warn'} />
+                {hasQuestToken ? 'ĐÃ NHẬP 1 TOKEN' : 'CHƯA NHẬP TOKEN'}
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-white">
+              Discord Quests &amp; Science Telemetry (1 Token)
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Sử dụng 1 Token tài khoản Discord để đồng bộ danh sách nhiệm vụ, gửi heartbeat 30s và cày giờ chơi hồ sơ.
+            </p>
+          </div>
+          <div className="pt-3 border-t border-line flex items-center justify-between">
+            <span className="text-xs font-mono text-slate-300">
+              {hasQuestToken ? `${totalQuests} nhiệm vụ đã đồng bộ` : 'Yêu cầu nhập 1 Token'}
+            </span>
+            <button
+              type="button"
+              onClick={() => onNavigateTab('quests')}
+              className="btn-primary btn-sm"
+            >
+              <span>{hasQuestToken ? 'Mở Discord Quests' : 'Nhập 1 Token ngay'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <div className="surface p-5 flex flex-col justify-between space-y-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-semibold text-blue-300">
+                CẤU HÌNH TOKEN 02 • TREO STREAM VOICE
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-white">
+                <StatusDot tone={hasStreamTokens ? 'ok' : 'warn'} />
+                {hasStreamTokens ? 'ĐÃ NHẬP 2 TOKEN' : 'CẦN 2 TOKEN (CHÍNH+PHỤ)'}
+              </span>
+            </div>
+            <h2 className="text-base font-bold text-white">
+              Treo Stream &amp; Viewer Farm (1 Token Chính + 1 Token Phụ)
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Riêng tính năng Treo Stream bắt buộc nhập 2 Token: 1 Token Chính (phát stream) và 1 Token Phụ (xem stream).
+            </p>
+          </div>
+          <div className="pt-3 border-t border-line flex items-center justify-between">
+            <span className="text-xs font-mono text-slate-300">
+              {hasStreamTokens ? `Streamer: ${streamStatus?.bot.tag || 'Sẵn sàng'}` : 'Yêu cầu 2 Token'}
+            </span>
+            <button
+              type="button"
+              onClick={() => onNavigateTab('stream')}
+              className="btn-primary btn-sm"
+            >
+              <span>{hasStreamTokens ? 'Mở Treo Stream' : 'Nhập 2 Token Stream'}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="surface-interactive p-4">
-          <p className="text-xs font-medium text-slate-400">Nhiệm vụ khả dụng</p>
+          <p className="text-xs font-medium text-slate-300">Nhiệm vụ khả dụng</p>
           <p className="mt-2 text-2xl font-bold text-white tabular-nums">{totalQuests}</p>
-          <p className="mt-1 text-xs font-mono text-slate-400">Từ Discord API</p>
+          <p className="mt-1 text-xs font-mono text-slate-300">Từ Discord API</p>
         </div>
 
         <div className="surface-interactive p-4">
@@ -239,7 +291,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <span className="text-2xl font-bold text-blue-300 tabular-nums">{runningJobs.length}</span>
             {runningJobs.length > 0 && <StatusDot tone="brand" />}
           </div>
-          <p className="mt-1 text-xs font-mono text-slate-400">Heartbeat 30s</p>
+          <p className="mt-1 text-xs font-mono text-slate-300">Heartbeat 30s</p>
         </div>
 
         <div className="surface-interactive p-4">
@@ -250,15 +302,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               <span className="text-xs text-blue-300 tabular-nums">({claimableQuests} chờ claim)</span>
             )}
           </div>
-          <p className="mt-1 text-xs font-mono text-slate-400">Sẵn sàng nhận thưởng</p>
+          <p className="mt-1 text-xs font-mono text-slate-300">Sẵn sàng nhận thưởng</p>
         </div>
 
         <div className="surface-interactive p-4">
           <p className="text-xs font-medium text-slate-300">StreamBot Voice</p>
-          <p className="mt-2 text-sm font-bold text-slate-100 truncate">
+          <p className="mt-2 text-sm font-bold text-white truncate">
             {streamPlaying ? 'Đang phát video' : streamConnected ? 'Đang chờ' : 'Ngoại tuyến'}
           </p>
-          <p className="mt-1 text-xs text-slate-400 font-mono">
+          <p className="mt-1 text-xs text-slate-300 font-mono">
             Độ trễ {formatPing(streamConnected, streamStatus?.bot.ping)}
           </p>
         </div>
@@ -271,16 +323,23 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         >
           <div className="surface overflow-hidden divide-y divide-line">
             {runningJobs.map((job) => (
-              <div key={job.questId} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div
+                key={job.questId}
+                className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+              >
                 <div className="min-w-0 flex-1 space-y-1">
                   <div className="flex items-center gap-2">
                     <StatusDot tone="brand" />
                     <p className="text-sm font-medium text-white truncate">{job.questName}</p>
                   </div>
-                  <p className="text-xs text-zinc-400 truncate">{job.message}</p>
+                  <p className="text-xs text-slate-300 truncate">{job.message}</p>
                   <div className="w-full max-w-md pt-1.5 flex items-center gap-3">
-                    <ProgressBar value={job.progressPercent} tone="brand" label={`Tiến độ ${job.questName}`} />
-                    <span className="text-xs font-mono text-brand-text tabular-nums shrink-0">
+                    <ProgressBar
+                      value={job.progressPercent}
+                      tone="brand"
+                      label={`Tiến độ ${job.questName}`}
+                    />
+                    <span className="text-xs font-mono text-blue-300 tabular-nums shrink-0">
                       {job.progressPercent.toFixed(0)}%
                     </span>
                   </div>
@@ -305,15 +364,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         <div className="surface p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-[15px] font-semibold text-white">StreamBot Voice Controller</h2>
-              <p className="text-xs text-zinc-500 mt-0.5">Phát media trực tiếp vào kênh thoại qua FFmpeg</p>
+              <h2 className="text-[15px] font-semibold text-white">Treo Stream Voice (2 Token)</h2>
+              <p className="text-xs text-slate-300 mt-0.5">
+                Phát media trực tiếp vào kênh thoại bằng Token Chính &amp; xem bằng Token Phụ
+              </p>
             </div>
             <button
               type="button"
               onClick={() => onNavigateTab('stream')}
               className="link text-xs"
             >
-              Chi tiết
+              Cấu hình 2 Token
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -331,15 +392,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               disabled={streamActionLoading || !streamInput.trim()}
               className="btn-primary shrink-0"
             >
-              {streamActionLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-3.5 h-3.5 fill-current" />}
+              {streamActionLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Play className="w-3.5 h-3.5 fill-current" />
+              )}
               Phát
             </button>
           </form>
 
           <div className="flex items-center justify-between pt-3 border-t border-line">
             <div>
-              <p className="text-[13px] font-medium text-zinc-200">Viewer Farm</p>
-              <p className="text-xs text-zinc-500">Giữ tài khoản trong voice để cày giờ xem</p>
+              <p className="text-[13px] font-medium text-white">Viewer Farm (Token Phụ)</p>
+              <p className="text-xs text-slate-300">Giữ tài khoản phụ trong voice để cày giờ xem</p>
             </div>
             <Switch
               checked={Boolean(streamStatus?.farm.autoWatch)}
@@ -354,8 +419,10 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-[15px] font-semibold text-white">Quản lý nhiệm vụ</h2>
-                <p className="text-xs text-zinc-500 mt-0.5">Tự động hóa hoàn thành nhiệm vụ Discord</p>
+                <h2 className="text-[15px] font-semibold text-white">Discord Quests (1 Token)</h2>
+                <p className="text-xs text-slate-300 mt-0.5">
+                  Tự động hóa hoàn thành nhiệm vụ Discord
+                </p>
               </div>
               <button
                 type="button"
@@ -369,38 +436,55 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
             <dl className="divide-y divide-line text-[13px]">
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">Nhiệm vụ trên tài khoản</dt>
-                <dd className="text-zinc-200 font-mono text-xs tabular-nums">{totalQuests}</dd>
+                <dt className="text-slate-300">Nhiệm vụ trên tài khoản</dt>
+                <dd className="text-white font-mono text-xs tabular-nums">{totalQuests}</dd>
               </div>
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">Chờ nhận thưởng</dt>
-                <dd className="text-amber-400 font-mono text-xs tabular-nums">{claimableQuests}</dd>
+                <dt className="text-slate-300">Chờ nhận thưởng</dt>
+                <dd className="text-blue-300 font-mono text-xs tabular-nums">{claimableQuests}</dd>
               </div>
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">Quest Daemon (:3001)</dt>
+                <dt className="text-slate-300">Quest Daemon (:3001)</dt>
                 <dd className="text-xs font-mono">
-                  {questConnected ? <span className="text-emerald-400">Kết nối</span> : <span className="text-rose-400">Ngoại tuyến</span>}
+                  {questConnected ? (
+                    <span className="text-blue-300">Kết nối</span>
+                  ) : (
+                    <span className="text-rose-300">Ngoại tuyến</span>
+                  )}
                 </dd>
               </div>
             </dl>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onNavigateTab('quests')}
-            className="btn-secondary w-full justify-between"
-          >
-            <span>Xem danh sách đầy đủ ({totalQuests})</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            {runningJobs.length > 0 ? (
+              <button
+                type="button"
+                onClick={handleStopAll}
+                disabled={questActionLoading.all}
+                className="btn-danger flex-1"
+              >
+                Dừng tất cả ({runningJobs.length})
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleStartAll}
+                disabled={questActionLoading.all}
+                className="btn-primary flex-1"
+              >
+                Chạy toàn bộ Quests
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="surface overflow-hidden">
         <div className="flex items-center justify-between px-4 h-10 border-b border-line">
           <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-zinc-500" />
-            <h2 className="text-[13px] font-medium text-zinc-200">Nhật ký sự kiện trực tiếp</h2>
+            <Terminal className="w-4 h-4 text-blue-300" />
+            <h2 className="text-[13px] font-medium text-white">Nhật ký sự kiện trực tiếp</h2>
           </div>
           <button
             type="button"
@@ -414,18 +498,18 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
         <div className="p-4 font-mono text-xs space-y-1.5 max-h-48 overflow-y-auto leading-relaxed">
           {recentLogs.length === 0 ? (
-            <p className="text-zinc-600 italic py-2">Chưa có sự kiện nào được ghi nhận...</p>
+            <p className="text-slate-300 italic py-2">Chưa có sự kiện nào được ghi nhận...</p>
           ) : (
             recentLogs.map((log, index) => {
               const p = parseLog(log);
               return (
                 <div key={index} className="flex items-baseline gap-2.5 text-[11px]">
-                  <span className="text-zinc-600 select-none shrink-0 tabular-nums">{p.time}</span>
+                  <span className="text-slate-300 select-none shrink-0 tabular-nums">{p.time}</span>
                   <span className={`font-semibold shrink-0 ${levelClass[p.level]}`}>
                     [{levelLabel[p.level]}]
                   </span>
-                  <span className="text-zinc-500 shrink-0 truncate max-w-[80px]">{p.source}</span>
-                  <span className="text-zinc-300 break-words min-w-0">{p.message}</span>
+                  <span className="text-slate-300 shrink-0 truncate max-w-[80px]">{p.source}</span>
+                  <span className="text-white break-words min-w-0">{p.message}</span>
                 </div>
               );
             })

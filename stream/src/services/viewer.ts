@@ -84,6 +84,30 @@ export class ViewerService {
 		}
 	}
 
+	public async updateTokenAndLogin(newToken: string): Promise<boolean> {
+		config.viewerToken = newToken.trim();
+		if (!this.isConfigured()) {
+			this.stopWatching();
+			this.isOnline = false;
+			return false;
+		}
+		try {
+			this.stopWatching();
+			try {
+				this.client.destroy();
+			} catch {}
+			this.client = new Client();
+			this.setupEvents();
+			await this.client.login(config.viewerToken);
+			this.isOnline = true;
+			return true;
+		} catch (err) {
+			this.isOnline = false;
+			logger.error("[Viewer Farm] Failed to login with updated VIEWER_TOKEN:", err);
+			return false;
+		}
+	}
+
 	public async watchStream(guildId: string, channelId: string, streamerUserId: string): Promise<boolean> {
 		if (!this.isConfigured() || !this.isOnline) {
 			return false;

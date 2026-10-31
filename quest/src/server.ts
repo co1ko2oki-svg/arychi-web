@@ -5,7 +5,10 @@ import cors from 'cors';
 import { WebSocketServer, WebSocket } from 'ws';
 import { questService, QuestJob } from './questService';
 import { userManager, StoredUser } from './userManager';
+import { SubscriptionManager, PLAN_MONTHLY_PRICE, PLAN_NAME, PLAN_ID } from './subscriptionDb';
 import { logEmitter, logBuffer, addLog, LogEntry, Utils } from './utils';
+
+const subscriptionManager = new SubscriptionManager();
 
 const PORT = parseInt(process.env.PORT || '3001', 10);
 const app = express();
@@ -125,6 +128,331 @@ app.get('/api/health', (_req: Request, res: Response) => {
 		service: 'Discord Quest Backend',
 		uptime: process.uptime(),
 		timestamp: new Date().toISOString(),
+	});
+});
+
+// Helper to extract session token from Authorization header or query/body
+function extractSessionToken(req: Request): string {
+	const authHeader = req.headers.authorization;
+	if (authHeader && authHeader.startsWith('Bearer ')) {
+		return authHeader.slice(7).trim();
+	}
+	return String(req.query.session || req.body?.sessionToken || '').trim();
+}
+
+// Get OAuth2 & Pricing configuration
+app.get('/api/auth/oauth/config', (_req: Request, res: Response) => {
+	const discordClientId = process.env.DISCORD_CLIENT_ID || '';
+	const discordRedirectUri = process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz/oauth/discord';
+	const googleClientId = process.env.GOOGLE_CLIENT_ID || '';
+	const googleRedirectUri = process.env.GOOGLE_REDIRECT_URI || 'https://arychi.xyz/oauth/google';
+
+	res.json({
+		plan: {
+			id: PLAN_ID,
+			name: PLAN_NAME,
+			pricePerMonth: PLAN_MONTHLY_PRICE,
+			currency: 'VND',
+		},
+		oauth: {
+			discordAuthUrl: discordClientId
+				? `https://discord.com/oauth2/authorize?client_id=${encodeURIComponent(
+						discordClientId
+				  )}&response_type=code&redirect_uri=${encodeURIComponent(
+						discordRedirectUri
+				  )}&scope=identify+email+guilds.join`
+				: null,
+			googleAuthUrl: googleClientId
+				? `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
+						googleClientId
+				  )}&response_type=token&redirect_uri=${encodeURIComponent(
+						googleRedirectUri
+				  )}&scope=openid+email+profile`
+				: null,
+		},
+		bankInfo: subscriptionManager.getBankInfo(),
+		payosConfigured: Boolean(
+			process.env.PAYOS_CLIENT_ID && process.env.PAYOS_API_KEY && process.env.PAYOS_CHECKSUM_KEY
+		),
+	});
+});
+
+// Login or Register via Discord Bot OAuth2 or Google Account OAuth2
+app.post('/api/auth/oauth/login', async (req: Request, res: Response) => {
+	try {
+		const provider = (req.body?.provider === 'google' ? 'google' : 'discord') as 'discord' | 'google';
+		const code = req.body?.code as string | undefined;
+		const accessToken = req.body?.accessToken as string | undefined;
+
+		let id = String(req.body?.id || '').trim();
+		let username = String(req.body?.username || '').trim();
+		let email = String(req.body?.email || '').trim();
+		let avatarUrl: string | null = req.body?.avatarUrl || null;
+
+		if (provider === 'discord') {
+			if (code && process.env.DISCORD_CLIENT_ID && process.env.DISCORD_CLIENT_SECRET) {
+				const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: new URLSearchParams({
+						client_id: process.env.DISCORD_CLIENT_ID,
+						client_secret: process.env.DISCORD_CLIENT_SECRET,
+						grant_type: 'authorization_code',
+						code,
+						redirect_uri: process.env.DISCORD_REDIRECT_URI || 'https://arychi.xyz',
+					}).toString(),
+				});
+				const tokenData: any = await tokenRes.json();
+				const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+					headers: { Authorization: `Bearer ${tokenData.access_token}` },
+				});
+				const userData: any = await userRes.json();
+				id = userData.id;
+				username = userData.username;
+				email = userData.email || `${username}@discord.oauth`;
+				avatarUrl = userData.avatar
+					? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
+					: null;
+			} else if (accessToken) {
+				const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+					headers: { Authorization: `Bearer ${accessToken}` },
+				});
+				const userData: any = await userRes.json();
+				id = userData.id;
+				username = userData.username;
+				email = userData.email || `${username}@discord.oauth`;
+				avatarUrl = userData.avatar
+					? `https://cdn.discordapp.com/avatars/${id}/${userData.avatar}.png`
+					: null;
+			}
+		} else if (provider === 'google' && accessToken) {
+			const gRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			});
+			const gData: any = await gRes.json();
+			id = `gg_${gData.sub}`;
+			username = gData.name || gData.email?.split('@')[0] || 'GoogleUser';
+			email = gData.email || '';
+			avatarUrl = gData.picture || null;
+		}
+
+		if (!username && email) {
+			username = email.split('@')[0];
+		}
+		if (!username) {
+			res.status(400).json({ error: 'Vui lòng nhập tên tài khoản hoặc email hợp lệ' });
+			return;
+		}
+		if (!id) {
+			const cleanSlug = (email || username).toLowerCase().replace(/[^a-z0-9]/g, '');
+			id = provider === 'discord' ? `dc_${cleanSlug}` : `gg_${cleanSlug}`;
+		}
+
+		const account = subscriptionManager.upsertOAuthAccount({
+			id,
+			provider,
+			username,
+			email: email || `${username}@${provider}.oauth`,
+			avatarUrl,
+		});
+
+		const subscription = subscriptionManager.computeSubscriptionStatus(account);
+		addLog(
+			'success',
+			`[OAuth2] User @${account.username} (${account.provider.toUpperCase()}) authenticated and linked with Bot.`
+		);
+
+		res.json({
+			success: true,
+			sessionToken: account.sessionToken,
+			account,
+			subscription,
+		});
+	} catch (err: any) {
+		addLog('error', `[OAuth2 Login Error]: ${err?.message || err}`);
+		res.status(500).json({ error: err?.message || 'Đăng nhập OAuth2 thất bại' });
+	}
+});
+
+// Verify session & subscription status (2nd verification for dash.arychi.xyz / dash.arychy.xyz)
+app.get('/api/subscription/verify', (req: Request, res: Response) => {
+	const sessionToken = extractSessionToken(req);
+	const account = subscriptionManager.getAccountBySession(sessionToken);
+
+	if (!account) {
+		res.json({
+			verified: false,
+			authenticated: false,
+			hasActivePlan: false,
+			daysRemaining: 0,
+			domainTarget: 'dash.arychi.xyz',
+			account: null,
+			subscription: null,
+		});
+		return;
+	}
+
+	const subscription = subscriptionManager.computeSubscriptionStatus(account);
+	const hasActivePlan = Boolean(subscription && subscription.isActive);
+
+	res.json({
+		verified: hasActivePlan,
+		authenticated: true,
+		hasActivePlan,
+		daysRemaining: subscription?.daysRemaining || 0,
+		domainTarget: 'dash.arychi.xyz',
+		account,
+		subscription,
+	});
+});
+
+// Create VietQR & PayOS payment order (50.000đ / 1 tháng, stackable by months)
+app.post('/api/payments/create', async (req: Request, res: Response) => {
+	try {
+		const sessionToken = extractSessionToken(req);
+		const account =
+			subscriptionManager.getAccountBySession(sessionToken) ||
+			(req.body?.userId ? subscriptionManager.getAccountById(String(req.body.userId)) : null);
+
+		if (!account) {
+			res.status(401).json({ error: 'Vui lòng đăng nhập qua Bot Discord OAuth2 hoặc Google trước khi mua gói' });
+			return;
+		}
+
+		const months = Number(req.body?.months || 1);
+		const returnOrigin = String(req.body?.returnOrigin || 'https://dash.arychi.xyz');
+		const order = await subscriptionManager.createPaymentOrder(account, months, returnOrigin);
+
+		addLog(
+			'info',
+			`[VietQR/PayOS] Created order #${order.orderCode} for @${account.username}: ${
+				order.months
+			} tháng (${order.amount.toLocaleString('vi-VN')}đ)`
+		);
+
+		res.json({
+			success: true,
+			order,
+		});
+	} catch (err: any) {
+		res.status(500).json({ error: err?.message || 'Không thể khởi tạo đơn thanh toán VietQR/PayOS' });
+	}
+});
+
+// Check payment order status (polls PayOS API if configured + checks Database)
+app.get('/api/payments/order/:orderCode', async (req: Request, res: Response) => {
+	const orderCode = Number(req.params.orderCode);
+	if (!orderCode) {
+		res.status(400).json({ error: 'Mã đơn hàng không hợp lệ' });
+		return;
+	}
+	const order = await subscriptionManager.checkOrderWithPayOS(orderCode);
+	if (!order) {
+		res.status(404).json({ error: 'Không tìm thấy đơn hàng trong Database' });
+		return;
+	}
+	const account = subscriptionManager.getAccountById(order.userId);
+	const subscription = subscriptionManager.computeSubscriptionStatus(account);
+	res.json({
+		order,
+		account,
+		subscription,
+	});
+});
+
+// PayOS Webhook endpoint for automatic payment confirmation & monthly addition
+app.post('/api/payments/webhook/payos', (req: Request, res: Response) => {
+	try {
+		const body = req.body;
+		const orderCode = Number(body?.data?.orderCode || body?.orderCode);
+		const isSuccess = body?.code === '00' || body?.success === true || body?.data?.code === '00';
+
+		if (orderCode && isSuccess) {
+			const result = subscriptionManager.markOrderPaidAndExtendSubscription(orderCode);
+			if (result) {
+				addLog(
+					'success',
+					`[PayOS Webhook] Đã xác nhận thanh toán đơn #${orderCode} (+${result.order.months} tháng) cho @${result.account.username}`
+				);
+			}
+		}
+		res.json({ success: true });
+	} catch (err: any) {
+		res.status(500).json({ error: err?.message || 'Webhook processing error' });
+	}
+});
+
+// Confirm VietQR / PayOS payment & credit months to Database
+app.post('/api/payments/confirm/:orderCode', async (req: Request, res: Response) => {
+	const orderCode = Number(req.params.orderCode);
+	if (!orderCode) {
+		res.status(400).json({ error: 'Mã đơn hàng không hợp lệ' });
+		return;
+	}
+
+	await subscriptionManager.checkOrderWithPayOS(orderCode);
+	const result = subscriptionManager.markOrderPaidAndExtendSubscription(orderCode);
+
+	if (!result) {
+		res.status(404).json({ error: 'Không tìm thấy đơn hàng hoặc tài khoản trong Database' });
+		return;
+	}
+
+	addLog(
+		'success',
+		`[Payment Verified] Đã cộng +${result.order.months} tháng gói 50k cho @${result.account.username} (Hết hạn: ${new Date(
+			result.account.subscriptionExpiresAt!
+		).toLocaleDateString('vi-VN')})`
+	);
+
+	res.json({
+		success: true,
+		order: result.order,
+		account: result.account,
+		subscription: result.subscription,
+	});
+});
+
+// Save & verify Discord account tokens in Database (1 Token for Quest/Badges, 2 Tokens for Stream: Main + Viewer)
+app.post('/api/account/tokens', async (req: Request, res: Response) => {
+	const sessionToken = extractSessionToken(req);
+	const account = subscriptionManager.getAccountBySession(sessionToken);
+
+	if (!account) {
+		res.status(401).json({ error: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.' });
+		return;
+	}
+
+	const { questToken, streamMainToken, streamViewerToken, streamGuildId, streamChannelId } = req.body || {};
+
+	// If questToken is provided and non-empty, verify it with Discord API
+	let verifiedDiscordUser = null;
+	if (typeof questToken === 'string' && questToken.trim().length > 0) {
+		const check = await questService.verifyToken(questToken.trim());
+		if (!check.valid || !check.user) {
+			res.status(400).json({
+				error: check.error || 'Token tài khoản Discord (Quest/Giờ chơi) không hợp lệ hoặc đã hết hạn.',
+			});
+			return;
+		}
+		verifiedDiscordUser = check.user;
+	}
+
+	const updated = subscriptionManager.updateAccountTokens(account.id, {
+		questToken: typeof questToken === 'string' ? questToken : undefined,
+		streamMainToken: typeof streamMainToken === 'string' ? streamMainToken : undefined,
+		streamViewerToken: typeof streamViewerToken === 'string' ? streamViewerToken : undefined,
+		streamGuildId: typeof streamGuildId === 'string' ? streamGuildId : undefined,
+		streamChannelId: typeof streamChannelId === 'string' ? streamChannelId : undefined,
+	});
+
+	addLog('info', `[Database] Đã lưu cấu hình Token cho tài khoản @${account.username}.`);
+
+	res.json({
+		success: true,
+		account: updated,
+		verifiedDiscordUser,
+		subscription: subscriptionManager.computeSubscriptionStatus(updated),
 	});
 });
 

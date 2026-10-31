@@ -4,19 +4,19 @@ import { X } from 'lucide-react';
 type Tone = 'ok' | 'warn' | 'error' | 'idle' | 'brand';
 
 const toneDot: Record<Tone, string> = {
-  ok: 'bg-emerald-400',
-  warn: 'bg-amber-400',
-  error: 'bg-rose-500',
-  idle: 'bg-zinc-600',
-  brand: 'bg-brand',
+  ok: 'bg-blue-400',
+  warn: 'bg-slate-300',
+  error: 'bg-rose-400',
+  idle: 'bg-slate-400',
+  brand: 'bg-blue-500',
 };
 
 const toneBar: Record<Tone, string> = {
-  ok: 'bg-emerald-400',
-  warn: 'bg-amber-400',
-  error: 'bg-rose-500',
-  idle: 'bg-zinc-500',
-  brand: 'bg-brand',
+  ok: 'bg-blue-400',
+  warn: 'bg-slate-300',
+  error: 'bg-rose-400',
+  idle: 'bg-slate-400',
+  brand: 'bg-blue-500',
 };
 
 export const StatusDot: React.FC<{ tone: Tone; className?: string }> = ({ tone, className = '' }) => (
@@ -56,9 +56,9 @@ interface PageHeaderProps {
 export const PageHeader: React.FC<PageHeaderProps> = ({ title, description, meta, actions }) => (
   <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between pb-6 border-b border-line">
     <div className="min-w-0 space-y-1.5">
-      <h1 className="text-[22px] sm:text-2xl font-semibold tracking-tight text-white">{title}</h1>
-      {description && <p className="text-sm text-zinc-300 max-w-2xl leading-relaxed">{description}</p>}
-      {meta && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-zinc-400">{meta}</div>}
+      <h1 className="text-[22px] sm:text-2xl font-bold tracking-tight text-white">{title}</h1>
+      {description && <p className="text-sm text-slate-300 max-w-[48ch] leading-relaxed">{description}</p>}
+      {meta && <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pt-1 text-xs text-slate-300">{meta}</div>}
     </div>
     {actions && <div className="flex flex-wrap items-center gap-2 shrink-0">{actions}</div>}
   </header>
@@ -78,7 +78,7 @@ export const Section: React.FC<SectionProps> = ({ id, title, description, action
     <div className="flex items-baseline justify-between gap-4 mb-3">
       <div className="min-w-0">
         <h2 className="text-[15px] font-semibold text-white">{title}</h2>
-        {description && <p className="mt-0.5 text-[13px] text-zinc-400">{description}</p>}
+        {description && <p className="mt-0.5 text-[13px] text-slate-300 max-w-[48ch]">{description}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </div>
@@ -102,7 +102,7 @@ export const Switch: React.FC<SwitchProps> = ({ checked, onChange, disabled, lab
     disabled={disabled}
     onClick={onChange}
     className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${
-      checked ? 'bg-brand' : 'bg-white/[0.14]'
+      checked ? 'bg-blue-600' : 'bg-white/[0.18]'
     }`}
   >
     <span
@@ -139,12 +139,12 @@ export function SegmentedControl<T extends string>({ options, value, onChange, a
             aria-selected={active}
             onClick={() => onChange(opt.value)}
             className={`h-8 px-3 rounded-md text-[13px] font-medium whitespace-nowrap transition-colors ${
-              active ? 'bg-white/[0.1] text-white' : 'text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.05]'
+              active ? 'bg-white/[0.12] text-white' : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
             }`}
           >
             {opt.label}
             {opt.count !== undefined && (
-              <span className={`ml-1.5 tabular-nums ${active ? 'text-zinc-300' : 'text-zinc-600'}`}>{opt.count}</span>
+              <span className={`ml-1.5 tabular-nums ${active ? 'text-blue-300' : 'text-slate-300'}`}>{opt.count}</span>
             )}
           </button>
         );
@@ -161,10 +161,10 @@ interface EmptyStateProps {
 }
 
 export const EmptyState: React.FC<EmptyStateProps> = ({ title, description, action, icon }) => (
-  <div className="py-14 px-6 text-center">
-    {icon && <div className="mx-auto mb-3 flex justify-center text-zinc-600">{icon}</div>}
-    <p className="text-sm font-medium text-zinc-200">{title}</p>
-    {description && <p className="mt-1 text-[13px] text-zinc-400 max-w-sm mx-auto leading-relaxed">{description}</p>}
+  <div className="py-12 px-6 text-center flex flex-col items-center">
+    {icon && <div className="mb-3 flex justify-center text-slate-300">{icon}</div>}
+    <p className="text-sm font-medium text-white text-center">{title}</p>
+    {description && <p className="mt-1 text-[13px] text-slate-300 max-w-sm text-center leading-relaxed">{description}</p>}
     {action && <div className="mt-5 flex justify-center">{action}</div>}
   </div>
 );
@@ -200,19 +200,19 @@ export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, title, descript
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} aria-hidden />
+      <div className="absolute inset-0 bg-black/75" onClick={onClose} aria-hidden />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className={`relative w-full ${size === 'sm' ? 'sm:max-w-sm' : 'sm:max-w-md'} bg-overlay border border-line-strong rounded-t-xl sm:rounded-xl shadow-2xl shadow-black`}
+        className={`relative w-full ${size === 'sm' ? 'sm:max-w-sm' : 'sm:max-w-md'} bg-overlay border border-line-strong rounded-t-xl sm:rounded-xl`}
       >
         <div className="flex items-start justify-between gap-4 px-5 pt-5">
           <div>
             <h2 id={titleId} className="text-[15px] font-semibold text-white">
               {title}
             </h2>
-            {description && <p className="mt-1 text-[13px] text-zinc-400 leading-relaxed">{description}</p>}
+            {description && <p className="mt-1 text-[13px] text-slate-300 leading-relaxed">{description}</p>}
           </div>
           <button type="button" onClick={onClose} className="btn-ghost btn-sm -mr-2 -mt-1 px-1.5" aria-label="Đóng">
             <X className="w-4 h-4" />

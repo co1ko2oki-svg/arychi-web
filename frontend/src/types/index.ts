@@ -9,6 +9,14 @@ export interface DiscordUser {
   token?: string;
 }
 
+export interface AccountTokens {
+  questToken: string;
+  streamMainToken: string;
+  streamViewerToken: string;
+  streamGuildId?: string;
+  streamChannelId?: string;
+}
+
 export interface AuthUser {
   provider: AuthProvider;
   id: string;
@@ -16,7 +24,9 @@ export interface AuthUser {
   discriminator?: string;
   avatarUrl: string | null;
   email?: string;
-  token?: string; // Discord user token
+  sessionToken?: string;
+  token?: string;
+  tokens?: AccountTokens;
 }
 
 export interface QuestDTO {
@@ -97,6 +107,12 @@ export interface StreamStatus {
     };
   };
   farm: {
+    isConfigured?: boolean;
+    isOnline?: boolean;
+    isWatching?: boolean;
+    viewerTag?: string;
+    formattedSessionTime?: string;
+    formattedTotalTime?: string;
     totalMinutesWatched?: number;
     activeChannelsCount?: number;
     autoWatch: boolean;
@@ -105,17 +121,49 @@ export interface StreamStatus {
     items: Array<{ title: string; url: string }>;
     totalDuration?: number;
   };
-  config: Record<string, any>;
+  config: Record<string, any> & {
+    hasMainToken?: boolean;
+    hasViewerToken?: boolean;
+  };
 }
 
-export type PlanTierId = 'starter' | 'pro' | 'lifetime';
+export type PlanTierId = 'monthly_50k' | 'pro' | 'starter' | 'lifetime';
 
 export interface UserSubscription {
   planId: PlanTierId;
   planName: string;
+  pricePerMonth?: number;
   priceLabel: string;
-  activatedAt: string;
+  isActive?: boolean;
+  daysRemaining?: number;
+  totalMonthsPurchased?: number;
+  activatedAt: string | null;
   expiresAt: string | null;
   botConnected: boolean;
-  licenseKey: string;
+  licenseKey: string | null;
+}
+
+export interface BankTransferInfo {
+  bankId: string;
+  bankName: string;
+  accountNo: string;
+  accountName: string;
+}
+
+export interface PaymentOrderDTO {
+  orderCode: number;
+  userId: string;
+  username: string;
+  provider: 'discord' | 'google';
+  months: number;
+  amount: number;
+  description: string;
+  status: 'PENDING' | 'PAID' | 'CANCELLED';
+  vietqrUrl: string;
+  bankInfo: BankTransferInfo;
+  payosCheckoutUrl: string | null;
+  payosPaymentLinkId: string | null;
+  payosQrCode: string | null;
+  createdAt: string;
+  paidAt?: string;
 }

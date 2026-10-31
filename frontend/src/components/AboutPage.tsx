@@ -1,19 +1,12 @@
 import React, { useState } from 'react';
 import {
-  Activity,
   ArrowRight,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
   Code2,
-  Cpu,
   Globe,
-  HardDrive,
   Lock,
-  Server,
-  ShieldCheck,
-  Sparkles,
-  Tv,
   Zap,
 } from 'lucide-react';
 import { NavTabId } from './Navbar';
@@ -44,16 +37,16 @@ export const AboutPage: React.FC<AboutPageProps> = ({
   };
 
   return (
-    <div className="space-y-16 py-6">
+    <div className="space-y-16 py-4">
       <PageHeader
-        title="Giới thiệu hệ thống"
-        description="Nền tảng tự động hóa Discord hợp nhất chạy trực tiếp trên thiết bị cá nhân của bạn. Gom toàn bộ công cụ vào một giao diện Web duy nhất qua kết nối nội bộ 127.0.0.1."
+        title="Tài liệu Kỹ thuật & Kiến trúc"
+        description="Kiến trúc vận hành 2 tên miền (arychi.xyz & dash.arychi.xyz), đồng bộ Database với VietQR/PayOS và quản lý Token."
         meta={
           <>
-            <span className="text-zinc-200">Arychi Suite v2.0.0</span>
+            <span className="text-white">Arychi Suite v2.0.0</span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone="ok" />
-              100% Localhost • Zero External Cloud
+              Gói 50.000đ / 1 tháng (Full tính năng)
             </span>
             <span className="inline-flex items-center gap-1.5">
               <StatusDot tone={questConnected ? 'ok' : 'error'} />
@@ -72,7 +65,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               onClick={() => onNavigateTab('home')}
               className="btn-primary"
             >
-              <span>Mở bảng điều khiển</span>
+              <span>Về Tổng quan</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
@@ -81,18 +74,21 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               onClick={onOpenLoginModal}
               className="btn-primary"
             >
-              <span>Kết nối tài khoản Discord</span>
+              <span>Đăng nhập OAuth2</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           )
         }
       />
 
-      <nav aria-label="Mục lục trang" className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line text-xs">
+      <nav
+        aria-label="Mục lục trang"
+        className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-line text-xs"
+      >
         {[
           { id: 'sec-modules', label: '3 Trụ cột kỹ thuật' },
           { id: 'sec-arch', label: 'Kiến trúc & Cổng mạng' },
-          { id: 'sec-security', label: 'Bảo mật & Riêng tư' },
+          { id: 'sec-security', label: 'Bảo mật & Database' },
           { id: 'sec-specs', label: 'Thông số môi trường' },
           { id: 'sec-history', label: 'Lịch sử phát triển' },
           { id: 'sec-faq', label: 'Giải đáp kỹ thuật' },
@@ -101,29 +97,36 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             key={item.id}
             type="button"
             onClick={() => scrollToSection(item.id)}
-            className="px-3 py-1.5 rounded-md whitespace-nowrap text-zinc-400 hover:text-white hover:bg-white/[0.05] transition-colors"
+            className="px-3 py-1.5 rounded-md whitespace-nowrap text-slate-300 hover:text-white hover:bg-white/[0.06] transition-colors"
           >
             {item.label}
           </button>
         ))}
       </nav>
 
-      <Section id="sec-modules" title="3 Trụ cột kỹ thuật độc lập" description="Mỗi module chịu trách nhiệm cho một luồng xử lý riêng biệt.">
+      <Section
+        id="sec-modules"
+        title="3 Trụ cột kỹ thuật độc lập"
+        description="Mỗi module chịu trách nhiệm cho một luồng xử lý riêng biệt trên dash.arychi.xyz."
+      >
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">Module 01</span>
-                <span className="text-xs font-mono text-slate-300">Port :3001</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">
+                  Module 01
+                </span>
+                <span className="text-xs font-mono text-slate-200">1 Token • :3001</span>
               </div>
               <h3 className="text-base font-bold text-white">Quest Engine</h3>
-              <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
-                Giải pháp cày nhiệm vụ Discord Quests tự động không cần cài đặt game dung lượng lớn. Giả lập heartbeat định kỳ gửi đến Discord theo định dạng desktop client chính thức.
+              <p className="text-[13px] text-slate-300 leading-relaxed">
+                Giải pháp cày nhiệm vụ Discord Quests tự động không cần cài đặt game dung lượng lớn.
+                Giả lập heartbeat định kỳ gửi đến Discord theo định dạng desktop client chính thức.
               </p>
-              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-300">
+              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-200">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                  <span>Mô phỏng Heartbeat 30s</span>
+                  <span>Yêu cầu nhập 1 Token Acc Discord</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
@@ -135,25 +138,28 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-slate-400">
-              Node.js + Fastify + WS
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-300">
+              Node.js + Express + WS
             </div>
           </div>
 
           <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">Module 02</span>
-                <span className="text-xs font-mono text-slate-300">Port :3000</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">
+                  Module 02
+                </span>
+                <span className="text-xs font-mono text-slate-200">2 Token • :3000</span>
               </div>
               <h3 className="text-base font-bold text-white">StreamBot Voice</h3>
-              <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
-                Truyền phát âm thanh Opus và video vào Voice Channel 24/7, tích hợp module Viewer Farm duy trì thời lượng xem stream cho tài khoản mà không bị gián đoạn.
+              <p className="text-[13px] text-slate-300 leading-relaxed">
+                Truyền phát âm thanh Opus và video vào Voice Channel 24/7, tích hợp Viewer Farm duy
+                trì thời lượng xem stream bằng tài khoản phụ.
               </p>
-              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-300">
+              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-200">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                  <span>Đa nguồn: YouTube, Twitch, MP4</span>
+                  <span>1 Token Chính (Stream) + 1 Token Phụ (Xem)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
@@ -165,22 +171,25 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-slate-400">
-              @discordjs/voice + FFmpeg
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-300">
+              discord.js-selfbot-v13 + FFmpeg
             </div>
           </div>
 
           <div className="surface-interactive p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">Module 03</span>
-                <span className="text-xs font-mono text-slate-300">Python 3</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-blue-300">
+                  Module 03
+                </span>
+                <span className="text-xs font-mono text-slate-200">1 Token • Python 3</span>
               </div>
               <h3 className="text-base font-bold text-white">Science Telemetry</h3>
-              <p className="text-[13px] text-slate-300 leading-relaxed max-w-[44ch]">
-                Giả lập nhịp độ chơi game gửi trực tiếp lên endpoint phân tích Discord Science API với chữ ký Windows PE nhị phân thực tế để cày huy hiệu và số giờ chơi hồ sơ.
+              <p className="text-[13px] text-slate-300 leading-relaxed">
+                Giả lập nhịp độ chơi game gửi trực tiếp lên endpoint phân tích Discord Science API
+                với chữ ký Windows PE nhị phân thực tế để cày huy hiệu hồ sơ.
               </p>
-              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-300">
+              <ul className="pt-3 border-t border-line space-y-1.5 text-xs text-slate-200">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                   <span>Trích xuất Windows PE Fingerprint</span>
@@ -195,119 +204,153 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-slate-400">
+            <div className="pt-3 border-t border-line text-xs font-mono text-slate-300">
               Python 3 + PE Header Hash
             </div>
           </div>
         </div>
       </Section>
 
-      <Section id="sec-arch" title="Kiến trúc & Cổng mạng" description="Mọi luồng dữ liệu đều được cô lập trong môi trường loopback.">
+      <Section
+        id="sec-arch"
+        title="Kiến trúc 2 Tên miền & Cổng mạng"
+        description="Phân tách rõ tầng giới thiệu (arychi.xyz) và tầng điều khiển (dash.arychi.xyz)."
+      >
         <div className="surface divide-y divide-line">
           <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-brand-text">Tầng 01: Frontend</p>
-              <p className="text-sm font-semibold text-white">Web UI (:5173)</p>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                React 18 + Vite SPA, lưu trữ token trong LocalStorage trình duyệt người dùng.
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+                Tầng 01: arychi.xyz
+              </p>
+              <p className="text-sm font-semibold text-white">Cổng Giới thiệu &amp; Thanh toán</p>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Đăng nhập OAuth2 (Bot Discord / Google) và thanh toán gói 50.000đ/tháng qua VietQR
+                &amp; PayOS.
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">Tầng 02: Cục bộ</p>
-              <p className="text-sm font-semibold text-white">Local Services (127.0.0.1)</p>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                Quest Engine (:3001), StreamBot (:3000) và Python Spoofer xử lý tác vụ không trung gian.
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+                Tầng 02: dash.arychi.xyz
+              </p>
+              <p className="text-sm font-semibold text-white">Xác minh Lần 2 &amp; Sidebar</p>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Kiểm tra lại trạng thái gói trong Database trước khi mở giao diện điều khiển cột
+                trái.
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Tầng 03: Đích đến</p>
-              <p className="text-sm font-semibold text-white">Discord API Endpoints</p>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                HTTPS TLS 1.3 kết nối trực tiếp đến các endpoint chính thức: /quests, /science, Voice RTC.
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+                Tầng 03: Backend &amp; Database
+              </p>
+              <p className="text-sm font-semibold text-white">Port :3001 &amp; :3000</p>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Lưu trữ tài khoản, thời hạn gói thuê bao và cấu hình Token vào Database.
               </p>
             </div>
           </div>
 
           <div className="p-5 divide-y divide-line text-[13px]">
             <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="font-mono text-zinc-200 font-semibold">5173 (TCP) • Vite Frontend</span>
-              <span className="text-zinc-400">Giao diện điều khiển SPA (React 18, Tailwind CSS)</span>
-              <span className="text-emerald-400 font-mono text-xs">Localhost only</span>
+              <span className="font-mono text-white font-semibold">5173 (TCP) • Web Portal</span>
+              <span className="text-slate-300">
+                Hỗ trợ định tuyến tên miền arychi.xyz và miền phụ dash.arychi.xyz
+              </span>
+              <span className="text-blue-300 font-mono text-xs">Dual-Domain</span>
             </div>
             <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="font-mono text-zinc-200 font-semibold">3001 (TCP/WS) • Quest Daemon</span>
-              <span className="text-zinc-400">Fastify REST API &amp; WebSocket Server cho tiến trình Quest</span>
-              <span className="text-emerald-400 font-mono text-xs">Đồng bộ realtime</span>
+              <span className="font-mono text-white font-semibold">
+                3001 (TCP/WS) • Quest &amp; Subscription DB
+              </span>
+              <span className="text-slate-300">
+                REST API OAuth2, VietQR/PayOS, Database &amp; Quest WebSocket
+              </span>
+              <span className="text-blue-300 font-mono text-xs">Realtime DB</span>
             </div>
             <div className="py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span className="font-mono text-zinc-200 font-semibold">3000 (TCP/WS) • StreamBot Service</span>
-              <span className="text-zinc-400">Node.js Web API, FFmpeg stream pipeline và Voice Gateway</span>
-              <span className="text-emerald-400 font-mono text-xs">Quản lý Voice Stream</span>
+              <span className="font-mono text-white font-semibold">
+                3000 (TCP/WS) • StreamBot Dual-Token
+              </span>
+              <span className="text-slate-300">
+                Quản lý đồng thời 1 Token Chính (Stream) và 1 Token Phụ (Viewer Farm)
+              </span>
+              <span className="text-blue-300 font-mono text-xs">2-Token Voice</span>
             </div>
           </div>
         </div>
       </Section>
 
-      <Section id="sec-security" title="Cam kết bảo mật & Quyền riêng tư" description="Nguyên tắc thiết kế bảo vệ an toàn tài khoản và dữ liệu cá nhân.">
+      <Section
+        id="sec-security"
+        title="Cam kết bảo mật & Quyền riêng tư"
+        description="Nguyên tắc thiết kế bảo vệ an toàn tài khoản và dữ liệu cá nhân."
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="surface p-5 space-y-2">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Lock className="w-4 h-4 text-brand-text" />
-              <span>Client-Side Only</span>
+              <Lock className="w-4 h-4 text-blue-300" />
+              <span>Xác minh Kép (2nd Verification)</span>
             </h3>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
-              Discord User Token chỉ lưu trong bộ nhớ trình duyệt và RAM tiến trình nội bộ máy bạn. Arychi không sở hữu bất kỳ cơ sở dữ liệu trên mây nào để thu thập dữ liệu người dùng.
+            <p className="text-[13px] text-slate-300 leading-relaxed">
+              Mọi lượt truy cập vào miền phụ dash.arychi.xyz đều phải qua bước xác minh lần 2 trực
+              tiếp với Database để đảm bảo gói 50.000đ/tháng đang còn hạn.
             </p>
           </div>
 
           <div className="surface p-5 space-y-2">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-emerald-400" />
+              <Zap className="w-4 h-4 text-blue-300" />
               <span>Anti-Rate Limit</span>
             </h3>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
-              Các gói tin telemetry gửi đến Discord được thiết kế với chu kỳ đệm tự nhiên tương tự ứng dụng chính thức, không bắn dồn dập bất thường nhằm triệt tiêu nguy cơ vi phạm giới hạn tốc độ.
+            <p className="text-[13px] text-slate-300 leading-relaxed">
+              Các gói tin telemetry gửi đến Discord được thiết kế với chu kỳ đệm tự nhiên tương tự
+              ứng dụng chính thức, không bắn dồn dập bất thường.
             </p>
           </div>
 
           <div className="surface p-5 space-y-2">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Globe className="w-4 h-4 text-cyan-400" />
-              <span>Zero Analytics</span>
+              <Globe className="w-4 h-4 text-blue-300" />
+              <span>VietQR &amp; PayOS Tự động</span>
             </h3>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
-              Ứng dụng không nhúng bất kỳ đoạn mã theo dõi hành vi, Google Analytics, pixel quảng cáo hay dịch vụ báo cáo lỗi của bên thứ ba nào. Mã nguồn chạy sạch sẽ 100%.
+            <p className="text-[13px] text-slate-300 leading-relaxed">
+              Giao dịch mua gói 50.000đ/tháng được xử lý qua chuẩn VietQR và PayOS API, tự động cộng
+              dồn số ngày sử dụng (30 ngày/tháng) vào Database.
             </p>
           </div>
 
           <div className="surface p-5 space-y-2">
             <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-amber-400" />
-              <span>Audit-Ready</span>
+              <Code2 className="w-4 h-4 text-blue-300" />
+              <span>Tách biệt Token theo Module</span>
             </h3>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
-              Toàn bộ source code TypeScript, Python và tệp thực thi đều nằm trực tiếp trên máy của bạn. Bạn hoàn toàn có thể mở bất kỳ tệp tin nào để kiểm tra, debug gói tin mạng.
+            <p className="text-[13px] text-slate-300 leading-relaxed">
+              Token dùng cho Discord Quests (1 Token) và Treo Stream (2 Token: 1 Chính + 1 Phụ) được
+              quản lý độc lập ngay trong bảng điều khiển.
             </p>
           </div>
         </div>
       </Section>
 
-      <Section id="sec-specs" title="Yêu cầu hệ thống" description="Môi trường vận hành khuyến nghị.">
+      <Section
+        id="sec-specs"
+        title="Yêu cầu hệ thống"
+        description="Môi trường vận hành khuyến nghị."
+      >
         <div className="surface divide-y sm:divide-y-0 sm:divide-x divide-line grid grid-cols-1 sm:grid-cols-2">
           <div className="p-5 space-y-3">
             <h3 className="text-sm font-semibold text-white">Yêu cầu phần mềm</h3>
             <dl className="divide-y divide-line text-[13px]">
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">Hệ điều hành</dt>
-                <dd className="font-mono text-zinc-200 text-xs">Windows 10/11, Linux, macOS</dd>
+                <dt className="text-slate-300">Hệ điều hành</dt>
+                <dd className="font-mono text-white text-xs">Windows 10/11, Linux, macOS</dd>
               </div>
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">Node.js Runtime</dt>
-                <dd className="font-mono text-zinc-200 text-xs">&gt;= v18.16.0 LTS (v20+)</dd>
+                <dt className="text-slate-300">Node.js Runtime</dt>
+                <dd className="font-mono text-white text-xs">&gt;= v18.16.0 LTS (v20+)</dd>
               </div>
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">Python Runtime</dt>
-                <dd className="font-mono text-zinc-200 text-xs">&gt;= 3.10.x</dd>
+                <dt className="text-slate-300">Python Runtime</dt>
+                <dd className="font-mono text-white text-xs">&gt;= 3.10.x</dd>
               </div>
             </dl>
           </div>
@@ -316,61 +359,56 @@ export const AboutPage: React.FC<AboutPageProps> = ({
             <h3 className="text-sm font-semibold text-white">Tài nguyên chiếm dụng</h3>
             <dl className="divide-y divide-line text-[13px]">
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">RAM</dt>
-                <dd className="font-mono text-emerald-400 text-xs font-semibold">~120MB – 250MB</dd>
+                <dt className="text-slate-300">RAM</dt>
+                <dd className="font-mono text-blue-300 text-xs font-semibold">~120MB – 250MB</dd>
               </div>
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">CPU (Quests/Badges)</dt>
-                <dd className="font-mono text-emerald-400 text-xs font-semibold">&lt; 1%</dd>
+                <dt className="text-slate-300">CPU (Quests/Badges)</dt>
+                <dd className="font-mono text-blue-300 text-xs font-semibold">&lt; 1%</dd>
               </div>
               <div className="py-2 flex items-center justify-between">
-                <dt className="text-zinc-500">CPU (StreamBot)</dt>
-                <dd className="font-mono text-brand-text text-xs font-semibold">2% – 5%</dd>
+                <dt className="text-slate-300">CPU (StreamBot)</dt>
+                <dd className="font-mono text-blue-300 text-xs font-semibold">2% – 5%</dd>
               </div>
             </dl>
           </div>
         </div>
       </Section>
 
-      <Section id="sec-history" title="Lịch sử phát triển" description="Các cột mốc phiên bản chính của Arychi Suite.">
+      <Section
+        id="sec-history"
+        title="Lịch sử phát triển"
+        description="Các cột mốc phiên bản chính của Arychi Suite."
+      >
         <div className="surface divide-y divide-line">
           <div className="p-5 space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono font-bold text-brand-text bg-brand-muted px-2 py-0.5 rounded">
-                v2.0.0
+              <span className="text-xs font-mono font-bold text-blue-300 bg-blue-600/20 px-2 py-0.5 rounded">
+                v2.1.0
               </span>
-              <p className="text-sm font-semibold text-white">Arychi UI Redesign &amp; Unified Dashboard</p>
-              <span className="text-xs text-zinc-500 ml-auto">Hiện tại</span>
+              <p className="text-sm font-semibold text-white">
+                Kiến trúc arychi.xyz / dash.arychi.xyz &amp; VietQR PayOS
+              </p>
+              <span className="text-xs text-slate-300 ml-auto">Hiện tại</span>
             </div>
-            <ul className="space-y-1 text-[13px] text-zinc-400 list-disc list-inside pt-1">
-              <li>Xây dựng trung tâm điều khiển hợp nhất React 18, Vite 5 và Tailwind CSS.</li>
-              <li>Loại bỏ hoàn toàn phong cách AI template, chuyển sang thiết kế tối giản, sắc sảo.</li>
-              <li>Đồng bộ trạng thái realtime qua WebSocket kép (:3001 và :3000).</li>
-              <li>Tích hợp module Science Telemetry cày giờ chơi qua PE Fingerprint.</li>
+            <ul className="space-y-1 text-[13px] text-slate-300 list-disc list-inside pt-1">
+              <li>Đồng nhất gói duy nhất 50.000đ/tháng mở khóa toàn bộ tính năng.</li>
+              <li>Tích hợp API VietQR &amp; PayOS tự động xác nhận và cộng tháng vào Database.</li>
+              <li>Xác minh lần 2 khi chuyển hướng sang dash.arychi.xyz với bố cục Sidebar cột trái.</li>
+              <li>Cấu hình 1 Token cho Quest/Giờ chơi và 2 Token (Chính + Phụ) cho Treo Stream.</li>
             </ul>
           </div>
 
           <div className="p-5 space-y-2">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-mono font-medium text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded">
+              <span className="text-xs font-mono font-medium text-slate-200 bg-white/[0.06] px-2 py-0.5 rounded">
                 v1.5.0
               </span>
               <p className="text-sm font-semibold text-white">StreamBot Voice &amp; Viewer Farm</p>
             </div>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
-              Tích hợp yt-dlp và FFmpeg tự động giải mã video phòng thoại, bổ sung module Viewer Farm tự động giữ kết nối.
-            </p>
-          </div>
-
-          <div className="p-5 space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-mono font-medium text-zinc-400 bg-white/[0.05] px-2 py-0.5 rounded">
-                v1.0.0
-              </span>
-              <p className="text-sm font-semibold text-white">Phiên bản ban đầu</p>
-            </div>
-            <p className="text-[13px] text-zinc-400 leading-relaxed">
-              Bản thử nghiệm đầu tiên thực hiện các gói heartbeat cho nhiệm vụ Discord Quests qua CLI.
+            <p className="text-[13px] text-slate-300 leading-relaxed">
+              Tích hợp yt-dlp và FFmpeg tự động giải mã video phòng thoại, bổ sung module Viewer
+              Farm tự động giữ kết nối.
             </p>
           </div>
         </div>
@@ -381,19 +419,15 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           {[
             {
               q: 'Tôi có thể tắt tab trình duyệt khi hệ thống đang làm Quest hoặc Stream không?',
-              a: 'Có thể. Các engine xử lý chính (Quest Engine :3001 và StreamBot :3000) chạy dưới dạng tiến trình độc lập trên máy tính của bạn sau khi mở start.bat. Bạn có thể đóng tab trình duyệt mà tiến trình vẫn tiếp tục chạy ngầm.',
+              a: 'Có thể. Các engine xử lý chính (Quest Engine :3001 và StreamBot :3000) chạy dưới dạng tiến trình độc lập trên máy chủ. Bạn có thể đóng tab trình duyệt mà tiến trình vẫn tiếp tục chạy ngầm.',
             },
             {
               q: 'Tại sao việc cày Discord Quest không cần phải tải game nặng?',
-              a: 'Ứng dụng Discord Desktop xác nhận tiến độ nhiệm vụ qua các gói tin telemetry định kỳ (heartbeat) gửi lên máy chủ. Quest Engine mô phỏng chuẩn xác định dạng này mỗi 30 giây, giúp bạn không phải tải 50GB-100GB game.',
+              a: 'Ứng dụng Discord Desktop xác nhận tiến độ nhiệm vụ qua các gói tin telemetry định kỳ (heartbeat) gửi lên máy chủ. Quest Engine mô phỏng chuẩn xác định dạng này mỗi 30 giây.',
             },
             {
-              q: 'Lấy token Discord có an toàn không và lấy ở đâu?',
-              a: 'Trên giao diện web Discord, bạn mở F12 > chuyển sang thẻ Network > tìm từ khóa "science" hoặc "/users/@me" > sao chép giá trị trường Authorization. Arychi chỉ lưu token này tại máy tính cục bộ của bạn.',
-            },
-            {
-              q: 'Có thể chạy đồng thời vừa làm Quest vừa phát nhạc/stream voice không?',
-              a: 'Hoàn toàn được. Mỗi module hoạt động trên một tiến trình Node.js riêng biệt và lắng nghe trên các cổng khác nhau (3001 cho Quest và 3000 cho Stream) nên không xung đột tài nguyên.',
+              q: 'Tại sao Treo Stream lại cần nhập 2 Token (1 Chính và 1 Phụ)?',
+              a: 'Discord yêu cầu có ít nhất 1 người xem trong kênh thoại để ghi nhận thời gian stream. Do đó 1 Token Chính được dùng để phát video và 1 Token Phụ tự động vào xem stream đó.',
             },
           ].map((item, idx) => {
             const isOpen = activeFaq === idx;
@@ -405,17 +439,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full text-left flex items-center justify-between text-sm font-semibold text-zinc-100 hover:text-white transition-colors"
+                  className="w-full text-left flex items-center justify-between text-sm font-semibold text-white hover:text-blue-300 transition-colors"
                 >
                   <span>{item.q}</span>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-brand-text shrink-0 ml-4" />
+                    <ChevronUp className="w-4 h-4 text-blue-300 shrink-0 ml-4" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0 ml-4" />
+                    <ChevronDown className="w-4 h-4 text-slate-300 shrink-0 ml-4" />
                   )}
                 </button>
                 {isOpen && (
-                  <p className="mt-3 pt-3 border-t border-line text-[13px] text-zinc-300 leading-relaxed max-w-[54ch]">
+                  <p className="mt-3 pt-3 border-t border-line text-[13px] text-slate-300 leading-relaxed">
                     {item.a}
                   </p>
                 )}
@@ -424,13 +458,6 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           })}
         </div>
       </Section>
-
-      <div className="surface p-5 text-xs text-zinc-300 leading-relaxed">
-        <p className="max-w-[60ch]">
-          <strong className="text-white font-semibold">Tuyên bố miễn trừ trách nhiệm: </strong>
-          Arychi Suite được phát triển với mục đích học tập, nghiên cứu giao thức mạng và tự động hóa cá nhân trên máy trạm cục bộ. Dự án không liên kết, không được tài trợ hoặc xác nhận bởi Discord Inc.
-        </p>
-      </div>
     </div>
   );
 };

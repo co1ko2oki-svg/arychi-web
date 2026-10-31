@@ -44,10 +44,22 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     [removeToast]
   );
 
-  const success = useCallback((message: string, title?: string) => showToast('success', message, title), [showToast]);
-  const error = useCallback((message: string, title?: string) => showToast('error', message, title, 5000), [showToast]);
-  const warning = useCallback((message: string, title?: string) => showToast('warning', message, title), [showToast]);
-  const info = useCallback((message: string, title?: string) => showToast('info', message, title), [showToast]);
+  const success = useCallback(
+    (message: string, title?: string) => showToast('success', message, title),
+    [showToast]
+  );
+  const error = useCallback(
+    (message: string, title?: string) => showToast('error', message, title, 5000),
+    [showToast]
+  );
+  const warning = useCallback(
+    (message: string, title?: string) => showToast('warning', message, title),
+    [showToast]
+  );
+  const info = useCallback(
+    (message: string, title?: string) => showToast('info', message, title),
+    [showToast]
+  );
 
   return (
     <ToastContext.Provider value={{ showToast, success, error, warning, info }}>
@@ -58,10 +70,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       >
         {toasts.map((t) => {
           const config = {
-            success: { icon: CheckCircle2, text: 'text-emerald-400' },
-            error: { icon: AlertCircle, text: 'text-rose-400' },
-            warning: { icon: AlertTriangle, text: 'text-amber-400' },
-            info: { icon: Info, text: 'text-zinc-400' },
+            success: { icon: CheckCircle2, text: 'text-blue-300' },
+            error: { icon: AlertCircle, text: 'text-rose-300' },
+            warning: { icon: AlertTriangle, text: 'text-slate-200' },
+            info: { icon: Info, text: 'text-slate-300' },
           }[t.type];
 
           const Icon = config.icon;
@@ -69,18 +81,18 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return (
             <div
               key={t.id}
-              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg bg-overlay border border-line-strong shadow-xl shadow-black/60"
+              className="pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg bg-overlay border border-line-strong"
               role={t.type === 'error' ? 'alert' : 'status'}
             >
               <Icon className={`w-4 h-4 shrink-0 mt-0.5 ${config.text}`} />
               <div className="flex-1 min-w-0 text-[13px] leading-5">
                 {t.title && <p className="font-medium text-white">{t.title}</p>}
-                <p className="text-zinc-300 break-words">{t.message}</p>
+                <p className="text-slate-200 break-words">{t.message}</p>
               </div>
               <button
                 type="button"
                 onClick={() => removeToast(t.id)}
-                className="text-zinc-500 hover:text-zinc-200 p-0.5 -mr-1 rounded transition-colors shrink-0"
+                className="text-slate-300 hover:text-white p-0.5 -mr-1 rounded transition-colors shrink-0"
                 aria-label="Đóng thông báo"
               >
                 <X className="w-4 h-4" />

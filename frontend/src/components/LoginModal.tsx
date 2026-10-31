@@ -1,64 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import { Eye, EyeOff, Loader2, LogOut, AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Globe, Loader2, LogOut, ShieldCheck, UserCheck } from 'lucide-react';
 import { questApi } from '../services/api';
-import { AuthUser } from '../types';
-import { Dialog } from './ui';
+import { AuthUser, UserSubscription } from '../types';
+import { Dialog, SegmentedControl } from './ui';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: AuthUser | null;
-  onSaveUser: (user: AuthUser | null) => void;
+  onSaveAuth: (user: AuthUser | null, sessionToken: string, subscription: UserSubscription | null) => void;
 }
 
-export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, user, onSaveUser }) => {
-  const [tokenInput, setTokenInput] = useState(user?.token || '');
-  const [showToken, setShowToken] = useState(false);
+export const LoginModal: React.FC<LoginModalProps> = ({
+  isOpen,
+  onClose,
+  user,
+  onSaveAuth,
+}) => {
+  const [provider, setProvider] = useState<'discord' | 'google'>('discord');
+  const [discordUsername, setDiscordUsername] = useState('');
+  const [discordId, setDiscordId] = useState('');
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleName, setGoogleName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
-      setTokenInput(user?.token || '');
       setError(null);
+      if (user) {
+        setProvider(user.provider === 'google' ? 'google' : 'discord');
+        setDiscordUsername(user.username || '');
+        setDiscordId(user.id || '');
+        setGoogleEmail(user.email || '');
+        setGoogleName(user.username || '');
+      }
     }
   }, [isOpen, user]);
 
-  const handleVerifyDiscordToken = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!tokenInput.trim()) {
-      setError('Vui lòng nhập Discord User Token');
-      return;
-    }
-    setLoading(true);
+  const handleOAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
-    try {
-      const res = await questApi.verifyToken(tokenInput.trim());
-      if (res.valid && res.user) {
-        const authUser: AuthUser = {
-          provider: 'discord',
-          id: res.user.id,
-          username: res.user.username,
-          discriminator: res.user.discriminator,
-          avatarUrl: res.user.avatarUrl,
-          email: res.user.email,
-          token: tokenInput.trim(),
-        };
-        onSaveUser(authUser);
-        onClose();
-      } else {
-        setError(res.error || 'Token không hợp lệ hoặc đã hết hạn.');
+
+    if (provider === 'discord') {
+      if (!discordUsername.trim()) {
+        setError('Vui lòng nhập Discord Username hoặc ID để ủy quyền qua Bot Discord OAuth2');
+        return;
       }
+    } else {
+      if (!googleEmail.trim() || !googleEmail.includes('@')) {
+        setError('Vui lòng nhập địa chỉ Gmail hợp lệ để đăng ký / đăng nhập');
+        return;
+      }
+    }
+
+    setLoading(true);
+    try {
+      const payload =
+        provider === 'discord'
+          ? {
+              provider: 'discord' as const,
+              username: discordUsername.trim().replace(/^@/, ''),
+              id: discordId.trim() || undefined,
+            }
+          : {
+              provider: 'google' as const,
+              email: googleEmail.trim(),
+              username: googleName.trim() || googleEmail.trim().split('@')[0],
+            };
+
+      const res = await questApi.oauthLogin(payload);
+      const authUser: AuthUser = {
+        ...res.account,
+        sessionToken: res.sessionToken,
+        token: res.account.tokens?.questToken || '',
+      };
+      onSaveAuth(authUser, res.sessionToken, res.subscription);
+      onClose();
     } catch (err: any) {
-      setError(err?.message || 'Không thể kết nối đến Quest Backend (:3001)');
+      setError(err?.message || 'Không thể kết nối máy chủ xác thực OAuth2 (:3001)');
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = () => {
-    onSaveUser(null);
-    setTokenInput('');
+    onSaveAuth(null, '', null);
     onClose();
   };
 
@@ -66,95 +93,157 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, user, o
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={user ? 'Tài khoản Discord' : 'Kết nối tài khoản Discord'}
-      description={
-        user
-          ? 'Tài khoản đang được dùng để đồng bộ và chạy nhiệm vụ.'
-          : 'Dán User Token để Arychi đồng bộ nhiệm vụ. Token chỉ được lưu trong trình duyệt và gửi tới backend nội bộ localhost:3001.'
-      }
+      title={user ? 'Tài khoản đã đăng nhập (OAuth2)' : 'Đăng nhập OAuth2 — arychi.xyz'}
+      description="Đăng nhập bằng Bot Discord (OAuth2) hoặc đăng ký bằng Tài khoản Google để mua gói 50.000đ/tháng và truy cập dash.arychi.xyz."
     >
       {user && (
         <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-line">
           <div className="flex items-center gap-3 min-w-0">
-            <img
-              src={user.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}
-              alt=""
-              className="w-9 h-9 rounded-full object-cover"
-            />
+            <div className="icon-badge">
+              <UserCheck className="w-4 h-4" />
+            </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-white truncate">@{user.username}</p>
-              <p className="text-xs text-emerald-400">Đã xác thực</p>
+              <p className="text-sm font-semibold text-white truncate">
+                @{user.username}{' '}
+                <span className="text-xs font-mono text-blue-300">
+                  ({user.provider === 'google' ? 'Google OAuth2' : 'Discord Bot OAuth2'})
+                </span>
+              </p>
+              <p className="text-xs text-slate-300 truncate">{user.email || `ID: ${user.id}`}</p>
             </div>
           </div>
-          <button type="button" onClick={handleLogout} className="btn-ghost btn-sm hover:text-rose-300">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="btn-ghost btn-sm hover:text-rose-300 shrink-0"
+          >
             <LogOut className="w-3.5 h-3.5" />
             Đăng xuất
           </button>
         </div>
       )}
 
-      <form onSubmit={handleVerifyDiscordToken} className="space-y-4">
-        <div>
-          <div className="flex items-center justify-between">
-            <label htmlFor="discord-token" className="field-label">
-              {user ? 'Thay token khác' : 'User Token'}
-            </label>
-            <button
-              type="button"
-              onClick={() => setShowToken((v) => !v)}
-              className="mb-1.5 text-xs text-zinc-500 hover:text-zinc-200 inline-flex items-center gap-1 transition-colors"
-              aria-pressed={showToken}
-            >
-              {showToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              {showToken ? 'Ẩn' : 'Hiện'}
-            </button>
-          </div>
-          <input
-            id="discord-token"
-            type={showToken ? 'text' : 'password'}
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="Giá trị header Authorization"
-            autoComplete="off"
-            spellCheck={false}
-            className="input font-mono"
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? 'discord-token-error' : undefined}
-            autoFocus
-          />
-          {error && (
-            <p id="discord-token-error" className="mt-2 text-xs text-rose-400 flex items-start gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-px" />
-              {error}
-            </p>
-          )}
-        </div>
+      <div className="mb-4">
+        <SegmentedControl
+          ariaLabel="Phương thức đăng nhập OAuth2"
+          value={provider}
+          onChange={(v) => {
+            setProvider(v);
+            setError(null);
+          }}
+          options={[
+            { value: 'discord', label: 'Bot Discord (OAuth2)' },
+            { value: 'google', label: 'Tài khoản Google' },
+          ]}
+        />
+      </div>
 
-        <button type="submit" disabled={loading || !tokenInput.trim()} className="btn-primary w-full">
-          {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-          {loading ? 'Đang xác thực…' : 'Xác thực và kết nối'}
+      <form onSubmit={handleOAuthSubmit} className="space-y-4">
+        {provider === 'discord' ? (
+          <>
+            <div className="p-3 rounded-lg bg-[#141722] border border-line space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-blue-300">
+                <ShieldCheck className="w-4 h-4 shrink-0" />
+                <span>Ủy quyền qua Bot Discord (OAuth2)</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Xác thực định danh Discord với Bot của Arychi. Bạn chưa cần nhập Token ở bước này (Token được nhập riêng trong trang quản trị dash.arychi.xyz).
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="oauth-discord-username" className="field-label">
+                Discord Username
+              </label>
+              <input
+                id="oauth-discord-username"
+                type="text"
+                value={discordUsername}
+                onChange={(e) => setDiscordUsername(e.target.value)}
+                placeholder="Ví dụ: arychi_user"
+                className="input"
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label htmlFor="oauth-discord-id" className="field-label">
+                Discord User ID (Tùy chọn)
+              </label>
+              <input
+                id="oauth-discord-id"
+                type="text"
+                value={discordId}
+                onChange={(e) => setDiscordId(e.target.value)}
+                placeholder="Ví dụ: 109283746519283746"
+                className="input font-mono"
+              />
+              <p className="field-hint">
+                Hệ thống lưu tài khoản và thời hạn gói vào Database theo Discord ID của bạn.
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="p-3 rounded-lg bg-[#141722] border border-line space-y-1">
+              <div className="flex items-center gap-2 text-xs font-semibold text-blue-300">
+                <Globe className="w-4 h-4 shrink-0" />
+                <span>Đăng ký / Đăng nhập bằng Tài khoản Google</span>
+              </div>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Sử dụng Gmail để khởi tạo tài khoản Arychi và quản lý gói thuê bao 50.000đ/tháng trên Database.
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="oauth-google-email" className="field-label">
+                Địa chỉ Email Google (Gmail)
+              </label>
+              <input
+                id="oauth-google-email"
+                type="email"
+                value={googleEmail}
+                onChange={(e) => setGoogleEmail(e.target.value)}
+                placeholder="you@gmail.com"
+                className="input"
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label htmlFor="oauth-google-name" className="field-label">
+                Tên hiển thị
+              </label>
+              <input
+                id="oauth-google-name"
+                type="text"
+                value={googleName}
+                onChange={(e) => setGoogleName(e.target.value)}
+                placeholder="Tên tài khoản của bạn"
+                className="input"
+              />
+            </div>
+          </>
+        )}
+
+        {error && (
+          <p className="text-xs text-rose-300 flex items-start gap-1.5">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </p>
+        )}
+
+        <button type="submit" disabled={loading} className="btn-primary w-full">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+          <span>
+            {loading
+              ? 'Đang xác thực OAuth2 & đồng bộ Database…'
+              : provider === 'discord'
+              ? 'Đăng nhập bằng Bot Discord (OAuth2)'
+              : 'Đăng ký / Tiếp tục với Google'}
+          </span>
         </button>
       </form>
-
-      <details className="mt-5 group">
-        <summary className="cursor-pointer list-none text-[13px] text-zinc-400 hover:text-zinc-200 select-none">
-          <span className="group-open:hidden">Cách lấy User Token →</span>
-          <span className="hidden group-open:inline">Cách lấy User Token</span>
-        </summary>
-        <ol className="mt-2 space-y-1.5 text-[13px] text-zinc-400 list-decimal pl-5 leading-relaxed">
-          <li>
-            Mở Discord trên Chrome hoặc Edge, nhấn <kbd className="inline-code">F12</kbd>.
-          </li>
-          <li>
-            Vào tab <strong className="text-zinc-200 font-medium">Network</strong>, tìm request{' '}
-            <code className="inline-code">/users/@me</code>.
-          </li>
-          <li>
-            Trong <strong className="text-zinc-200 font-medium">Request Headers</strong>, sao chép giá trị{' '}
-            <code className="inline-code">Authorization</code>.
-          </li>
-        </ol>
-      </details>
     </Dialog>
   );
 };

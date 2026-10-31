@@ -17,10 +17,10 @@ export const levelLabel: Record<LogEntry['level'], string> = {
 };
 
 export const levelClass: Record<LogEntry['level'], string> = {
-  info: 'text-zinc-500',
-  warn: 'text-amber-400',
-  error: 'text-rose-400',
-  success: 'text-emerald-400',
+  info: 'text-slate-300',
+  warn: 'text-slate-200',
+  error: 'text-rose-300',
+  success: 'text-blue-300',
 };
 
 export const formatTime = (timestamp: string) => {

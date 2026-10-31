@@ -13,6 +13,8 @@ science_state.json
 science_state.json.bak
 quest/data/users.json
 **/data/users.json
+quest/data/subscriptions.json
+**/data/subscriptions.json
 
 # Build outputs
 dist/

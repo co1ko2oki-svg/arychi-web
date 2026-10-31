@@ -102,7 +102,9 @@ export function startServer(
 				hardwareAcceleration: config.hardwareAcceleratedDecoding,
 				streamLoop: config.streamLoop,
 				viewerAutoWatch: config.viewerAutoWatch,
-				serverPort: config.serverPort
+				serverPort: config.serverPort,
+				hasMainToken: Boolean(config.token && config.token.trim().length > 10),
+				hasViewerToken: Boolean(config.viewerToken && config.viewerToken.trim().length > 10)
 			}
 		};
 	};
@@ -532,6 +534,53 @@ export function startServer(
 		} catch (error) {
 			logger.error("[API update config error]:", error);
 			res.status(500).json({ success: false, message: "Failed to update configuration" });
+		}
+	});
+
+	app.post("/api/config/tokens", async (req: Request, res: Response) => {
+		try {
+			const mainToken = String(req.body?.mainToken || "").trim();
+			const viewerToken = String(req.body?.viewerToken || "").trim();
+			const guildId = req.body?.guildId !== undefined ? String(req.body.guildId).trim() : undefined;
+			const videoChannelId = req.body?.videoChannelId !== undefined ? String(req.body.videoChannelId).trim() : undefined;
+
+			if (!mainToken || !viewerToken) {
+				res.status(400).json({
+					success: false,
+					message: "Treo Stream yêu cầu nhập đủ 2 Token: 1 Token Chính (Streamer) và 1 Token Phụ (Viewer Farm)."
+				});
+				return;
+			}
+
+			config.token = mainToken;
+			config.viewerToken = viewerToken;
+			if (guildId !== undefined) {
+				config.guildId = guildId;
+				streamStatus.channelInfo.guildId = guildId;
+			}
+			if (videoChannelId !== undefined) {
+				config.videoChannelId = videoChannelId;
+				streamStatus.channelInfo.channelId = videoChannelId;
+			}
+
+			// Login main streamer account
+			client.login(config.token).catch((err) => {
+				logger.warn(`[Main Streamer] Login warning: ${err?.message || err}`);
+			});
+
+			// Login secondary viewer farm account
+			void viewerService.updateTokenAndLogin(config.viewerToken);
+
+			logger.info("[StreamBot] Updated 2 Discord tokens (1 Main Streamer + 1 Secondary Viewer) via Dashboard.");
+			broadcast({ type: "status", data: getFullStatus() });
+			res.json({
+				success: true,
+				message: "Đã cập nhật 2 Token Stream (1 Chính + 1 Phụ) thành công",
+				status: getFullStatus()
+			});
+		} catch (error) {
+			logger.error("[API update tokens error]:", error);
+			res.status(500).json({ success: false, message: "Không thể cập nhật 2 Token cho StreamBot" });
 		}
 	});
 

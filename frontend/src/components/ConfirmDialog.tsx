@@ -54,7 +54,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </>
       }
     >
-      <p className="text-[13px] text-zinc-300 leading-relaxed break-words">{message}</p>
+      <p className="text-[13px] text-slate-300 leading-relaxed break-words">{message}</p>
     </Dialog>
   );
 };

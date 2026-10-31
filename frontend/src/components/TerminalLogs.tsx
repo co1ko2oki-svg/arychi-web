@@ -44,7 +44,9 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
   const serialize = (iso: boolean) =>
     filteredLogs
       .map((l) => {
-        const t = iso ? new Date(l.timestamp).toISOString() : new Date(l.timestamp).toLocaleTimeString();
+        const t = iso
+          ? new Date(l.timestamp).toISOString()
+          : new Date(l.timestamp).toLocaleTimeString();
         return `[${t}] [${l.level.toUpperCase()}] ${l.message}`;
       })
       .join('\n');
@@ -119,12 +121,16 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
           ]}
         />
         <div className="flex items-center gap-4">
-          <label className="flex items-center gap-2 text-[13px] text-zinc-400 shrink-0">
-            <Switch checked={autoScroll} onChange={() => setAutoScroll((v) => !v)} label="Tự động cuộn" />
+          <label className="flex items-center gap-2 text-[13px] text-slate-300 shrink-0">
+            <Switch
+              checked={autoScroll}
+              onChange={() => setAutoScroll((v) => !v)}
+              label="Tự động cuộn"
+            />
             Tự động cuộn
           </label>
           <div className="relative w-full lg:w-64">
-            <Search className="w-4 h-4 text-zinc-600 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-300 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="search"
               value={searchTerm}
@@ -138,7 +144,7 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
       </div>
 
       <div className="surface overflow-hidden">
-        <div className="hidden sm:grid grid-cols-[76px_56px_84px_1fr] gap-3 px-4 h-9 items-center border-b border-line text-2xs font-medium uppercase tracking-[0.06em] text-zinc-500">
+        <div className="hidden sm:grid grid-cols-[76px_56px_84px_1fr] gap-3 px-4 h-9 items-center border-b border-line text-2xs font-medium uppercase tracking-[0.06em] text-slate-300">
           <span>Thời gian</span>
           <span>Mức</span>
           <span>Nguồn</span>
@@ -166,27 +172,28 @@ export const TerminalLogs: React.FC<TerminalLogsProps> = ({ logs, onClear }) => 
                 <div
                   key={`${log.timestamp}-${index}`}
                   className={`grid grid-cols-[64px_48px_1fr] sm:grid-cols-[76px_56px_84px_1fr] gap-3 px-4 py-1 hover:bg-white/[0.03] ${
-                    log.level === 'error' ? 'bg-rose-500/[0.04]' : ''
+                    log.level === 'error' ? 'bg-rose-500/[0.05]' : ''
                   }`}
                 >
-                  <span className="text-zinc-600 tabular-nums">{p.time}</span>
+                  <span className="text-slate-300 tabular-nums">{p.time}</span>
                   <span className={`font-medium ${levelClass[p.level]}`}>{levelLabel[p.level]}</span>
-                  <span className="hidden sm:block text-zinc-500 truncate">{p.source}</span>
-                  <span className="text-zinc-300 break-words min-w-0">{p.message}</span>
+                  <span className="hidden sm:block text-slate-300 truncate">{p.source}</span>
+                  <span className="text-white break-words min-w-0">{p.message}</span>
                 </div>
               );
             })
           )}
         </div>
-        <div className="flex items-center justify-between px-4 h-9 border-t border-line text-xs text-zinc-500">
+        <div className="flex items-center justify-between px-4 h-9 border-t border-line text-xs text-slate-300">
           <span>
-            Hiển thị <span className="tabular-nums text-zinc-300">{filteredLogs.length}</span> / {logs.length} dòng
+            Hiển thị <span className="tabular-nums text-white">{filteredLogs.length}</span> /{' '}
+            {logs.length} dòng
           </span>
           {!autoScroll && filteredLogs.length > 0 && (
             <button
               type="button"
               onClick={() => setAutoScroll(true)}
-              className="text-brand-text hover:text-white transition-colors"
+              className="text-blue-300 hover:text-white transition-colors"
             >
               Cuộn tới mới nhất
             </button>
