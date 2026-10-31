@@ -20,6 +20,7 @@ export default {
         },
       },
       fontFamily: {
+        display: ['"Outfit"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
         sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace'],
       },

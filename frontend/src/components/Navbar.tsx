@@ -77,11 +77,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   );
 
   return (
-    <header className="sticky top-0 z-40 bg-black/90 backdrop-blur border-b border-line">
+    <header className="sticky top-0 z-40 bg-[#040407]/85 backdrop-blur-md border-b border-line">
       <div className="page h-14 flex items-center gap-6">
         <a href="#home" onClick={(e) => go(e, 'home')} className="flex items-center gap-2.5 shrink-0 rounded-md">
-          <span className="grid place-items-center w-7 h-7 rounded-md bg-brand text-white text-[13px] font-bold">A</span>
-          <span className="text-[15px] font-semibold tracking-tight text-white">Arychi</span>
+          <span className="grid place-items-center w-7 h-7 rounded-lg bg-gradient-to-b from-[#7C79FF] to-[#5B58EB] text-white text-[13px] font-bold shadow-[0_2px_10px_rgba(109,106,247,0.45)] border border-white/20">
+            A
+          </span>
+          <span className="text-[15px] font-bold tracking-tight text-white">Arychi</span>
         </a>
 
         <nav aria-label="Điều hướng chính" className="hidden md:flex items-center self-stretch">
@@ -99,14 +101,14 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 {item.label}
                 {item.indicator}
-                {active && <span className="absolute inset-x-3 -bottom-px h-px bg-white" />}
+                {active && <span className="absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-brand" />}
               </a>
             );
           })}
         </nav>
 
         <div className="ml-auto flex items-center gap-4">
-          <div className="hidden lg:flex items-center gap-3 text-xs text-zinc-500">{services}</div>
+          <div className="hidden lg:flex items-center gap-3 text-xs font-mono text-zinc-400">{services}</div>
 
           {user ? (
             <button

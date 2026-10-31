@@ -110,17 +110,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
       <Section id="sec-modules" title="3 Trụ cột kỹ thuật độc lập" description="Mỗi module chịu trách nhiệm cho một luồng xử lý riêng biệt.">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="surface p-5 flex flex-col justify-between space-y-4">
+          <div className="surface-interactive card-accent-indigo p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-semibold uppercase tracking-wider text-brand-text">Module 01</span>
-                <span className="text-xs font-mono text-zinc-400">Port :3001</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-brand-text">Module 01</span>
+                <span className="text-xs font-mono text-zinc-300">Port :3001</span>
               </div>
-              <h3 className="text-base font-semibold text-white">Quest Engine</h3>
-              <p className="text-[13px] text-zinc-400 leading-relaxed">
+              <h3 className="text-base font-bold text-white">Quest Engine</h3>
+              <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
                 Giải pháp cày nhiệm vụ Discord Quests tự động không cần cài đặt game dung lượng lớn. Giả lập heartbeat định kỳ gửi đến Discord theo định dạng desktop client chính thức.
               </p>
-              <ul className="space-y-1.5 text-xs text-zinc-300 pt-1">
+              <ul className="surface-well p-3 space-y-1.5 text-xs text-zinc-300">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-brand-text shrink-0" />
                   <span>Mô phỏng Heartbeat 30s</span>
@@ -135,22 +135,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-500">
+            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-400">
               Node.js + Fastify + WS
             </div>
           </div>
 
-          <div className="surface p-5 flex flex-col justify-between space-y-4">
+          <div className="surface-interactive card-accent-amber p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-semibold uppercase tracking-wider text-amber-400">Module 02</span>
-                <span className="text-xs font-mono text-zinc-400">Port :3000</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-amber-400">Module 02</span>
+                <span className="text-xs font-mono text-zinc-300">Port :3000</span>
               </div>
-              <h3 className="text-base font-semibold text-white">StreamBot Voice</h3>
-              <p className="text-[13px] text-zinc-400 leading-relaxed">
+              <h3 className="text-base font-bold text-white">StreamBot Voice</h3>
+              <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
                 Truyền phát âm thanh Opus và video vào Voice Channel 24/7, tích hợp module Viewer Farm duy trì thời lượng xem stream cho tài khoản mà không bị gián đoạn.
               </p>
-              <ul className="space-y-1.5 text-xs text-zinc-300 pt-1">
+              <ul className="surface-well p-3 space-y-1.5 text-xs text-zinc-300">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                   <span>Đa nguồn: YouTube, Twitch, MP4</span>
@@ -165,22 +165,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-500">
+            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-400">
               @discordjs/voice + FFmpeg
             </div>
           </div>
 
-          <div className="surface p-5 flex flex-col justify-between space-y-4">
+          <div className="surface-interactive card-accent-emerald p-5 flex flex-col justify-between space-y-4">
             <div className="space-y-3">
               <div className="flex items-center justify-between pb-3 border-b border-line">
-                <span className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Module 03</span>
-                <span className="text-xs font-mono text-zinc-400">Python 3</span>
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-400">Module 03</span>
+                <span className="text-xs font-mono text-zinc-300">Python 3</span>
               </div>
-              <h3 className="text-base font-semibold text-white">Science Telemetry</h3>
-              <p className="text-[13px] text-zinc-400 leading-relaxed">
+              <h3 className="text-base font-bold text-white">Science Telemetry</h3>
+              <p className="text-[13px] text-zinc-300 leading-relaxed max-w-[44ch]">
                 Giả lập nhịp độ chơi game gửi trực tiếp lên endpoint phân tích Discord Science API với chữ ký Windows PE nhị phân thực tế để cày huy hiệu và số giờ chơi hồ sơ.
               </p>
-              <ul className="space-y-1.5 text-xs text-zinc-300 pt-1">
+              <ul className="surface-well p-3 space-y-1.5 text-xs text-zinc-300">
                 <li className="flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                   <span>Trích xuất Windows PE Fingerprint</span>
@@ -195,7 +195,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 </li>
               </ul>
             </div>
-            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-500">
+            <div className="pt-3 border-t border-line text-xs font-mono text-zinc-400">
               Python 3 + PE Header Hash
             </div>
           </div>
@@ -377,42 +377,45 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       </Section>
 
       <Section id="sec-faq" title="Giải đáp kỹ thuật (FAQ)">
-        <div className="surface divide-y divide-line">
+        <div className="space-y-3">
           {[
             {
               q: 'Tôi có thể tắt tab trình duyệt khi hệ thống đang làm Quest hoặc Stream không?',
-              a: 'Có thể. Các engine xử lý chính (Quest Engine :3001 và StreamBot :3000) chạy dưới dạng tiến trình độc lập trên máy tính của bạn sau khi bạn mở start.bat. Bạn hoàn toàn có thể thu nhỏ hoặc đóng tab trình duyệt; các tiến trình vẫn tiếp tục chạy ngầm cho đến khi hoàn thành.',
+              a: 'Có thể. Các engine xử lý chính (Quest Engine :3001 và StreamBot :3000) chạy dưới dạng tiến trình độc lập trên máy tính của bạn sau khi mở start.bat. Bạn có thể đóng tab trình duyệt mà tiến trình vẫn tiếp tục chạy ngầm.',
             },
             {
               q: 'Tại sao việc cày Discord Quest không cần phải tải game nặng?',
-              a: 'Ứng dụng Discord Desktop chính thức xác nhận tiến độ làm nhiệm vụ bằng việc gửi các gói tin telemetry định kỳ (heartbeat) chứa ID nhiệm vụ và chữ ký phiên lên máy chủ Discord. Quest Engine mô phỏng chuẩn xác định dạng gói tin này với nhịp độ 30 giây một lần, giúp bạn không cần tốn hàng giờ tải và cài đặt 50GB-100GB game.',
+              a: 'Ứng dụng Discord Desktop xác nhận tiến độ nhiệm vụ qua các gói tin telemetry định kỳ (heartbeat) gửi lên máy chủ. Quest Engine mô phỏng chuẩn xác định dạng này mỗi 30 giây, giúp bạn không phải tải 50GB-100GB game.',
             },
             {
               q: 'Lấy token Discord có an toàn không và lấy ở đâu?',
-              a: 'Token Discord của bạn đóng vai trò như chìa khóa xác thực tài khoản. Trên giao diện web Discord, bạn mở F12 > chuyển sang thẻ Network > tìm kiếm từ khóa "science" hoặc "quest" > sao chép giá trị trong trường Authorization. Hãy lưu ý không bao giờ gửi token này cho bất kỳ người lạ hoặc trang web trực tuyến nào. Arychi chỉ lưu token này tại máy tính cục bộ của bạn.',
+              a: 'Trên giao diện web Discord, bạn mở F12 > chuyển sang thẻ Network > tìm từ khóa "science" hoặc "/users/@me" > sao chép giá trị trường Authorization. Arychi chỉ lưu token này tại máy tính cục bộ của bạn.',
             },
             {
               q: 'Có thể chạy đồng thời vừa làm Quest vừa phát nhạc/stream voice không?',
-              a: 'Hoàn toàn được. Mỗi module trong Arychi Suite hoạt động trên một tiến trình Node.js riêng biệt và lắng nghe trên các cổng khác nhau (3001 cho Quest và 3000 cho Stream), vì vậy chúng hoạt động song song mượt mà mà không gây xung đột tài nguyên.',
+              a: 'Hoàn toàn được. Mỗi module hoạt động trên một tiến trình Node.js riêng biệt và lắng nghe trên các cổng khác nhau (3001 cho Quest và 3000 cho Stream) nên không xung đột tài nguyên.',
             },
           ].map((item, idx) => {
             const isOpen = activeFaq === idx;
             return (
-              <div key={idx} className="p-4 sm:p-5">
+              <div
+                key={idx}
+                className={`surface p-5 ${isOpen ? 'card-accent-indigo border-brand/40' : ''}`}
+              >
                 <button
                   type="button"
                   onClick={() => setActiveFaq(isOpen ? null : idx)}
-                  className="w-full text-left flex items-center justify-between text-sm font-semibold text-zinc-200 hover:text-white transition-colors"
+                  className="w-full text-left flex items-center justify-between text-sm font-semibold text-zinc-100 hover:text-white transition-colors"
                 >
                   <span>{item.q}</span>
                   {isOpen ? (
                     <ChevronUp className="w-4 h-4 text-brand-text shrink-0 ml-4" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-zinc-500 shrink-0 ml-4" />
+                    <ChevronDown className="w-4 h-4 text-zinc-400 shrink-0 ml-4" />
                   )}
                 </button>
                 {isOpen && (
-                  <p className="mt-2.5 text-[13px] text-zinc-400 leading-relaxed max-w-3xl">
+                  <p className="mt-3 pt-3 border-t border-line text-[13px] text-zinc-300 leading-relaxed max-w-[54ch]">
                     {item.a}
                   </p>
                 )}
@@ -422,9 +425,11 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </Section>
 
-      <div className="p-4 rounded-lg border border-line bg-raised text-xs text-zinc-500 leading-relaxed">
-        <strong className="text-zinc-400 font-medium">Tuyên bố miễn trừ trách nhiệm: </strong>
-        Arychi Suite được phát triển với mục đích học tập, nghiên cứu giao thức mạng và tự động hóa cá nhân trên máy trạm cục bộ. Dự án không liên kết, không được tài trợ hoặc xác nhận bởi Discord Inc.
+      <div className="surface p-5 text-xs text-zinc-300 leading-relaxed">
+        <p className="max-w-[60ch]">
+          <strong className="text-white font-semibold">Tuyên bố miễn trừ trách nhiệm: </strong>
+          Arychi Suite được phát triển với mục đích học tập, nghiên cứu giao thức mạng và tự động hóa cá nhân trên máy trạm cục bộ. Dự án không liên kết, không được tài trợ hoặc xác nhận bởi Discord Inc.
+        </p>
       </div>
     </div>
   );

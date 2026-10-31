@@ -36,9 +36,12 @@ export const ProgressBar: React.FC<{ value: number; tone?: Tone; label?: string 
       aria-valuemax={100}
       aria-valuenow={Math.round(clamped)}
       aria-label={label}
-      className="h-1 w-full bg-white/[0.08] rounded-full overflow-hidden"
+      className="h-1.5 w-full bg-white/[0.08] rounded-full overflow-hidden"
     >
-      <div className={`h-full rounded-full transition-[width] duration-500 ${toneBar[tone]}`} style={{ width: `${clamped}%` }} />
+      <div
+        className={`h-full w-full origin-left rounded-full transition-transform duration-500 ${toneBar[tone]}`}
+        style={{ transform: `scaleX(${clamped / 100})` }}
+      />
     </div>
   );
 };

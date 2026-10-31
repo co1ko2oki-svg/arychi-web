@@ -201,35 +201,35 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
       />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="surface p-4">
+        <div className="surface-interactive p-4">
           <p className="text-xs font-medium text-zinc-400">Nhiệm vụ khả dụng</p>
-          <p className="mt-2 text-2xl font-semibold text-white tabular-nums">{totalQuests}</p>
-          <p className="mt-1 text-xs text-zinc-400">Từ Discord API</p>
+          <p className="mt-2 text-2xl font-bold text-white tabular-nums">{totalQuests}</p>
+          <p className="mt-1 text-xs font-mono text-zinc-400">Từ Discord API</p>
         </div>
 
-        <div className="surface p-4">
-          <p className="text-xs font-medium text-zinc-400">Đang thực thi</p>
+        <div className="surface-interactive card-accent-indigo p-4">
+          <p className="text-xs font-medium text-zinc-300">Đang thực thi</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-semibold text-brand-text tabular-nums">{runningJobs.length}</span>
+            <span className="text-2xl font-bold text-brand-text tabular-nums">{runningJobs.length}</span>
             {runningJobs.length > 0 && <StatusDot tone="brand" />}
           </div>
-          <p className="mt-1 text-xs text-zinc-400">Heartbeat 30s</p>
+          <p className="mt-1 text-xs font-mono text-zinc-400">Heartbeat 30s</p>
         </div>
 
-        <div className="surface p-4">
-          <p className="text-xs font-medium text-zinc-400">Đã hoàn thành</p>
+        <div className="surface-interactive card-accent-emerald p-4">
+          <p className="text-xs font-medium text-zinc-300">Đã hoàn thành</p>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-semibold text-emerald-400 tabular-nums">{completedQuests}</span>
+            <span className="text-2xl font-bold text-emerald-400 tabular-nums">{completedQuests}</span>
             {claimableQuests > 0 && (
               <span className="text-xs text-amber-400 tabular-nums">({claimableQuests} chờ claim)</span>
             )}
           </div>
-          <p className="mt-1 text-xs text-zinc-400">Sẵn sàng nhận thưởng</p>
+          <p className="mt-1 text-xs font-mono text-zinc-400">Sẵn sàng nhận thưởng</p>
         </div>
 
-        <div className="surface p-4">
-          <p className="text-xs font-medium text-zinc-400">StreamBot Voice</p>
-          <p className="mt-2 text-sm font-semibold text-zinc-200 truncate">
+        <div className="surface-interactive card-accent-amber p-4">
+          <p className="text-xs font-medium text-zinc-300">StreamBot Voice</p>
+          <p className="mt-2 text-sm font-bold text-zinc-100 truncate">
             {streamPlaying ? 'Đang phát video' : streamConnected ? 'Đang chờ' : 'Ngoại tuyến'}
           </p>
           <p className="mt-1 text-xs text-zinc-400 font-mono">
