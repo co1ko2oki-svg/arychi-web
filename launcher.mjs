@@ -115,13 +115,18 @@ const startServices = () => {
 
   const rootEnv = parseEnvFile(path.join(rootDir, '.env'));
 
-  const questGoBin = path.join(rootDir, 'bin', process.platform === 'win32' ? 'quest-server.exe' : 'quest-server');
-  const streamGoBin = path.join(rootDir, 'bin', process.platform === 'win32' ? 'stream-server.exe' : 'stream-server');
+  const isWin = process.platform === 'win32';
+  const binExt = isWin ? '.exe' : '';
+  const questGoBin = path.join(rootDir, 'bin', `quest-server${binExt}`);
+  const streamGoBin = path.join(rootDir, 'bin', `stream-server${binExt}`);
 
   if (!fs.existsSync(questGoBin)) {
     console.log('\x1b[33m[Launcher] Bien dich quest-server Go lan dau...\x1b[0m');
     try {
-      execSync('go build -o bin/quest-server.exe ./backend/cmd/quest', { cwd: rootDir, stdio: 'inherit' });
+      execSync(`go build -o bin/quest-server${binExt} ./backend/cmd/quest`, { cwd: rootDir, stdio: 'inherit' });
+      if (!isWin) {
+        try { fs.chmodSync(questGoBin, 0o755); } catch {}
+      }
     } catch (err) {
       console.warn('\x1b[31m[Launcher] Khong the build quest-server Go:\x1b[0m', err?.message);
     }
@@ -130,10 +135,18 @@ const startServices = () => {
   if (!fs.existsSync(streamGoBin)) {
     console.log('\x1b[33m[Launcher] Bien dich stream-server Go lan dau...\x1b[0m');
     try {
-      execSync('go build -o bin/stream-server.exe ./backend/cmd/stream', { cwd: rootDir, stdio: 'inherit' });
+      execSync(`go build -o bin/stream-server${binExt} ./backend/cmd/stream`, { cwd: rootDir, stdio: 'inherit' });
+      if (!isWin) {
+        try { fs.chmodSync(streamGoBin, 0o755); } catch {}
+      }
     } catch (err) {
       console.warn('\x1b[31m[Launcher] Khong the build stream-server Go:\x1b[0m', err?.message);
     }
+  }
+
+  if (!isWin) {
+    if (fs.existsSync(questGoBin)) { try { fs.chmodSync(questGoBin, 0o755); } catch {} }
+    if (fs.existsSync(streamGoBin)) { try { fs.chmodSync(streamGoBin, 0o755); } catch {} }
   }
 
   console.log('\x1b[32m[Launcher] Khoi dong cac dich vu Go Backend hieu nang cao (bin/quest-server & bin/stream-server)...\x1b[0m');
@@ -157,8 +170,8 @@ const startServices = () => {
       name: 'WEB :5173',
       color: '\x1b[32m',
       cwd: path.join(rootDir, 'frontend'),
-      cmd: process.platform === 'win32' ? 'cmd.exe' : 'npx',
-      args: process.platform === 'win32' ? ['/c', 'npx', 'vite', '--port', '5173'] : ['vite', '--port', '5173'],
+      cmd: isWin ? 'cmd.exe' : 'npx',
+      args: isWin ? ['/c', 'npx', 'vite', '--port', '5173', '--host'] : ['vite', '--port', '5173', '--host'],
     },
   ];
 

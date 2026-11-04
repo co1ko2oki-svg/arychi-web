@@ -1,0 +1,16 @@
+[Unit]
+Description=Arychi Web Suite Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/arychi-web
+ExecStart=/usr/bin/node launcher.mjs
+Restart=always
+RestartSec=5
+Environment=NODE_ENV=production
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

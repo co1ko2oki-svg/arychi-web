@@ -61,10 +61,10 @@ func GetFFmpegExecutablePath() string {
 	}
 
 	candidates := []string{
-		filepath.Join(root, "stream", "node_modules", "node-av", "binary", binName),
-		filepath.Join(root, "node_modules", "node-av", "binary", binName),
-		filepath.Join(root, "stream", "scripts", binName),
+		filepath.Join(root, "bin", binName),
 		filepath.Join(root, "scripts", binName),
+		filepath.Join(root, "stream", "scripts", binName),
+		filepath.Join(root, "node_modules", "node-av", "binary", binName),
 	}
 
 	for _, c := range candidates {
@@ -87,10 +87,10 @@ func GetFFprobeExecutablePath() string {
 	}
 
 	candidates := []string{
-		filepath.Join(root, "stream", "node_modules", "node-av", "binary", binName),
-		filepath.Join(root, "node_modules", "node-av", "binary", binName),
-		filepath.Join(root, "stream", "scripts", binName),
+		filepath.Join(root, "bin", binName),
 		filepath.Join(root, "scripts", binName),
+		filepath.Join(root, "stream", "scripts", binName),
+		filepath.Join(root, "node_modules", "node-av", "binary", binName),
 	}
 
 	for _, c := range candidates {
@@ -337,6 +337,9 @@ func GetYtDlpExecutablePath() string {
 		if info, err := os.Stat(c); err == nil && !info.IsDir() {
 			return c
 		}
+	}
+	if sysPath, err := exec.LookPath(binName); err == nil {
+		return sysPath
 	}
 	return candidates[0]
 }
