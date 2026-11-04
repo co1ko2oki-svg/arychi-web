@@ -14,7 +14,7 @@ import { questApi, streamApi } from '../services/api';
 import { useToast } from './Toast';
 import { NavTabId } from './Navbar';
 import { PageHeader, ProgressBar, Section, StatusDot, Switch } from './ui';
-import { formatPing, levelClass, levelLabel, parseLog } from './format';
+import { formatPing, levelClass, levelLabel, parseLog } from '../utils/format';
 
 interface DashboardOverviewProps {
   user?: AuthUser | null;

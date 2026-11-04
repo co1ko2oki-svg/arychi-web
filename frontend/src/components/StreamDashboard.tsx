@@ -20,7 +20,7 @@ import { AccountTokens, AuthUser, StreamStatus } from '../types';
 import { questApi, streamApi } from '../services/api';
 import { useToast } from './Toast';
 import { PageHeader, StatusDot } from './ui';
-import { formatPing } from './format';
+import { formatPing } from '../utils/format';
 
 interface StreamDashboardProps {
   user?: AuthUser | null;

@@ -329,8 +329,9 @@ func GetYtDlpExecutablePath() string {
 	binName := getYtDlpBinaryName()
 
 	candidates := []string{
-		filepath.Join(root, "stream", "scripts", binName),
+		filepath.Join(root, "bin", binName),
 		filepath.Join(root, "scripts", binName),
+		filepath.Join(root, "stream", "scripts", binName),
 	}
 	for _, c := range candidates {
 		if info, err := os.Stat(c); err == nil && !info.IsDir() {

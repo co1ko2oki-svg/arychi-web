@@ -3,7 +3,7 @@ import { Copy, Download, Search, Trash2 } from 'lucide-react';
 import { LogEntry } from '../types';
 import { useToast } from './Toast';
 import { EmptyState, PageHeader, SegmentedControl, Switch } from './ui';
-import { levelClass, levelLabel, parseLog } from './format';
+import { levelClass, levelLabel, parseLog } from '../utils/format';
 
 interface TerminalLogsProps {
   logs: LogEntry[];

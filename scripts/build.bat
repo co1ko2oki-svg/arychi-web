@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 >nul
 title Biên dịch Arychi Go Backend
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 echo [1/5] Dang build quest-server...
 go build -o bin/quest-server.exe ./backend/cmd/quest
