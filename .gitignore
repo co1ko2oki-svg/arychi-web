@@ -11,14 +11,13 @@ node_modules/
 *.local
 science_state.json
 science_state.json.bak
+data/*.json
+data/*.json.bak
+!data/.gitkeep
 database/commercial_db.json
 database/*.bak
 database/*.tmp
 database/users.json
-quest/data/users.json
-**/data/users.json
-quest/data/subscriptions.json
-**/data/subscriptions.json
 
 # Build outputs
 dist/
@@ -26,6 +25,10 @@ dist/
 build/
 **/build/
 *.tsbuildinfo
+
+# Go binaries
+bin/*.exe
+bin/*
 
 # Cache directories
 .cache/
@@ -53,9 +56,9 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Stream media storage
-stream/videos/*
-!stream/videos/.gitkeep
-stream/tmp/
+videos/*
+!videos/.gitkeep
+tmp/
 
 # OS generated files
 .DS_Store

@@ -6,10 +6,15 @@
   "scripts": {
     "start": "node launcher.mjs",
     "dev": "node launcher.mjs",
-    "optimize": "node scripts/optimize.mjs",
     "frontend": "npm --prefix frontend run dev",
     "build": "npm --prefix frontend run build",
-    "quest": "npm --prefix quest start",
-    "stream": "npm --prefix stream run start:node"
+    "build:go": "go build -o bin/arychi-server.exe ./backend/cmd/server && go build -o bin/quest-server.exe ./backend/cmd/quest && go build -o bin/stream-server.exe ./backend/cmd/stream && go build -o bin/quest-bot.exe ./backend/cmd/bot && go build -o bin/spoofer.exe ./backend/cmd/spoofer",
+    "test:go": "go test -v ./backend/tests/...",
+    "vet:go": "go vet ./...",
+    "server": "bin/arychi-server.exe",
+    "quest": "bin/quest-server.exe",
+    "stream": "bin/stream-server.exe",
+    "bot": "bin/quest-bot.exe",
+    "spoofer": "bin/spoofer.exe"
   }
 }

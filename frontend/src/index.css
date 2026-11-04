@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #111714;
+  --bg-soft: #161e1a;
+  --surface: #1a231f;
+  --surface-raised: #212c27;
+  --line: #2d3b33;
+  --line-strong: #3b4c42;
+  --ink: #f2f5f1;
+  --ink-soft: #9aa8a0;
+  --ink-faint: #67756d;
+  --accent: #8e96e8;
+  --accent-soft: rgba(142, 150, 232, 0.15);
+  --mint: #72b991;
+  --mint-soft: rgba(114, 185, 145, 0.15);
+  --coral: #e08383;
+  --coral-soft: rgba(224, 131, 131, 0.15);
+  --amber: #d7ad69;
+  --amber-soft: rgba(215, 173, 105, 0.15);
+}
+
 @layer base {
   html {
     color-scheme: dark;
@@ -10,19 +30,20 @@
   }
 
   body {
-    background-color: #07080C;
-    color: #E2E8F0;
+    background-color: #111714;
+    color: #f2f5f1;
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.875rem;
-    line-height: 1.45rem;
+    line-height: 1.5rem;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    min-height: 100vh;
   }
 
   p,
   li {
-    max-width: 50ch;
+    max-width: 65ch;
   }
 
   h1,
@@ -48,12 +69,12 @@
   }
 
   :focus-visible {
-    outline: 2px solid #3B82F6;
+    outline: 2px solid #8e96e8;
     outline-offset: 2px;
   }
 
   ::selection {
-    background: rgba(37, 99, 235, 0.4);
+    background: rgba(142, 150, 232, 0.3);
     color: #ffffff;
   }
 }
@@ -61,7 +82,7 @@
 @layer components {
   .page {
     width: 100%;
-    max-width: 1160px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     padding-left: 1rem;
@@ -80,29 +101,27 @@
     }
   }
 
+  /* Clean Surface Cards (aqac.lol inspired) */
   .surface {
-    background-color: #0E1017;
-    border: 1px solid #1E2230;
-    border-radius: 0.75rem;
-    transition:
-      border-color 180ms ease,
-      background-color 180ms ease;
+    background-color: #1a231f;
+    border: 1px solid #2d3b33;
+    border-radius: 0.875rem;
+    box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+    transition: border-color 150ms ease, background-color 150ms ease;
   }
 
   .surface-interactive {
-    background-color: #0E1017;
-    border: 1px solid #1E2230;
-    border-radius: 0.75rem;
-    transition:
-      transform 180ms ease,
-      border-color 180ms ease,
-      background-color 180ms ease;
+    background-color: #1a231f;
+    border: 1px solid #2d3b33;
+    border-radius: 0.875rem;
+    box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+    transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
   }
 
   .surface-interactive:hover {
-    transform: translateY(-2px);
-    background-color: #131620;
-    border-color: #333A52;
+    background-color: #212c27;
+    border-color: #3b4c42;
+    transform: translateY(-1px);
   }
 
   .icon-badge {
@@ -111,21 +130,21 @@
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
-    border-radius: 0.5rem;
-    background-color: #151926;
-    border: 1px solid #262C40;
-    color: #93C5FD;
+    border-radius: 0.625rem;
+    background-color: rgba(142, 150, 232, 0.12);
+    border: 1px solid rgba(142, 150, 232, 0.22);
+    color: #8e96e8;
     flex-shrink: 0;
   }
 
   .eyebrow {
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-size: 12px;
-    line-height: 18px;
-    font-weight: 500;
+    font-size: 11px;
+    line-height: 16px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #CBD5E1;
+    color: #9aa8a0;
   }
 
   .btn {
@@ -134,112 +153,112 @@
     justify-content: center;
     gap: 0.5rem;
     height: 2.375rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    border-radius: 0.5rem;
+    padding-left: 1.125rem;
+    padding-right: 1.125rem;
+    border-radius: 0.625rem;
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     white-space: nowrap;
     user-select: none;
-    transition:
-      color 150ms ease,
-      background-color 150ms ease,
-      border-color 150ms ease,
-      transform 150ms ease;
+    transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
   .btn:disabled {
-    opacity: 0.4;
+    opacity: 0.45;
     cursor: not-allowed;
   }
 
   .btn-sm {
-    height: 1.875rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    font-size: 0.75rem;
+    height: 2rem;
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+    font-size: 12px;
     gap: 0.375rem;
+    border-radius: 0.5rem;
   }
 
+  /* Refined Primary Button (Warm Pastel Periwinkle) */
   .btn-primary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     height: 2.375rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    border-radius: 0.5rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    border-radius: 0.625rem;
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-weight: 600;
     white-space: nowrap;
     user-select: none;
-    background-color: #2563EB;
-    color: #ffffff;
-    border: 1px solid #3B82F6;
-    transition:
-      background-color 150ms ease,
-      border-color 150ms ease,
-      transform 150ms ease;
+    background-color: #8e96e8;
+    color: #111714;
+    border: 1px solid rgba(142, 150, 232, 0.4);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
   .btn-primary:hover:not(:disabled) {
-    background-color: #3B82F6;
-    border-color: #60A5FA;
+    background-color: #9da4eb;
+    border-color: rgba(142, 150, 232, 0.6);
+    transform: translateY(-1px);
+  }
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  /* Refined Mint Button */
+  .btn-mint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.375rem;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+    border-radius: 0.625rem;
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    user-select: none;
+    background-color: #72b991;
+    color: #111714;
+    border: 1px solid rgba(114, 185, 145, 0.4);
+    transition: background-color 150ms ease, transform 150ms ease;
+  }
+  .btn-mint:hover:not(:disabled) {
+    background-color: #81c79e;
     transform: translateY(-1px);
   }
 
+  /* Secondary Button */
   .btn-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
     height: 2.375rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    border-radius: 0.5rem;
+    padding-left: 1.125rem;
+    padding-right: 1.125rem;
+    border-radius: 0.625rem;
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
     user-select: none;
-    background-color: #141722;
-    color: #F1F5F9;
-    border: 1px solid #262B3D;
-    transition:
-      background-color 150ms ease,
-      border-color 150ms ease,
-      transform 150ms ease;
+    background-color: #1a231f;
+    color: #f2f5f1;
+    border: 1px solid #2d3b33;
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
   .btn-secondary:hover:not(:disabled) {
-    background-color: #1C2030;
-    border-color: #363D56;
+    background-color: #212c27;
+    border-color: #3b4c42;
     transform: translateY(-1px);
   }
 
   .btn-ghost {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    height: 2.25rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    border-radius: 0.5rem;
-    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: #CBD5E1;
-    background-color: transparent;
-    border: 1px solid transparent;
-    transition: color 150ms ease, background-color 150ms ease;
-  }
-  .btn-ghost:hover:not(:disabled) {
-    color: #F8FAFC;
-    background-color: #141722;
-  }
-
-  .btn-danger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -251,38 +270,60 @@
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-weight: 500;
-    color: #FDA4AF;
-    border: 1px solid rgba(244, 63, 94, 0.35);
-    background-color: rgba(244, 63, 94, 0.08);
+    color: #9aa8a0;
+    background-color: transparent;
+    border: 1px solid transparent;
+    transition: color 150ms ease, background-color 150ms ease;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    color: #f2f5f1;
+    background-color: #1a231f;
+  }
+
+  .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border-radius: 0.5rem;
+    font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #e08383;
+    border: 1px solid rgba(224, 131, 131, 0.3);
+    background-color: rgba(224, 131, 131, 0.1);
     transition: color 150ms ease, background-color 150ms ease, border-color 150ms ease;
   }
   .btn-danger:hover:not(:disabled) {
-    background-color: rgba(244, 63, 94, 0.16);
-    border-color: rgba(244, 63, 94, 0.5);
-    color: #FECDD3;
+    background-color: rgba(224, 131, 131, 0.18);
+    border-color: rgba(224, 131, 131, 0.45);
   }
 
   .input {
     width: 100%;
     height: 2.375rem;
-    background-color: #07080C;
-    border: 1px solid #222636;
-    border-radius: 0.5rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
+    background-color: #161e1a;
+    border: 1px solid #2d3b33;
+    border-radius: 0.625rem;
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
     font-size: 13px;
-    color: #F8FAFC;
-    transition: border-color 150ms ease;
+    color: #f2f5f1;
+    transition: border-color 150ms ease, background-color 150ms ease;
   }
   .input::placeholder {
-    color: #94A3B8;
+    color: #67756d;
   }
   .input:hover {
-    border-color: #333A52;
+    border-color: #3b4c42;
   }
   .input:focus {
     outline: none;
-    border-color: #3B82F6;
+    border-color: #8e96e8;
+    background-color: #1a231f;
   }
   .input:disabled {
     opacity: 0.5;
@@ -293,14 +334,14 @@
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-weight: 500;
-    color: #E2E8F0;
+    color: #f2f5f1;
     margin-bottom: 0.375rem;
   }
 
   .field-hint {
     margin-top: 0.375rem;
-    font-size: 0.75rem;
-    color: #CBD5E1;
+    font-size: 12px;
+    color: #9aa8a0;
   }
 
   .link {
@@ -310,27 +351,27 @@
     font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 13px;
     font-weight: 600;
-    color: #93C5FD;
+    color: #8e96e8;
     transition: color 150ms ease;
   }
   .link:hover {
-    color: #ffffff;
+    color: #9da4eb;
   }
 
   .inline-code {
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
     font-size: 0.85em;
-    color: #E2E8F0;
-    background-color: #151926;
-    border: 1px solid #262C40;
+    color: #f2f5f1;
+    background-color: #161e1a;
+    border: 1px solid #2d3b33;
     padding: 0.125rem 0.4rem;
-    border-radius: 0.3rem;
+    border-radius: 0.375rem;
   }
 }
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -338,13 +379,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1E2230;
+  background: #2d3b33;
   border-radius: 9999px;
-  border: 2px solid #07080C;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #333A52;
+  background: #3b4c42;
 }
 
 @media (prefers-reduced-motion: reduce) {

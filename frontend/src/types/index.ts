@@ -30,6 +30,7 @@ export interface AuthUser {
   sessionToken?: string;
   token?: string;
   tokens?: AccountTokens;
+  role?: 'admin' | 'user';
 }
 
 export interface QuestDTO {
@@ -144,29 +145,4 @@ export interface UserSubscription {
   expiresAt: string | null;
   botConnected: boolean;
   licenseKey: string | null;
-}
-
-export interface BankTransferInfo {
-  bankId: string;
-  bankName: string;
-  accountNo: string;
-  accountName: string;
-}
-
-export interface PaymentOrderDTO {
-  orderCode: number;
-  userId: string;
-  username: string;
-  provider: 'discord';
-  months: number;
-  amount: number;
-  description: string;
-  status: 'PENDING' | 'PAID' | 'CANCELLED';
-  vietqrUrl: string;
-  bankInfo: BankTransferInfo;
-  payosCheckoutUrl: string | null;
-  payosPaymentLinkId: string | null;
-  payosQrCode: string | null;
-  createdAt: string;
-  paidAt?: string;
 }

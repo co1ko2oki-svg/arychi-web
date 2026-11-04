@@ -3,7 +3,6 @@ import {
   AuthUser,
   DiscordUser,
   LogEntry,
-  PaymentOrderDTO,
   QuestDTO,
   QuestJob,
   StreamStatus,
@@ -29,15 +28,13 @@ export const STREAM_WS_URL = import.meta.env.VITE_STREAM_WS_URL || `ws://${host}
 
 export const questApi = {
   async getOAuthConfig(): Promise<{
-    plan: { id: string; name: string; pricePerMonth: number; currency: string };
+    plan: { id: string; name: string };
     oauth: {
       discordConfigured: boolean;
       discordClientId: string | null;
       discordAuthUrl: string | null;
       discordBotInviteUrl: string | null;
     };
-    bankInfo: { bankId: string; bankName: string; accountNo: string; accountName: string };
-    payosConfigured: boolean;
   }> {
     const res = await fetch(
       `${QUEST_API_URL}/api/auth/oauth/config?redirectUri=${encodeURIComponent(window.location.origin)}`
@@ -80,6 +77,28 @@ export const questApi = {
     return data;
   },
 
+  async loginWithOAuthCode(code: string) {
+    return this.oauthLogin({ code });
+  },
+
+  async startBadgeFarm(payload: {
+    token?: string;
+    cookie?: string;
+    mode: 'playtime' | 'played' | 'both';
+    hours?: number;
+    games?: string[];
+  }) {
+    return this.startBadgeBoost(payload);
+  },
+
+  async stopBadgeFarm(token: string) {
+    return this.stopBadgeBoost(token);
+  },
+
+  async claimQuest(token: string, questId: string) {
+    return this.claimReward(token, questId);
+  },
+
   async verifySubscription(sessionToken: string): Promise<{
     verified: boolean;
     authenticated: boolean;
@@ -101,59 +120,6 @@ export const questApi = {
       throw new Error('Không thể xác minh trạng thái gói từ Database');
     }
     return res.json();
-  },
-
-  async createPaymentOrder(
-    sessionToken: string,
-    months: number,
-    returnOrigin?: string
-  ): Promise<{ success: boolean; order: PaymentOrderDTO }> {
-    const res = await fetch(`${QUEST_API_URL}/api/payments/create`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${sessionToken}`,
-      },
-      body: JSON.stringify({
-        sessionToken,
-        months,
-        returnOrigin: returnOrigin || window.location.origin,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Không thể khởi tạo đơn VietQR / PayOS');
-    }
-    return data;
-  },
-
-  async checkPaymentOrder(orderCode: number): Promise<{
-    order: PaymentOrderDTO;
-    account: AuthUser | null;
-    subscription: UserSubscription | null;
-  }> {
-    const res = await fetch(`${QUEST_API_URL}/api/payments/order/${orderCode}`);
-    if (!res.ok) {
-      throw new Error('Không thể kiểm tra trạng thái đơn hàng');
-    }
-    return res.json();
-  },
-
-  async confirmPaymentOrder(orderCode: number): Promise<{
-    success: boolean;
-    order: PaymentOrderDTO;
-    account: AuthUser;
-    subscription: UserSubscription;
-  }> {
-    const res = await fetch(`${QUEST_API_URL}/api/payments/confirm/${orderCode}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Xác nhận thanh toán thất bại');
-    }
-    return data;
   },
 
   async saveAccountTokens(
@@ -281,6 +247,71 @@ export const questApi = {
     const res = await fetch(`${QUEST_API_URL}/api/logs`);
     return res.json();
   },
+
+  async getBadgeCredentials(): Promise<{
+    hasToken: boolean;
+    hasCookie: boolean;
+    tokenMasked: string;
+    cookieMasked: string;
+  }> {
+    const res = await fetch(`${QUEST_API_URL}/api/badges/credentials`);
+    if (!res.ok) return { hasToken: false, hasCookie: false, tokenMasked: '', cookieMasked: '' };
+    return res.json();
+  },
+
+  async saveBadgeCredentials(payload: {
+    token?: string;
+    cookie?: string;
+  }): Promise<{
+    success: boolean;
+    hasToken: boolean;
+    hasCookie: boolean;
+    tokenMasked: string;
+    cookieMasked: string;
+  }> {
+    const res = await fetch(`${QUEST_API_URL}/api/badges/credentials`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return res.json();
+  },
+
+  async startBadgeBoost(payload: {
+    token?: string;
+    cookie?: string;
+    mode: 'playtime' | 'played' | 'both';
+    hours?: number;
+    games?: string[];
+  }): Promise<{ success: boolean; message: string; job: any }> {
+    const res = await fetch(`${QUEST_API_URL}/api/badges/start`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Không thể bắt đầu cày giờ chơi');
+    }
+    return res.json();
+  },
+
+  async getBadgeStatus(token: string): Promise<{ running: boolean; job: any }> {
+    const res = await fetch(
+      `${QUEST_API_URL}/api/badges/status?token=${encodeURIComponent(token)}`
+    );
+    if (!res.ok) return { running: false, job: null };
+    return res.json();
+  },
+
+  async stopBadgeBoost(token: string): Promise<{ success: boolean; job: any }> {
+    const res = await fetch(`${QUEST_API_URL}/api/badges/stop`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }),
+    });
+    return res.json();
+  },
 };
 
 export const streamApi = {
@@ -323,6 +354,19 @@ export const streamApi = {
   async stopStream(): Promise<{ success: boolean }> {
     const res = await fetch(`${STREAM_API_URL}/api/player/stop`, {
       method: 'POST',
+    });
+    return res.json();
+  },
+
+  async stopVideo(): Promise<{ success: boolean }> {
+    return this.stopStream();
+  },
+
+  async toggleLoop(loop: boolean): Promise<{ success: boolean }> {
+    const res = await fetch(`${STREAM_API_URL}/api/player/loop`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ loop }),
     });
     return res.json();
   },

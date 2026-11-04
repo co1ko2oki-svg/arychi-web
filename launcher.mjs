@@ -115,30 +115,43 @@ const startServices = () => {
 
   const rootEnv = parseEnvFile(path.join(rootDir, '.env'));
 
-  const streamDistIndex = path.join(rootDir, 'stream', 'dist', 'index.js');
-  if (!fs.existsSync(streamDistIndex)) {
-    console.log('\x1b[33m[Launcher] Bien dich StreamBot TypeScript lan dau...\x1b[0m');
+  const questGoBin = path.join(rootDir, 'bin', process.platform === 'win32' ? 'quest-server.exe' : 'quest-server');
+  const streamGoBin = path.join(rootDir, 'bin', process.platform === 'win32' ? 'stream-server.exe' : 'stream-server');
+
+  if (!fs.existsSync(questGoBin)) {
+    console.log('\x1b[33m[Launcher] Bien dich quest-server Go lan dau...\x1b[0m');
     try {
-      execSync('npm run build', { cwd: path.join(rootDir, 'stream'), stdio: 'inherit' });
+      execSync('go build -o bin/quest-server.exe ./backend/cmd/quest', { cwd: rootDir, stdio: 'inherit' });
     } catch (err) {
-      console.warn('\x1b[31m[Launcher] Khong the build StreamBot tu dong:\x1b[0m', err?.message);
+      console.warn('\x1b[31m[Launcher] Khong the build quest-server Go:\x1b[0m', err?.message);
     }
   }
 
+  if (!fs.existsSync(streamGoBin)) {
+    console.log('\x1b[33m[Launcher] Bien dich stream-server Go lan dau...\x1b[0m');
+    try {
+      execSync('go build -o bin/stream-server.exe ./backend/cmd/stream', { cwd: rootDir, stdio: 'inherit' });
+    } catch (err) {
+      console.warn('\x1b[31m[Launcher] Khong the build stream-server Go:\x1b[0m', err?.message);
+    }
+  }
+
+  console.log('\x1b[32m[Launcher] Khoi dong cac dich vu Go Backend hieu nang cao (bin/quest-server & bin/stream-server)...\x1b[0m');
+
   const services = [
     {
-      name: 'QUEST :3001',
+      name: 'QUEST :3001 (Go)',
       color: '\x1b[35m',
-      cwd: path.join(rootDir, 'quest'),
-      cmd: process.platform === 'win32' ? 'cmd.exe' : 'npx',
-      args: process.platform === 'win32' ? ['/c', 'npx', 'tsx', 'src/server.ts'] : ['tsx', 'src/server.ts'],
+      cwd: rootDir,
+      cmd: questGoBin,
+      args: [],
     },
     {
-      name: 'STREAM :3000',
+      name: 'STREAM :3000 (Go)',
       color: '\x1b[33m',
-      cwd: path.join(rootDir, 'stream'),
-      cmd: 'node',
-      args: ['--experimental-websocket', 'dist/index.js'],
+      cwd: rootDir,
+      cmd: streamGoBin,
+      args: [],
     },
     {
       name: 'WEB :5173',

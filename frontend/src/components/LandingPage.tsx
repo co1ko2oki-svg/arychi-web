@@ -6,78 +6,84 @@ import {
   ChevronDown,
   ChevronUp,
   Cpu,
-  KeyRound,
   Lock,
-  QrCode,
   Radio,
   ShieldCheck,
   Sparkles,
   Terminal,
   Tv,
 } from 'lucide-react';
-import { AuthUser, PlanTierId, UserSubscription } from '../types';
+import { AuthUser } from '../types';
 import { NavTabId } from './Navbar';
-import { SINGLE_PLAN_20K } from './SubscriptionModal';
 import { StatusDot } from './ui';
 
 interface LandingPageProps {
   onOpenLoginModal: () => void;
-  onOpenSubscriptionModal: (planId?: PlanTierId) => void;
   onEnterDashboard?: () => void;
   user: AuthUser | null;
-  subscription: UserSubscription | null;
   questConnected: boolean;
   streamConnected: boolean;
   onNavigateTab?: (tab: NavTabId) => void;
 }
 
+// 10 Discord Stream Badge Tiers (Matching official Discord stream hours)
+const STREAM_BADGE_TIERS = [
+  { hours: '1h', title: 'Người mới', color: '#9aa8a0', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '5h', title: 'Chim non', color: '#8ec07c', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '20h', title: 'Đột phá', color: '#72b991', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '75h', title: 'Nổi bật', color: '#4ec9b0', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '150h', title: 'Người tạo xu hướng', color: '#56b6c2', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '300h', title: 'Tiêu điểm', color: '#61afef', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '500h', title: 'Ngôi sao', color: '#8e96e8', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '1.000h', title: 'Cảm giác', color: '#d172e8', bg: 'bg-[#1a231f]', isLocked: false },
+  { hours: '2.000h', title: 'Nhà tiên tri', color: '#e06c75', bg: 'bg-[#1a231f]', isLocked: true },
+  { hours: '5.000+h', title: 'Xuất thần', color: '#d7ad69', bg: 'bg-[#1a231f]', isLocked: true },
+];
+
 export const LandingPage: React.FC<LandingPageProps> = ({
   onOpenLoginModal,
-  onOpenSubscriptionModal,
   onEnterDashboard,
   user,
-  subscription,
   questConnected,
   streamConnected,
 }) => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-  const hasActivePlan = Boolean(subscription && subscription.isActive !== false);
 
   const services = [
     {
-      title: 'Discord Quests (1 Token)',
-      port: 'PORT :3001',
+      title: 'Discord Quests ✨',
+      port: 'SĂN QUÀ DISCORD',
       summary:
-        'Mô phỏng gói tin heartbeat 30 giây chuẩn Discord Desktop để hoàn thành nhiệm vụ tự động không cần tải game.',
+        'Tự động cày 100% nhiệm vụ game Discord để nhận avatar độc quyền, khung viền hồ sơ và vật phẩm game mà không cần tải game.',
       specs: [
-        'Yêu cầu nhập 1 Token Acc Discord trong Dashboard',
-        'Tự động nhận nhiệm vụ & Claim thưởng khi hoàn tất',
+        'Chỉ cần nhập 1 Token Discord trong Dashboard',
+        'Tự động nhận nhiệm vụ, xem video & báo cáo tiến trình',
       ],
-      tech: 'Node.js · Fastify · WS',
+      tech: 'Tự động 100% · Hỗ trợ Mobile & PC',
       icon: Sparkles,
     },
     {
-      title: 'Treo Stream Voice (2 Token)',
-      port: 'PORT :3000',
+      title: 'Treo Stream Voice 🎧',
+      port: 'CHINH PHỤC 5.000H',
       summary:
-        'Truyền phát trực tiếp YouTube, Twitch hoặc file MP4 vào kênh thoại bằng FFmpeg, tích hợp sẵn Viewer Farm.',
+        'Truyền phát video 24/7 với 2 nguồn có sẵn (Lofi Beats, Cozy Gaming) hoặc URL tùy chọn, tự động kết nối lại và cày giờ xem tài khoản phụ.',
       specs: [
-        'Yêu cầu 2 Token: 1 Token Chính (Stream) + 1 Token Phụ (Xem)',
-        'Tự động duy trì thời lượng xem stream 24/7',
+        'Yêu cầu 2 Token: 1 Token Chính (Phát) + 1 Token Phụ (Xem)',
+        'Tự động reconnect, loop liên tục & theo dõi tiến trình 10 cấp huy hiệu',
       ],
-      tech: 'FFmpeg · yt-dlp · Opus',
+      tech: 'Âm thanh chất lượng cao · Reconnect thông minh',
       icon: Tv,
     },
     {
-      title: 'Science Telemetry (1 Token)',
-      port: 'PYTHON 3',
+      title: 'Cày Giờ Chơi Game 🎮',
+      port: 'HỒ SƠ DISCORD',
       summary:
-        'Khởi tạo chữ ký nhị phân Windows PE gửi trực tiếp tới /api/v9/science nhằm cộng giờ chơi và mở khóa huy hiệu.',
+        'Tự động tăng số giờ chơi cho các tựa game yêu thích và mở khóa danh sách 1.000+ tựa game hiển thị trên hồ sơ cá nhân Discord của bạn.',
       specs: [
-        'Yêu cầu nhập 1 Token Acc Discord trong Dashboard',
-        'Đa luồng song song tốc độ cao lên tới 5.000 giờ',
+        'Hỗ trợ Discord Token và Cookie xác thực',
+        '2 nút bấm đơn giản: Cày giờ chơi & Đánh dấu 1.000+ Game',
       ],
-      tech: 'Python 3 · PE Spoofer',
+      tech: 'An toàn · Không cần tải game',
       icon: Cpu,
     },
   ];
@@ -86,245 +92,201 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     {
       icon: Lock,
       tag: 'OAUTH2 AUTHENTICATION',
-      title: 'Đăng nhập qua Bot Discord OAuth2',
-      desc: 'Tại tên miền chính arychi.xyz, người dùng xác thực an toàn qua hệ thống Discord OAuth2 của Astral Bot để liên kết tài khoản với Database.',
-    },
-    {
-      icon: QrCode,
-      tag: 'VIETQR & PAYOS API',
-      title: 'Tự động xác nhận & Cộng dồn theo tháng',
-      desc: 'Tích hợp API VietQR và PayOS cho gói duy nhất 20.000đ/tháng. Tự động xác nhận giao dịch, cộng dồn số tháng và lưu trữ vào Database.',
+      title: 'Đăng nhập qua Discord OAuth2',
+      desc: 'Người dùng xác thực tài khoản an toàn qua hệ thống Discord OAuth2 chính thức, không lưu trữ thông tin nhạy cảm.',
     },
     {
       icon: ShieldCheck,
-      tag: '2ND VERIFICATION',
-      title: 'Chuyển hướng & Xác minh kép tại dash.arychi.xyz',
-      desc: 'Khi truy cập bảng điều khiển dash.arychi.xyz, hệ thống thực hiện xác minh lần 2 trực tiếp với Database để đảm bảo tài khoản đã có gói hợp lệ.',
+      tag: 'HARDENED GATEWAY',
+      title: 'Bảo vệ Gateway & Chống Khóa Tài Khoản',
+      desc: 'Phân loại mã đóng kết nối (Close Codes), xử lý mã lỗi 4003/4004 dứt điểm, ngăn chặn vòng lặp reconnect gây yêu cầu đổi mật khẩu.',
+    },
+    {
+      icon: Radio,
+      tag: 'STREAM AUTOMATION',
+      title: 'Tự Động Phát & Chinh Phục 5.000 Giờ',
+      desc: 'Luồng phát stream được giám sát định kỳ, tự động kết nối lại khi rớt mạng, tích hợp theo dõi 10 cấp huy hiệu hiển thị trực quan.',
     },
     {
       icon: Terminal,
-      tag: 'SIDEBAR BACKEND',
-      title: 'Giao diện cột trái & Quản lý Token độc lập',
-      desc: 'Bảng điều khiển cột trái trên dash.arychi.xyz tách biệt rõ cấu hình: 1 Token cho Quest/Giờ chơi và 2 Token (1 Chính + 1 Phụ) riêng cho Treo Stream.',
+      tag: 'STREAMLINED CONTROLS',
+      title: 'Giao Diện Điều Khiển Gọn Gàng',
+      desc: 'Bảng điều khiển trực quan tách biệt cấu hình: 1 Token cho Quest, 2 Token cho Treo Stream và Token + Cookie cho Cày Giờ Chơi.',
     },
   ];
 
   const steps = [
     {
       step: 'BƯỚC 01',
-      time: 'arychi.xyz',
+      time: 'Xác thực',
       title: 'Đăng nhập OAuth2 Discord',
-      desc: 'Xác thực tài khoản an toàn qua hệ thống OAuth2 của Bot Discord mà không cần nhập token cá nhân.',
+      desc: 'Đăng nhập an toàn qua OAuth2 chính thức để kết nối phiên làm việc của bạn.',
       cmdLabel: 'Trạng thái OAuth2',
-      cmdValue: user ? `@${user.username} (DISCORD)` : 'Chưa đăng nhập',
+      cmdValue: user ? `@${user.username}` : 'Chưa đăng nhập',
     },
     {
       step: 'BƯỚC 02',
-      time: '20.000đ / 1 tháng',
-      title: 'Thanh toán VietQR & PayOS',
-      desc: 'Quét mã VietQR hoặc cổng PayOS cho gói duy nhất 20.000đ/tháng. Hệ thống tự xác nhận và cộng tháng vào Database.',
-      cmdLabel: 'Trạng thái Gói',
-      cmdValue: hasActivePlan ? `Còn ${subscription?.daysRemaining ?? 30} ngày` : 'Chưa kích hoạt gói 20k',
+      time: 'Cấu hình Token',
+      title: 'Nhập Token Theo Tính Năng',
+      desc: 'Nhập Token cho Quest hoặc 2 Token (Chính + Phụ) cho Treo Stream và bắt đầu điều khiển.',
+      cmdLabel: 'Cơ chế hoạt động',
+      cmdValue: 'Phân luồng độc lập',
     },
     {
       step: 'BƯỚC 03',
-      time: 'dash.arychi.xyz',
-      title: 'Vào Dashboard & Nhập Token',
-      desc: 'Chuyển hướng sang miền phụ dash.arychi.xyz, xác minh gói lần 2 và nhập 1 Token (Quest) hoặc 2 Token Chính/Phụ (Stream).',
-      cmdLabel: 'Miền điều khiển',
-      cmdValue: 'https://dash.arychi.xyz',
+      time: 'Tự động 24/7',
+      title: 'Tận Hưởng Kết Quả',
+      desc: 'Máy chủ tự động xử lý nhiệm vụ, phát stream phòng thoại và tăng giờ chơi game đều đặn.',
+      cmdLabel: 'Tiến độ',
+      cmdValue: 'Thời gian thực',
     },
   ];
 
   const faqs = [
     {
-      q: 'Tại sao arychi.xyz chỉ hiển thị trang giới thiệu và bảng giá?',
-      a: 'Theo kiến trúc bảo mật 2 tên miền của Arychi, tên miền chính arychi.xyz đóng vai trò cổng giới thiệu, đăng nhập Bot Discord OAuth2 và thanh toán gói. Toàn bộ chức năng điều khiển backend nằm tại tên miền phụ dash.arychi.xyz.',
+      q: 'Làm thế nào để chinh phục huy hiệu Stream 5.000 giờ?',
+      a: 'Bạn vào mục Treo Stream Voice, nhập Token tài khoản Chính (phát luồng) và Token tài khoản Phụ (xem luồng), cấu hình Server ID và Voice Channel ID, sau đó chọn nguồn phát (Lofi Beats Chill Stream hoặc Cozy Gaming Ambient Loop). Hệ thống sẽ tự động giữ luồng phát và tự kết nối lại nếu có gián đoạn.',
     },
     {
-      q: 'Hệ thống có bao nhiêu gói dịch vụ và thanh toán như thế nào?',
-      a: 'Arychi loại bỏ toàn bộ các gói phân mảnh và chỉ giữ lại duy nhất 1 gói 20.000đ / 1 tháng mở khóa 100% tính năng. Khi thanh toán qua API VietQR và PayOS, hệ thống tự động xác nhận và cộng dồn số tháng vào Database.',
+      q: 'Hệ thống có an toàn cho tài khoản Discord không?',
+      a: 'Rất an toàn. Ứng dụng đã được rà soát và khắc phục triệt để lỗi reconnect vô hạn khi gặp lỗi 4003/4004 (nguyên nhân gây khóa bảo vệ mật khẩu), mô phỏng headers tự nhiên và tuân thủ yêu cầu Gateway của Discord.',
     },
     {
-      q: 'Quá trình chuyển hướng sang dash.arychi.xyz hoạt động ra sao?',
-      a: 'Khi bạn bấm "Vào Dashboard (dash.arychi.xyz)", hệ thống chuyển hướng kèm phiên xác thực và kiểm tra lần thứ 2 đối chiếu với Database để chắc chắn tài khoản đã mua gói 20.000đ/tháng còn hiệu lực.',
+      q: 'Tại sao Treo Stream cần 2 Token (1 Chính + 1 Phụ)?',
+      a: 'Theo cơ chế của Discord, thời gian stream chỉ được tính tích lũy khi có ít nhất 1 người dùng khác đang xem luồng stream của bạn trong phòng thoại. Do đó tài khoản Phụ đóng vai trò người xem để tài khoản Chính được cộng giờ hợp lệ.',
     },
     {
-      q: 'Tại sao tính năng Treo Stream cần nhập 2 Token (1 Chính và 1 Phụ)?',
-      a: 'Trong bảng điều khiển bên cột trái của dash.arychi.xyz, tính năng Treo Stream sử dụng 1 Token Chính để vào kênh thoại phát video và 1 Token Phụ (Viewer Farm) tự động vào xem luồng phát đó nhằm cày giờ stream an toàn.',
+      q: 'Cày giờ chơi game hoạt động như thế nào?',
+      a: 'Bạn chỉ cần nhập User Token và Cookie (cf_clearance), sau đó chọn số giờ muốn cày và bấm "Bắt đầu cày giờ chơi". Không cần mở game thật hay bật máy tính liên tục.',
     },
   ];
 
   return (
-    <div className="space-y-20 py-6">
+    <div className="space-y-16 py-8">
+      {/* Hero Section */}
       <section id="intro" className="grid grid-cols-1 lg:grid-cols-[1.15fr_0.85fr] gap-10 items-center">
         <div className="space-y-6">
-          <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-200">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#141927] border border-line text-blue-300 font-medium">
-              arychi.xyz • Cổng Giới Thiệu
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <StatusDot tone={questConnected ? 'ok' : 'error'} />
-              Quest :3001 {questConnected ? 'Online' : 'Offline'}
-            </span>
-            <span className="text-slate-400">•</span>
-            <span className="inline-flex items-center gap-1.5">
-              <StatusDot tone={streamConnected ? 'ok' : 'warn'} />
-              Stream :3000 {streamConnected ? 'Live' : 'Standby'}
-            </span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#8e96e8]">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Bộ Tiện Ích Discord Chuyên Nghiệp ✨</span>
           </div>
 
-          <div className="space-y-3.5">
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-[1.15]">
-              Hệ thống Tự động hóa Discord — Arychi Suite
-            </h1>
-            <p className="text-base text-slate-300 leading-relaxed">
-              Đăng nhập an toàn bằng Bot Discord (OAuth2), kích hoạt gói duy nhất 20.000đ/tháng qua VietQR &amp; PayOS để truy cập trung tâm điều khiển tại miền phụ dash.arychi.xyz.
-            </p>
-          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#f2f5f1] tracking-tight leading-tight">
+            Tự động hoá Discord Quests, Stream 5.000h &amp; Game Hồ Sơ
+          </h1>
 
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          <p className="text-sm sm:text-base text-[#9aa8a0] leading-relaxed max-w-xl">
+            Nền tảng tự động nhận quà Discord Quests, duy trì luồng phát âm nhạc/video liên tục để chinh phục huy hiệu 5.000 giờ và tăng giờ chơi game an toàn 24/7.
+          </p>
+
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            {onEnterDashboard ? (
+              <button
+                type="button"
+                onClick={onEnterDashboard}
+                className="btn-primary h-10 px-6 text-sm"
+              >
+                <span>Vào Dashboard ngay ✨</span>
+                <ArrowUpRight className="w-4 h-4" />
+              </button>
+            ) : null}
+
             {!user ? (
               <button
                 type="button"
                 onClick={onOpenLoginModal}
-                className="btn-primary h-10 px-5 text-sm"
+                className="btn-secondary h-10 px-5 text-sm"
               >
-                <span>1. Đăng nhập Discord</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            ) : !hasActivePlan ? (
-              <button
-                type="button"
-                onClick={() => onOpenSubscriptionModal('monthly_20k')}
-                className="btn-primary h-10 px-5 text-sm"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>2. Mua gói 20.000đ / 1 tháng (VietQR)</span>
+                <span>Đăng nhập Discord (OAuth2)</span>
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={onEnterDashboard}
-                className="btn-primary h-10 px-5 text-sm"
-              >
-                <span>Vào Dashboard (dash.arychi.xyz)</span>
-                <ArrowUpRight className="w-4 h-4" />
-              </button>
-            )}
-
-            <button
-              type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_20k')}
-              className="btn-secondary h-10 px-4 text-sm"
-            >
-              <KeyRound className="w-4 h-4 text-blue-400" />
-              <span>
-                {hasActivePlan
-                  ? `Gói 20k: Còn ${subscription?.daysRemaining ?? 30} ngày`
-                  : 'Gói Full: 20.000đ / 1 tháng'}
-              </span>
-            </button>
-
-            {user && (
-              <button
-                type="button"
-                onClick={onEnterDashboard}
-                className="btn-secondary h-10 px-4 text-sm"
-              >
-                <span>Chuyển tới dash.arychi.xyz</span>
-                <ArrowUpRight className="w-4 h-4 text-blue-300" />
-              </button>
+              <div className="inline-flex items-center gap-2 h-10 px-4 rounded-lg bg-[#1a231f] border border-[#2d3b33] text-xs text-[#72b991] font-mono">
+                <CheckCircle2 className="w-4 h-4 text-[#72b991]" />
+                <span>Đã đăng nhập @{user.username}</span>
+              </div>
             )}
           </div>
 
-          <div className="pt-3 grid grid-cols-3 gap-4 max-w-md border-t border-line">
+          <div className="pt-4 grid grid-cols-3 gap-4 max-w-md border-t border-[#2d3b33]">
             <div>
-              <p className="text-lg font-bold font-mono text-white">20.000đ</p>
-              <p className="text-xs text-slate-300">1 Tháng / Full tính năng</p>
+              <p className="text-lg font-bold font-mono text-[#f2f5f1]">100%</p>
+              <p className="text-xs text-[#9aa8a0]">Tự động hoàn thành</p>
             </div>
             <div>
-              <p className="text-lg font-bold font-mono text-blue-300">VietQR</p>
-              <p className="text-xs text-slate-300">&amp; PayOS Tự xác nhận</p>
+              <p className="text-lg font-bold font-mono text-[#8e96e8]">5.000h</p>
+              <p className="text-xs text-[#9aa8a0]">Huy hiệu Stream Voice</p>
             </div>
             <div>
-              <p className="text-lg font-bold font-mono text-white">2 Token</p>
-              <p className="text-xs text-slate-300">Chính &amp; Phụ cho Stream</p>
+              <p className="text-lg font-bold font-mono text-[#72b991]">24/7</p>
+              <p className="text-xs text-[#9aa8a0]">Chạy nền máy chủ</p>
             </div>
           </div>
         </div>
 
+        {/* Telemetry Status Card */}
         <div className="surface p-6 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-line">
+          <div className="flex items-center justify-between pb-3 border-b border-[#2d3b33]">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-500" />
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-500" />
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-400" />
-              <span className="ml-1.5 text-xs font-mono font-semibold text-white">
-                CỔNG XÁC MINH • ARYCHI.XYZ
+              <span className="w-2.5 h-2.5 rounded-full bg-[#72b991]" />
+              <span className="text-xs font-mono font-semibold text-[#f2f5f1]">
+                HỆ THỐNG VẬN HÀNH
               </span>
             </div>
-            <span className="text-xs font-mono text-blue-300">
-              {hasActivePlan ? 'READY FOR DASH' : 'YÊU CẦU GÓI 20K'}
-            </span>
+            <span className="text-xs font-mono text-[#8e96e8]">ONLINE 24/7</span>
           </div>
 
-          <div className="divide-y divide-line">
-            <div className="py-3.5 flex items-center justify-between gap-3">
+          <div className="divide-y divide-[#2d3b33]">
+            <div className="py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="icon-badge">
                   <Sparkles className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    1. Đăng nhập Discord
+                  <p className="text-sm font-semibold text-[#f2f5f1] truncate">
+                    1. Discord Quests
                   </p>
-                  <p className="text-xs font-mono text-slate-300 truncate">
-                    {user
-                      ? `Đã xác thực @${user.username} (DISCORD)`
-                      : 'Cần xác thực qua Bot Discord OAuth2'}
+                  <p className="text-xs font-mono text-[#9aa8a0] truncate">
+                    Cổng :3001 • Nhận quà &amp; Avatar
                   </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-200 shrink-0">
-                <StatusDot tone={user ? 'ok' : 'warn'} />
-                {user ? 'VERIFIED' : 'LOGIN'}
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#f2f5f1] shrink-0">
+                <StatusDot tone={questConnected ? 'ok' : 'error'} />
+                {questConnected ? 'READY' : 'OFFLINE'}
               </span>
             </div>
 
-            <div className="py-3.5 flex items-center justify-between gap-3">
+            <div className="py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="icon-badge">
-                  <QrCode className="w-4 h-4" />
+                  <Tv className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    2. Gói 20.000đ / 1 tháng (Database)
+                  <p className="text-sm font-semibold text-[#f2f5f1] truncate">
+                    2. Treo Stream Voice
                   </p>
-                  <p className="text-xs font-mono text-slate-300 truncate">
-                    {hasActivePlan
-                      ? `Đang hoạt động • Còn ${subscription?.daysRemaining ?? 30} ngày`
-                      : 'Tự động cộng tháng qua VietQR & PayOS'}
+                  <p className="text-xs font-mono text-[#9aa8a0] truncate">
+                    Cổng :3000 • 2 Token Chính &amp; Phụ
                   </p>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-slate-200 shrink-0">
-                <StatusDot tone={hasActivePlan ? 'ok' : 'error'} />
-                {hasActivePlan ? 'ACTIVE' : '20K/MO'}
+              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#f2f5f1] shrink-0">
+                <StatusDot tone={streamConnected ? 'ok' : 'warn'} />
+                {streamConnected ? 'READY' : 'STANDBY'}
               </span>
             </div>
 
-            <div className="py-3.5 flex items-center justify-between gap-3">
+            <div className="py-3 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="icon-badge">
-                  <ShieldCheck className="w-4 h-4" />
+                  <Cpu className="w-4 h-4" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
-                    3. Chuyển hướng tới dash.arychi.xyz
+                  <p className="text-sm font-semibold text-[#f2f5f1] truncate">
+                    3. Cày Giờ Chơi Game
                   </p>
-                  <p className="text-xs font-mono text-slate-300 truncate">
-                    Xác minh gói lần 2 &amp; mở giao diện cột trái
+                  <p className="text-xs font-mono text-[#9aa8a0] truncate">
+                    Mở khóa danh mục 1.000+ Game
                   </p>
                 </div>
               </div>
@@ -334,121 +296,81 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 className="btn-secondary btn-sm shrink-0"
               >
                 <span>Mở Dash</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-blue-300" />
+                <ArrowUpRight className="w-3.5 h-3.5 text-[#8e96e8]" />
               </button>
             </div>
           </div>
 
-          <div className="pt-3 border-t border-line flex items-center justify-between text-xs font-mono text-slate-300">
-            <span>Đồng bộ trực tiếp vào Database</span>
+          <div className="pt-3 border-t border-[#2d3b33] flex items-center justify-between text-xs font-mono text-[#9aa8a0]">
+            <span>Phiên làm việc bảo mật</span>
             <button
               type="button"
-              onClick={() =>
-                !user
-                  ? onOpenLoginModal()
-                  : !hasActivePlan
-                  ? onOpenSubscriptionModal('monthly_20k')
-                  : onEnterDashboard?.()
-              }
+              onClick={onEnterDashboard}
               className="link text-xs"
             >
-              <span>
-                {!user
-                  ? 'Đăng nhập Discord ngay'
-                  : !hasActivePlan
-                  ? 'Mua gói 20k/tháng'
-                  : 'Truy cập dash.arychi.xyz'}
-              </span>
+              <span>Vào bảng điều khiển</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
       </section>
 
-      <section id="pricing" className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            Một Gói Duy Nhất — 20.000đ / 1 Tháng (Full Tính Năng)
-          </h2>
-          <p className="text-xs font-mono text-slate-300">
-            Thanh toán tự động qua API VietQR &amp; PayOS • Cộng dồn theo tháng trong Database
+      {/* Stream Badge Showcase (10 Tiers) */}
+      <section id="stream-badge" className="surface p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-[#2d3b33] pb-4">
+          <div>
+            <span className="text-xs font-mono text-[#8e96e8] uppercase tracking-wider font-semibold">
+              Huy hiệu Stream Discord
+            </span>
+            <h2 className="text-xl sm:text-2xl font-bold text-[#f2f5f1] tracking-tight mt-1">
+              Chinh phục 10 cấp độ huy hiệu Stream (1h → 5.000+h)
+            </h2>
+          </div>
+          <p className="text-xs font-mono text-[#9aa8a0]">
+            Cần ít nhất 1 người xem trong phòng thoại để tích lũy giờ
           </p>
         </div>
 
-        <div className="surface p-6 sm:p-8 border-blue-500/50 grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-8 items-center">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="px-2.5 py-1 rounded bg-blue-600 text-white text-xs font-mono font-semibold">
-                GÓI DUY NHẤT • FULL ACCESS
-              </span>
-              <span className="text-xs font-mono text-blue-300">
-                TỰ ĐỘNG XÁC NHẬN VIETQR &amp; PAYOS
-              </span>
-            </div>
-
-            <h3 className="text-2xl font-bold text-white">{SINGLE_PLAN_20K.name}</h3>
-            <p className="text-sm text-slate-300 leading-relaxed">{SINGLE_PLAN_20K.summary}</p>
-
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              {SINGLE_PLAN_20K.features.map((feat) => (
-                <li key={feat} className="flex items-start gap-2 text-xs text-slate-200">
-                  <CheckCircle2 className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                  <span>{feat}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="lg:border-l border-line lg:pl-8 space-y-5">
-            <div className="space-y-1">
-              <span className="text-xs font-mono text-slate-300">CHI PHÍ THUÊ BAO CỐ ĐỊNH</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold font-mono text-white">20.000đ</span>
-                <span className="text-sm text-slate-300">/ 1 tháng (30 ngày)</span>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {STREAM_BADGE_TIERS.map((tier) => (
+            <div
+              key={tier.title}
+              className="bg-[#161e1a] border border-[#2d3b33] rounded-lg p-3 text-center space-y-2 hover:border-[#3b4c42] transition-colors"
+            >
+              {/* Computer monitor icon */}
+              <div className="w-8 h-8 mx-auto flex items-center justify-center">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke={tier.color}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="w-6 h-6"
+                >
+                  <rect width="20" height="14" x="2" y="3" rx="2" />
+                  <line x1="8" x2="16" y1="21" y2="21" />
+                  <line x1="12" x2="12" y1="17" y2="21" />
+                </svg>
               </div>
-              <p className="text-xs text-blue-300 font-mono">
-                Hỗ trợ đăng ký nhiều tháng (cộng dồn trực tiếp vào Database)
-              </p>
+              <div className="text-xs font-semibold text-[#f2f5f1] truncate">{tier.title}</div>
+              <div className="text-[11px] font-mono text-[#9aa8a0] flex items-center justify-center gap-1">
+                {tier.isLocked && <span className="text-[10px]">🔒</span>}
+                <span>{tier.hours}</span>
+              </div>
             </div>
-
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                onClick={() =>
-                  user ? onOpenSubscriptionModal('monthly_20k') : onOpenLoginModal()
-                }
-                className="btn-primary w-full h-10"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>
-                  {!user
-                    ? 'Đăng nhập OAuth2 để mua gói 20k'
-                    : hasActivePlan
-                    ? 'Gia hạn thêm tháng (+20.000đ/tháng)'
-                    : 'Mua gói 20.000đ/tháng (VietQR / PayOS)'}
-                </span>
-              </button>
-
-              <button
-                type="button"
-                onClick={onEnterDashboard}
-                className="btn-secondary w-full h-10"
-              >
-                <span>Vào Dashboard (dash.arychi.xyz)</span>
-                <ArrowUpRight className="w-4 h-4 text-blue-300" />
-              </button>
-            </div>
-          </div>
+          ))}
         </div>
       </section>
 
+      {/* Core Modules Section */}
       <section id="modules" className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            Các chức năng cột trái trên dash.arychi.xyz
+          <h2 className="text-2xl font-bold text-[#f2f5f1] tracking-tight">
+            Các tính năng cốt lõi trên Arychi Suite
           </h2>
-          <p className="text-xs font-mono text-slate-300">
-            Nhập 1 Token cho Quest/Giờ chơi • Nhập 2 Token (1 Chính + 1 Phụ) cho Treo Stream
+          <p className="text-xs font-mono text-[#9aa8a0]">
+            Thiết kế tối ưu, điều khiển độc lập &amp; ổn định
           </p>
         </div>
 
@@ -465,28 +387,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="icon-badge">
                       <Icon className="w-4 h-4" />
                     </div>
-                    <span className="text-xs font-mono font-medium text-blue-300">
+                    <span className="text-xs font-mono font-medium text-[#8e96e8]">
                       {svc.port}
                     </span>
                   </div>
 
                   <div className="space-y-2">
-                    <h3 className="text-lg font-bold text-white">{svc.title}</h3>
-                    <p className="text-[13px] text-slate-300 leading-relaxed">{svc.summary}</p>
+                    <h3 className="text-lg font-bold text-[#f2f5f1]">{svc.title}</h3>
+                    <p className="text-[13px] text-[#9aa8a0] leading-relaxed">{svc.summary}</p>
                   </div>
 
-                  <ul className="pt-3 border-t border-line space-y-2 text-xs text-slate-300">
+                  <ul className="pt-3 border-t border-[#2d3b33] space-y-2 text-xs text-[#9aa8a0]">
                     {svc.specs.map((s) => (
                       <li key={s} className="flex items-center gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#72b991] shrink-0" />
                         <span>{s}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="pt-4 border-t border-line flex items-center justify-between gap-2">
-                  <span className="text-xs font-mono text-slate-300">{svc.tech}</span>
+                <div className="pt-4 border-t border-[#2d3b33] flex items-center justify-between gap-2">
+                  <span className="text-xs font-mono text-[#9aa8a0]">{svc.tech}</span>
                   <button
                     type="button"
                     onClick={onEnterDashboard}
@@ -502,13 +424,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
+      {/* Architecture & Hardening Section */}
       <section id="architecture" className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            Kiến trúc vận hành 2 tên miền &amp; Thanh toán tự động
+          <h2 className="text-2xl font-bold text-[#f2f5f1] tracking-tight">
+            Kiến trúc an toàn &amp; Bảo mật Discord
           </h2>
-          <p className="text-xs font-mono text-slate-300">
-            arychi.xyz (Giới thiệu &amp; OAuth2) → dash.arychi.xyz (Xác minh lần 2 &amp; Điều khiển)
+          <p className="text-xs font-mono text-[#9aa8a0]">
+            Bảo vệ thông tin tài khoản • Tự động xử lý kết nối
           </p>
         </div>
 
@@ -522,11 +445,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div className="icon-badge">
                       <Icon className="w-4 h-4" />
                     </div>
-                    <h3 className="text-base font-bold text-white">{feat.title}</h3>
+                    <h3 className="text-base font-bold text-[#f2f5f1]">{feat.title}</h3>
                   </div>
-                  <span className="text-2xs font-mono text-blue-300 shrink-0">{feat.tag}</span>
+                  <span className="text-[11px] font-mono text-[#8e96e8] shrink-0">{feat.tag}</span>
                 </div>
-                <p className="text-[13px] text-slate-300 leading-relaxed">{feat.desc}</p>
+                <p className="text-[13px] text-[#9aa8a0] leading-relaxed">{feat.desc}</p>
               </div>
             );
           })}
@@ -537,27 +460,28 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <div key={item.step} className="surface p-6 flex flex-col justify-between space-y-5">
               <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-blue-300 font-semibold">{item.step}</span>
-                  <span className="text-slate-300">{item.time}</span>
+                  <span className="text-[#8e96e8] font-semibold">{item.step}</span>
+                  <span className="text-[#9aa8a0]">{item.time}</span>
                 </div>
-                <h3 className="text-base font-bold text-white">{item.title}</h3>
-                <p className="text-[13px] text-slate-300 leading-relaxed">{item.desc}</p>
+                <h3 className="text-base font-bold text-[#f2f5f1]">{item.title}</h3>
+                <p className="text-[13px] text-[#9aa8a0] leading-relaxed">{item.desc}</p>
               </div>
 
-              <div className="pt-3 border-t border-line flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-300">{item.cmdLabel}</span>
-                <span className="text-blue-300 font-semibold">{item.cmdValue}</span>
+              <div className="pt-3 border-t border-[#2d3b33] flex items-center justify-between text-xs font-mono">
+                <span className="text-[#9aa8a0]">{item.cmdLabel}</span>
+                <span className="text-[#72b991] font-semibold">{item.cmdValue}</span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
+      {/* FAQ Section */}
       <section id="faq" className="grid grid-cols-1 lg:grid-cols-[0.85fr_1.15fr] gap-8 items-start">
         <div className="space-y-3">
-          <h2 className="text-2xl font-bold text-white tracking-tight">Câu hỏi thường gặp</h2>
-          <p className="text-[13px] text-slate-300 leading-relaxed">
-            Giải đáp về cơ chế đăng nhập OAuth2, gói 20.000đ/tháng qua VietQR &amp; PayOS, xác minh kép tại dash.arychi.xyz và cách nhập Token.
+          <h2 className="text-2xl font-bold text-[#f2f5f1] tracking-tight">Câu hỏi thường gặp</h2>
+          <p className="text-[13px] text-[#9aa8a0] leading-relaxed">
+            Giải đáp các thắc mắc về cơ chế đăng nhập OAuth2, treo stream cày huy hiệu 5.000 giờ, săn quà Quests và tính an toàn của tài khoản.
           </p>
         </div>
 
@@ -572,16 +496,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   aria-expanded={isOpen}
                   className="w-full p-5 flex items-center justify-between gap-4 text-left"
                 >
-                  <span className="text-sm font-semibold text-white">{faq.q}</span>
+                  <span className="text-sm font-semibold text-[#f2f5f1]">{faq.q}</span>
                   {isOpen ? (
-                    <ChevronUp className="w-4 h-4 text-blue-300 shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-[#8e96e8] shrink-0" />
                   ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-300 shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-[#9aa8a0] shrink-0" />
                   )}
                 </button>
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-2 border-t border-line">
-                    <p className="text-[13px] text-slate-300 leading-relaxed">{faq.a}</p>
+                  <div className="px-5 pb-5 pt-2 border-t border-[#2d3b33]">
+                    <p className="text-[13px] text-[#9aa8a0] leading-relaxed">{faq.a}</p>
                   </div>
                 )}
               </div>

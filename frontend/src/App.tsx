@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, KeyRound, Loader2, Lock, QrCode, ShieldCheck, UserCheck } from 'lucide-react';
 import { Navbar, NavTabId } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { DashboardOverview } from './components/DashboardOverview';
@@ -10,13 +9,11 @@ import { StreamDashboard } from './components/StreamDashboard';
 import { BadgeDashboard } from './components/BadgeDashboard';
 import { TerminalLogs } from './components/TerminalLogs';
 import { LoginModal } from './components/LoginModal';
-import { SubscriptionModal } from './components/SubscriptionModal';
 import { SiteFooter } from './components/SiteFooter';
 import { ToastProvider, useToast } from './components/Toast';
 import {
   AccountTokens,
   AuthUser,
-  PlanTierId,
   QuestDTO,
   QuestJob,
   LogEntry,
@@ -74,21 +71,9 @@ const AppContent: React.FC = () => {
     }
   });
 
-  const [subscription, setSubscription] = useState<UserSubscription | null>(() => {
-    try {
-      const saved = localStorage.getItem('arychi_subscription');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
   const [token, setToken] = useState<string>(
     () => localStorage.getItem('arychi_discord_token') || ''
   );
-
-  const [verifyingDash, setVerifyingDash] = useState<boolean>(false);
-  const [dashVerified, setDashVerified] = useState<boolean>(false);
 
   const [quests, setQuests] = useState<QuestDTO[]>([]);
   const [jobs, setJobs] = useState<Map<string, QuestJob>>(new Map());
@@ -100,13 +85,6 @@ const AppContent: React.FC = () => {
   const [loadingQuests, setLoadingQuests] = useState(false);
   const [loadingStream, setLoadingStream] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
-  const [selectedSubPlan, setSelectedSubPlan] = useState<PlanTierId>('monthly_20k');
-
-  const handleOpenSubModal = (planId: PlanTierId = 'monthly_20k') => {
-    setSelectedSubPlan(planId);
-    setIsSubModalOpen(true);
-  };
 
   const handleSaveAuth = (
     newUser: AuthUser | null,
@@ -115,128 +93,88 @@ const AppContent: React.FC = () => {
   ) => {
     setUser(newUser);
     setSessionToken(newSessionToken);
-    setSubscription(newSub);
 
     if (newUser && newSessionToken) {
       localStorage.setItem('arychi_oauth_user', JSON.stringify(newUser));
       localStorage.setItem('arychi_session_token', newSessionToken);
-      const qTok = newUser.tokens?.questToken || '';
-      if (qTok) {
-        setToken(qTok);
-        localStorage.setItem('arychi_discord_token', qTok);
+      if (newUser.tokens?.questToken) {
+        setToken(newUser.tokens.questToken);
+        localStorage.setItem('arychi_discord_token', newUser.tokens.questToken);
       }
-      toast.success(
-        `Đã đăng nhập OAuth2: @${newUser.username} (${newUser.provider.toUpperCase()})`
-      );
     } else {
       localStorage.removeItem('arychi_oauth_user');
       localStorage.removeItem('arychi_session_token');
       localStorage.removeItem('arychi_subscription');
-      setDashVerified(false);
-      toast.info('Đã đăng xuất tài khoản OAuth2');
-    }
-
-    if (newSub) {
-      localStorage.setItem('arychi_subscription', JSON.stringify(newSub));
-    } else {
-      localStorage.removeItem('arychi_subscription');
+      localStorage.removeItem('arychi_discord_token');
+      setToken('');
     }
   };
 
-  const handleActivateSubscription = (sub: UserSubscription, updatedUser?: AuthUser) => {
-    setSubscription(sub);
-    localStorage.setItem('arychi_subscription', JSON.stringify(sub));
-    if (updatedUser) {
-      setUser(updatedUser);
-      localStorage.setItem('arychi_oauth_user', JSON.stringify(updatedUser));
+  const handleUpdateAccountTokens = (tokens: Partial<AccountTokens>) => {
+    if (tokens.questToken !== undefined) {
+      setToken(tokens.questToken);
+      localStorage.setItem('arychi_discord_token', tokens.questToken);
     }
-    setDashVerified(Boolean(sub.isActive !== false));
-    toast.success(
-      `Đã xác nhận thanh toán & kích hoạt gói 20.000đ/tháng (Còn ${sub.daysRemaining ?? 30} ngày)`
-    );
-  };
-
-  const handleUpdateAccountTokens = (partialTokens: Partial<AccountTokens>) => {
     setUser((prev) => {
-      if (!prev) return prev;
-      const mergedTokens: AccountTokens = {
-        questToken: prev.tokens?.questToken || '',
-        streamMainToken: prev.tokens?.streamMainToken || '',
-        streamViewerToken: prev.tokens?.streamViewerToken || '',
-        streamGuildId: prev.tokens?.streamGuildId || '',
-        streamChannelId: prev.tokens?.streamChannelId || '',
-        ...partialTokens,
+      if (!prev) return null;
+      const updated: AuthUser = {
+        ...prev,
+        tokens: {
+          questToken: tokens.questToken ?? prev.tokens?.questToken ?? '',
+          streamMainToken: tokens.streamMainToken ?? prev.tokens?.streamMainToken ?? '',
+          streamViewerToken: tokens.streamViewerToken ?? prev.tokens?.streamViewerToken ?? '',
+          streamGuildId: tokens.streamGuildId ?? prev.tokens?.streamGuildId,
+          streamChannelId: tokens.streamChannelId ?? prev.tokens?.streamChannelId,
+          prefix: tokens.prefix ?? prev.tokens?.prefix,
+          commandChannelId: tokens.commandChannelId ?? prev.tokens?.commandChannelId,
+          adminIds: tokens.adminIds ?? prev.tokens?.adminIds,
+        },
       };
-      const next: AuthUser = { ...prev, tokens: mergedTokens };
-      localStorage.setItem('arychi_oauth_user', JSON.stringify(next));
-      return next;
+      localStorage.setItem('arychi_oauth_user', JSON.stringify(updated));
+      return updated;
     });
   };
 
   const handleSaveQuestToken = (newToken: string, updatedTokens?: Partial<AccountTokens>) => {
     setToken(newToken);
-    if (newToken) {
-      localStorage.setItem('arychi_discord_token', newToken);
-    } else {
-      localStorage.removeItem('arychi_discord_token');
-    }
+    localStorage.setItem('arychi_discord_token', newToken);
     if (updatedTokens) {
       handleUpdateAccountTokens(updatedTokens);
     }
   };
 
-  // Verify session & subscription against Backend Database (2nd verification for dash.arychi.xyz)
-  const verifySubscriptionFromDb = useCallback(
-    async (tok: string) => {
-      if (!tok) {
-        setDashVerified(false);
-        return;
-      }
-      setVerifyingDash(true);
-      try {
-        const res = await questApi.verifySubscription(tok);
-        if (res.authenticated && res.account) {
-          setUser(res.account);
-          localStorage.setItem('arychi_oauth_user', JSON.stringify(res.account));
-          if (res.account.tokens?.questToken) {
-            setToken(res.account.tokens.questToken);
-            localStorage.setItem('arychi_discord_token', res.account.tokens.questToken);
-          }
+  // Verify session against Backend
+  const verifySession = useCallback(async (tok: string) => {
+    if (!tok) return;
+    try {
+      const res = await questApi.verifySubscription(tok);
+      if (res.authenticated && res.account) {
+        setUser(res.account);
+        localStorage.setItem('arychi_oauth_user', JSON.stringify(res.account));
+        if (res.account.tokens?.questToken) {
+          setToken(res.account.tokens.questToken);
+          localStorage.setItem('arychi_discord_token', res.account.tokens.questToken);
         }
-        if (res.subscription) {
-          setSubscription(res.subscription);
-          localStorage.setItem('arychi_subscription', JSON.stringify(res.subscription));
-        }
-        setDashVerified(Boolean(res.verified && res.hasActivePlan));
-      } catch {
-        // Fallback to local state if backend is temporarily unreachable
-        setDashVerified(Boolean(user && subscription && subscription.isActive !== false));
-      } finally {
-        setVerifyingDash(false);
       }
-    },
-    [user, subscription]
-  );
+    } catch {
+      // Offline fallback
+    }
+  }, []);
 
   useEffect(() => {
     if (sessionToken) {
-      verifySubscriptionFromDb(sessionToken);
+      verifySession(sessionToken);
     }
-  }, [sessionToken, domainMode, verifySubscriptionFromDb]);
+  }, [sessionToken, domainMode, verifySession]);
 
-  // Capture Discord Bot Application OAuth2 code redirect
+  // Capture Discord OAuth2 redirect
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const urlParams = new URLSearchParams(window.location.search);
-    const oauthCode = urlParams.get('code');
-    if (oauthCode) {
-      toast.info('Đang kết nối tài khoản Discord qua Bot OAuth2…');
+    const code = urlParams.get('code');
+    if (code) {
       questApi
-        .oauthLogin({
-          provider: 'discord',
-          code: oauthCode,
-          redirectUri: window.location.origin,
-        })
+        .loginWithOAuthCode(code)
         .then((res) => {
           handleSaveAuth(res.account, res.sessionToken, res.subscription);
           const cleanUrl = new URL(window.location.href);
@@ -248,248 +186,174 @@ const AppContent: React.FC = () => {
           toast.success(`Đã kết nối tài khoản Discord: @${res.account.username}`);
         })
         .catch((err) => {
-          toast.error(`Xác thực Discord Bot OAuth2 thất bại: ${err?.message || 'Mã code hết hạn'}`);
+          toast.error(`Xác thực Discord OAuth2 thất bại: ${err?.message || 'Mã code hết hạn'}`);
         });
     }
   }, []);
 
-  // Redirect / Navigate to dash.arychi.xyz
+  // Redirect / Navigate to Dashboard
   const handleEnterDashboard = () => {
-    if (!user || !sessionToken) {
-      toast.warning('Vui lòng đăng nhập bằng Bot Discord OAuth2 trước');
-      setIsLoginModalOpen(true);
-      return;
-    }
-    if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng mua gói 20.000đ/tháng qua VietQR / PayOS trước khi vào Dashboard');
-      setIsSubModalOpen(true);
-      return;
-    }
-
     const host = window.location.hostname.toLowerCase();
     if ((host === 'arychi.xyz' || host === 'www.arychi.xyz' || host === 'arychy.xyz') && !host.startsWith('dash.')) {
       const rootDomain = host.replace(/^www\./, '');
-      window.location.href = `https://dash.${rootDomain}?session=${encodeURIComponent(sessionToken)}#home`;
+      const sess = sessionToken ? `?session=${encodeURIComponent(sessionToken)}` : '';
+      window.location.href = `https://dash.${rootDomain}${sess}#home`;
       return;
     }
 
     const nextUrl = new URL(window.location.href);
     nextUrl.searchParams.set('domain', 'dash');
-    nextUrl.searchParams.set('session', sessionToken);
+    if (sessionToken) {
+      nextUrl.searchParams.set('session', sessionToken);
+    }
     nextUrl.hash = '#home';
     window.history.pushState({}, '', nextUrl.toString());
     setDomainMode('dash');
     setActiveTab('home');
-    verifySubscriptionFromDb(sessionToken);
+    if (sessionToken) {
+      verifySession(sessionToken);
+    }
   };
 
   const handleBackToLanding = () => {
-    const host = window.location.hostname.toLowerCase();
-    if (host.startsWith('dash.')) {
-      const rootDomain = host.replace(/^dash\./, '');
-      window.location.href = `https://${rootDomain}`;
-      return;
-    }
     const nextUrl = new URL(window.location.href);
     nextUrl.searchParams.delete('domain');
-    nextUrl.hash = '#intro';
+    nextUrl.hash = '';
     window.history.pushState({}, '', nextUrl.toString());
     setDomainMode('landing');
+    setActiveTab('home');
   };
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setActiveTab(getTabFromHash());
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
 
   const handleSelectTab = (tab: NavTabId) => {
     setActiveTab(tab);
-    if (window.location.hash !== `#${tab}`) {
-      window.location.hash = `#${tab}`;
-    }
+    window.location.hash = `#${tab}`;
   };
 
-  useEffect(() => {
-    if (domainMode === 'landing') {
-      document.title = 'Arychi Suite — arychi.xyz (Giới thiệu & Gói 20k/tháng)';
-      return;
-    }
-    const titles: Record<NavTabId, string> = {
-      home: 'Tổng quan · dash.arychi.xyz',
-      about: 'Tài liệu kỹ thuật · dash.arychi.xyz',
-      quests: 'Discord Quests (1 Token) · dash.arychi.xyz',
-      stream: 'Treo Stream (2 Token) · dash.arychi.xyz',
-      badges: 'Giờ chơi (1 Token) · dash.arychi.xyz',
-      logs: 'Nhật ký hệ thống · dash.arychi.xyz',
-    };
-    document.title = titles[activeTab] || 'dash.arychi.xyz';
-  }, [activeTab, domainMode]);
-
   const loadQuests = useCallback(async () => {
-    if (!token) return;
+    if (!token && !user?.tokens?.questToken) return;
+    const activeToken = token || user?.tokens?.questToken || '';
     setLoadingQuests(true);
     try {
-      const data = await questApi.getQuests(token);
-      setQuests(data.quests);
-      setQuestConnected(true);
-    } catch (err: any) {
-      console.warn('Could not load quests:', err?.message);
+      const data = await questApi.getQuests(activeToken);
+      setQuests(data.quests || []);
+    } catch {
+      // Ignore transient errors
     } finally {
       setLoadingQuests(false);
     }
-  }, [token]);
+  }, [token, user?.tokens?.questToken]);
 
   const loadStreamStatus = useCallback(async () => {
     setLoadingStream(true);
     try {
-      const status = await streamApi.getStatus();
-      setStreamStatus(status);
-      setStreamConnected(true);
+      const st = await streamApi.getStatus();
+      setStreamStatus(st);
     } catch {
-      setStreamConnected(false);
+      // Ignore transient errors
     } finally {
       setLoadingStream(false);
     }
   }, []);
 
+  // WebSockets for Quests & Stream
   useEffect(() => {
     let ws: WebSocket | null = null;
-    let timer: any = null;
+    let reconnectTimer: any;
 
-    const connectQuestWs = () => {
+    const connectQuestWS = () => {
       try {
         ws = new WebSocket(QUEST_WS_URL);
-
-        ws.onopen = () => {
-          setQuestConnected(true);
-          ws?.send(JSON.stringify({ type: 'get_init' }));
-        };
-
-        ws.onmessage = (event) => {
-          try {
-            const msg = JSON.parse(event.data);
-            if (msg.type === 'init') {
-              if (msg.data?.logs) setLogs((prev) => mergeLogs(prev, msg.data.logs));
-              if (msg.data?.jobs) {
-                const map = new Map<string, QuestJob>();
-                msg.data.jobs.forEach((j: QuestJob) => map.set(j.questId, j));
-                setJobs(map);
-              }
-            } else if (msg.type === 'log') {
-              setLogs((prev) => {
-                const next = [...prev, msg.data];
-                return next.length > 500 ? next.slice(-500) : next;
-              });
-            } else if (msg.type === 'job:progress' || msg.type === 'job:update') {
-              const updatedJob = msg.data as QuestJob;
-              setJobs((prev) => {
-                const next = new Map(prev);
-                next.set(updatedJob.questId, updatedJob);
-                return next;
-              });
-
-              if (updatedJob.status === 'completed') {
-                loadQuests();
-              }
-            }
-          } catch {}
-        };
-
+        ws.onopen = () => setQuestConnected(true);
         ws.onclose = () => {
           setQuestConnected(false);
-          timer = setTimeout(connectQuestWs, 3000);
+          reconnectTimer = setTimeout(connectQuestWS, 3000);
         };
-
-        ws.onerror = () => {
-          ws?.close();
+        ws.onerror = () => ws?.close();
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'job_progress' && data.payload) {
+              const incoming = data.payload as QuestJob;
+              setJobs((prev) => new Map(prev).set(incoming.questId, incoming));
+            } else if (data.type === 'initial_state' && data.payload) {
+              if (data.payload.quests) setQuests(data.payload.quests);
+              if (data.payload.logs) {
+                setLogs((prev) => mergeLogs(prev, data.payload.logs));
+              }
+            } else if (data.type === 'log' && data.payload) {
+              setLogs((prev) => mergeLogs(prev, [data.payload]));
+            }
+          } catch {
+            // Ignore malformed WS payloads
+          }
         };
       } catch {
-        timer = setTimeout(connectQuestWs, 3000);
+        setQuestConnected(false);
+        reconnectTimer = setTimeout(connectQuestWS, 5000);
       }
     };
 
-    connectQuestWs();
+    connectQuestWS();
 
     return () => {
-      clearTimeout(timer);
-      ws?.close();
+      if (ws) ws.close();
+      clearTimeout(reconnectTimer);
     };
-  }, [loadQuests]);
+  }, []);
 
   useEffect(() => {
     let ws: WebSocket | null = null;
-    let timer: any = null;
+    let reconnectTimer: any;
 
-    const connectStreamWs = () => {
+    const connectStreamWS = () => {
       try {
         ws = new WebSocket(STREAM_WS_URL);
-
-        ws.onopen = () => {
-          setStreamConnected(true);
-        };
-
-        ws.onmessage = (event) => {
-          try {
-            const msg = JSON.parse(event.data);
-            if (msg.type === 'status') {
-              setStreamStatus(msg.data);
-            } else if (msg.type === 'init') {
-              if (msg.status) setStreamStatus(msg.status);
-              if (msg.logs) {
-                const formatted = msg.logs.map((l: any) => ({
-                  timestamp: l.timestamp || new Date().toISOString(),
-                  level: l.level || 'info',
-                  message: `[StreamBot] ${l.message || ''}`,
-                }));
-                setLogs((prev) => mergeLogs(prev, formatted));
-              }
-            } else if (msg.type === 'log') {
-              setLogs((prev) => [
-                ...prev,
-                {
-                  timestamp: msg.data?.timestamp || new Date().toISOString(),
-                  level: msg.data?.level || 'info',
-                  message: `[StreamBot] ${msg.data?.message || ''}`,
-                },
-              ]);
-            }
-          } catch {}
-        };
-
+        ws.onopen = () => setStreamConnected(true);
         ws.onclose = () => {
           setStreamConnected(false);
-          timer = setTimeout(connectStreamWs, 4000);
+          reconnectTimer = setTimeout(connectStreamWS, 3000);
         };
-
-        ws.onerror = () => {
-          ws?.close();
+        ws.onerror = () => ws?.close();
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'status' && data.data) {
+              setStreamStatus(data.data);
+            }
+          } catch {
+            // Ignore malformed WS payloads
+          }
         };
       } catch {
-        timer = setTimeout(connectStreamWs, 4000);
+        setStreamConnected(false);
+        reconnectTimer = setTimeout(connectStreamWS, 5000);
       }
     };
 
-    connectStreamWs();
+    connectStreamWS();
 
     return () => {
-      clearTimeout(timer);
-      ws?.close();
+      if (ws) ws.close();
+      clearTimeout(reconnectTimer);
     };
   }, []);
+
+  useEffect(() => {
+    loadStreamStatus();
+    const interval = setInterval(loadStreamStatus, 10000);
+    return () => clearInterval(interval);
+  }, [loadStreamStatus]);
 
   useEffect(() => {
     if (token) {
       loadQuests();
     }
-    loadStreamStatus();
-  }, [token, loadQuests, loadStreamStatus]);
+  }, [token, loadQuests]);
 
   const runningQuestsCount = Array.from(jobs.values()).filter(
     (j) => j.status === 'running' || j.status === 'enrolling'
   ).length;
+
   const streamPlaying = Boolean(streamStatus?.stream.playing);
   const hasQuestToken = Boolean(token || user?.tokens?.questToken);
   const hasStreamTokens = Boolean(
@@ -498,30 +362,26 @@ const AppContent: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#111714] text-[#f2f5f1]">
       {domainMode === 'landing' ? (
         <>
           <Navbar
             activeTab={activeTab}
             onSelectTab={handleSelectTab}
             user={user}
-            subscription={subscription}
             questConnected={questConnected}
             streamConnected={streamConnected}
             runningQuestsCount={runningQuestsCount}
             streamPlaying={streamPlaying}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
-            onOpenSubscriptionModal={handleOpenSubModal}
             onEnterDashboard={handleEnterDashboard}
           />
 
           <main className="page flex-1 pt-8 pb-16">
             <LandingPage
               onOpenLoginModal={() => setIsLoginModalOpen(true)}
-              onOpenSubscriptionModal={handleOpenSubModal}
               onEnterDashboard={handleEnterDashboard}
               user={user}
-              subscription={subscription}
               questConnected={questConnected}
               streamConnected={streamConnected}
               onNavigateTab={(tab) => handleSelectTab(tab)}
@@ -530,102 +390,12 @@ const AppContent: React.FC = () => {
 
           <SiteFooter onNavigateTab={handleSelectTab} onEnterDashboard={handleEnterDashboard} />
         </>
-      ) : verifyingDash ? (
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="surface p-8 max-w-md w-full text-center space-y-4">
-            <Loader2 className="w-7 h-7 text-blue-400 animate-spin mx-auto" />
-            <h1 className="text-lg font-bold text-white">
-              Đang xác minh lần 2 tại dash.arychi.xyz…
-            </h1>
-            <p className="text-xs text-slate-300 mx-auto">
-              Hệ thống đang đối chiếu phiên đăng nhập OAuth2 và thời hạn gói 20.000đ/tháng trực tiếp từ Database.
-            </p>
-          </div>
-        </div>
-      ) : !user || !subscription || !dashVerified ? (
-        <div className="min-h-screen flex items-center justify-center p-6">
-          <div className="surface p-8 max-w-xl w-full space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-line">
-              <div className="flex items-center gap-2.5">
-                <Lock className="w-5 h-5 text-blue-400" />
-                <h1 className="text-lg font-bold text-white">
-                  Xác minh truy cập — dash.arychi.xyz
-                </h1>
-              </div>
-              <span className="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 text-xs font-mono text-rose-300">
-                CHƯA ĐỦ ĐIỀU KIỆN
-              </span>
-            </div>
-
-            <p className="text-sm text-slate-300 leading-relaxed">
-              Miền phụ <code className="inline-code">dash.arychi.xyz</code> yêu cầu xác minh lần thứ 2 với Database: Tài khoản phải đăng nhập qua Bot Discord OAuth2 và đã kích hoạt gói <strong>20.000đ / 1 tháng</strong>.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-[#141722] border border-line space-y-1.5">
-                <div className="flex items-center gap-2 text-xs font-mono text-blue-300">
-                  <UserCheck className="w-4 h-4" />
-                  <span>1. TÀI KHOẢN OAUTH2</span>
-                </div>
-                <p className="text-sm font-semibold text-white">
-                  {user ? `Đã đăng nhập: @${user.username}` : 'Chưa đăng nhập OAuth2'}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-lg bg-[#141722] border border-line space-y-1.5">
-                <div className="flex items-center gap-2 text-xs font-mono text-blue-300">
-                  <KeyRound className="w-4 h-4" />
-                  <span>2. GÓI 20.000Đ / THÁNG</span>
-                </div>
-                <p className="text-sm font-semibold text-white">
-                  {subscription && subscription.isActive !== false
-                    ? `Còn ${subscription.daysRemaining ?? 30} ngày`
-                    : 'Chưa mua gói 20k/tháng'}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-line">
-              <button
-                type="button"
-                onClick={handleBackToLanding}
-                className="btn-ghost"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Về trang giới thiệu arychi.xyz</span>
-              </button>
-
-              <div className="flex flex-wrap items-center gap-2.5">
-                {!user ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsLoginModalOpen(true)}
-                    className="btn-primary"
-                  >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>Đăng nhập OAuth2 ngay</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => handleOpenSubModal('monthly_20k')}
-                    className="btn-primary"
-                  >
-                    <QrCode className="w-4 h-4" />
-                    <span>Mua gói 20.000đ/tháng (VietQR)</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       ) : (
         <div className="min-h-screen flex flex-col lg:flex-row">
           <Sidebar
             activeTab={activeTab}
             onSelectTab={handleSelectTab}
             user={user}
-            subscription={subscription}
             hasQuestToken={hasQuestToken}
             hasStreamTokens={hasStreamTokens}
             questConnected={questConnected}
@@ -633,15 +403,13 @@ const AppContent: React.FC = () => {
             runningQuestsCount={runningQuestsCount}
             streamPlaying={streamPlaying}
             onOpenLoginModal={() => setIsLoginModalOpen(true)}
-            onOpenSubscriptionModal={handleOpenSubModal}
             onBackToLanding={handleBackToLanding}
           />
 
-          <main className="flex-1 min-w-0 px-4 sm:px-8 py-8 max-w-5xl">
+          <main className="flex-1 min-w-0 px-4 sm:px-8 py-8 max-w-6xl">
             {activeTab === 'home' && (
               <DashboardOverview
                 user={user}
-                subscription={subscription}
                 token={token}
                 questConnected={questConnected}
                 streamConnected={streamConnected}
@@ -655,14 +423,12 @@ const AppContent: React.FC = () => {
                 logs={logs}
                 onNavigateTab={handleSelectTab}
                 onOpenLoginModal={() => setIsLoginModalOpen(true)}
-                onOpenSubscriptionModal={handleOpenSubModal}
               />
             )}
 
             {activeTab === 'quests' && (
               <QuestDashboard
                 user={user}
-                subscription={subscription}
                 sessionToken={sessionToken}
                 token={token}
                 onSaveQuestToken={handleSaveQuestToken}
@@ -671,14 +437,12 @@ const AppContent: React.FC = () => {
                 loading={loadingQuests}
                 onRefresh={loadQuests}
                 onOpenLoginModal={() => setIsLoginModalOpen(true)}
-                onOpenSubscriptionModal={handleOpenSubModal}
               />
             )}
 
             {activeTab === 'stream' && (
               <StreamDashboard
                 user={user}
-                subscription={subscription}
                 sessionToken={sessionToken}
                 onUpdateAccountTokens={handleUpdateAccountTokens}
                 status={streamStatus}
@@ -686,23 +450,33 @@ const AppContent: React.FC = () => {
                 onRefresh={loadStreamStatus}
                 streamConnected={streamConnected}
                 onOpenLoginModal={() => setIsLoginModalOpen(true)}
-                onOpenSubscriptionModal={handleOpenSubModal}
               />
             )}
 
             {activeTab === 'badges' && (
               <BadgeDashboard
                 user={user}
-                subscription={subscription}
                 sessionToken={sessionToken}
                 token={token}
                 onSaveQuestToken={handleSaveQuestToken}
                 onOpenLoginModal={() => setIsLoginModalOpen(true)}
-                onOpenSubscriptionModal={handleOpenSubModal}
               />
             )}
 
-            {activeTab === 'logs' && <TerminalLogs logs={logs} onClear={() => setLogs([])} />}
+            {activeTab === 'logs' &&
+              (user?.role === 'admin' ? (
+                <TerminalLogs logs={logs} onClear={() => setLogs([])} />
+              ) : (
+                <div className="surface p-8 text-center space-y-3 rounded-xl border border-[#2d3b33]">
+                  <div className="w-12 h-12 rounded-lg bg-[#161e1a] border border-[#2d3b33] text-[#8e96e8] mx-auto grid place-items-center text-xl">
+                    🔒
+                  </div>
+                  <h3 className="text-base font-bold text-[#f2f5f1]">Khu vực dành cho Quản trị viên</h3>
+                  <p className="text-xs text-[#9aa8a0] max-w-md mx-auto leading-relaxed">
+                    Nhật ký kỹ thuật chỉ hiển thị cho tài khoản Quản trị viên. Người dùng có thể sử dụng các chức năng Quests, Treo Stream và Cày giờ chơi bình thường.
+                  </p>
+                </div>
+              ))}
 
             {activeTab === 'about' && (
               <AboutPage
@@ -722,17 +496,6 @@ const AppContent: React.FC = () => {
         onClose={() => setIsLoginModalOpen(false)}
         user={user}
         onSaveAuth={handleSaveAuth}
-      />
-
-      <SubscriptionModal
-        isOpen={isSubModalOpen}
-        onClose={() => setIsSubModalOpen(false)}
-        user={user}
-        subscription={subscription}
-        sessionToken={sessionToken}
-        initialPlanId={selectedSubPlan}
-        onOpenLoginModal={() => setIsLoginModalOpen(true)}
-        onActivateSubscription={handleActivateSubscription}
       />
     </div>
   );

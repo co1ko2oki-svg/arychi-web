@@ -7,29 +7,31 @@ interface SiteFooterProps {
 }
 
 export const SiteFooter: React.FC<SiteFooterProps> = ({ onEnterDashboard }) => (
-  <footer className="border-t border-line">
-    <div className="page py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-300">
+  <footer className="border-t border-[#2d3b33] bg-[#111714]">
+    <div className="page py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#9aa8a0]">
       <p>
-        <span className="text-white font-semibold">Arychi Suite 2.1</span> — arychi.xyz &amp;
-        dash.arychi.xyz. Gói 20.000đ/tháng tự xác nhận qua VietQR &amp; PayOS.
+        <span className="text-[#f2f5f1] font-semibold">Arychi Suite</span> — Hệ thống tự động hóa Discord Quests, Treo Stream 5.000h &amp; Game Hồ Sơ.
       </p>
       <nav aria-label="Liên kết cuối trang" className="flex items-center gap-4">
-        <a href="#intro" className="hover:text-white transition-colors">
+        <a href="#intro" className="hover:text-[#f2f5f1] transition-colors">
           Giới thiệu
         </a>
-        <a href="#pricing" className="hover:text-white transition-colors">
-          Gói 20k/tháng
+        <a href="#modules" className="hover:text-[#f2f5f1] transition-colors">
+          Tính năng
         </a>
-        <a href="#faq" className="hover:text-white transition-colors">
+        <a href="#stream-badge" className="hover:text-[#f2f5f1] transition-colors">
+          Huy hiệu 5.000h
+        </a>
+        <a href="#faq" className="hover:text-[#f2f5f1] transition-colors">
           Hỏi đáp
         </a>
         {onEnterDashboard && (
           <button
             type="button"
             onClick={onEnterDashboard}
-            className="text-blue-300 hover:text-white font-semibold transition-colors"
+            className="text-[#8e96e8] hover:text-[#f2f5f1] font-semibold transition-colors"
           >
-            dash.arychi.xyz →
+            Vào Dashboard →
           </button>
         )}
       </nav>

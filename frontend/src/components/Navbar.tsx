@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowUpRight, ChevronRight, KeyRound, Menu, ShieldCheck, X } from 'lucide-react';
-import { AuthUser, PlanTierId, UserSubscription } from '../types';
+import { ArrowUpRight, ChevronRight, Menu, ShieldCheck, Sparkles, X } from 'lucide-react';
+import { AuthUser, UserSubscription } from '../types';
 import { questApi } from '../services/api';
 
 export type NavTabId = 'home' | 'about' | 'quests' | 'stream' | 'badges' | 'logs';
@@ -26,15 +26,13 @@ interface NavbarProps {
   runningQuestsCount?: number;
   streamPlaying?: boolean;
   onOpenLoginModal: () => void;
-  onOpenSubscriptionModal?: (planId?: PlanTierId) => void;
+  onOpenSubscriptionModal?: () => void;
   onEnterDashboard?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   user,
-  subscription,
   onOpenLoginModal,
-  onOpenSubscriptionModal,
   onEnterDashboard,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -43,7 +41,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const sectionLinks = [
     { href: '#intro', id: 'intro', label: 'Giới thiệu' },
     { href: '#modules', id: 'modules', label: 'Tính năng' },
-    { href: '#pricing', id: 'pricing', label: 'Gói 20k/tháng' },
+    { href: '#stream-badge', id: 'stream-badge', label: 'Huy hiệu 5.000h' },
     { href: '#architecture', id: 'architecture', label: 'Kiến trúc' },
     { href: '#faq', id: 'faq', label: 'Hỏi đáp' },
   ];
@@ -85,7 +83,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     const handleScroll = () => {
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          const sections = ['intro', 'modules', 'pricing', 'architecture', 'faq'];
+          const sections = ['intro', 'modules', 'stream-badge', 'architecture', 'faq'];
           let currentSection = sections[0];
           for (const sectionId of sections) {
             const el = document.getElementById(sectionId);
@@ -111,23 +109,21 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
   }, []);
 
-  const hasActivePlan = Boolean(subscription && subscription.isActive !== false);
-
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#07080C]/95 backdrop-blur-md border-b border-[#1E2230]">
+    <header className="sticky top-0 z-50 w-full bg-[#111714]/95 backdrop-blur-md border-b border-[#2d3b33]">
       <div className="page h-14 flex items-center justify-between gap-4">
         {/* Brand */}
         <a
           href="#intro"
           onClick={(e) => handleNavClick(e, '#intro')}
-          className="flex items-center gap-2.5 shrink-0 select-none"
+          className="flex items-center gap-2.5 shrink-0 select-none group"
         >
-          <span className="grid place-items-center w-7 h-7 rounded-md bg-blue-600 text-white text-[13px] font-bold border border-blue-400/30">
-            A
-          </span>
-          <span className="text-[15px] font-bold tracking-tight text-white">Arychi</span>
-          <span className="hidden sm:inline-block px-2 py-0.5 rounded bg-[#141722] border border-[#1E2230] text-[11px] font-mono text-blue-300">
-            arychi.xyz
+          <div className="w-8 h-8 rounded-lg bg-[#1a231f] border border-[#2d3b33] flex items-center justify-center text-[#8e96e8] font-bold shrink-0 group-hover:border-[#3b4c42] transition-colors">
+            <Sparkles className="w-4 h-4 text-[#8e96e8]" />
+          </div>
+          <span className="text-[15px] font-bold tracking-tight text-[#f2f5f1]">Arychi Suite</span>
+          <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-md bg-[#72b991]/15 border border-[#72b991]/30 text-xs font-mono font-medium text-[#72b991]">
+            Official Bot ✨
           </span>
         </a>
 
@@ -142,8 +138,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                 onClick={(e) => handleNavClick(e, item.href)}
                 className={`px-3 py-1.5 rounded-md text-[13px] font-medium whitespace-nowrap transition-colors duration-150 ${
                   isActive
-                    ? 'text-white bg-[#141722] font-semibold border border-[#1E2230]'
-                    : 'text-slate-300 hover:text-white hover:bg-[#141722]'
+                    ? 'text-[#f2f5f1] bg-[#1a231f] border border-[#2d3b33]'
+                    : 'text-[#9aa8a0] hover:text-[#f2f5f1] hover:bg-[#1a231f]'
                 }`}
               >
                 {item.label}
@@ -154,50 +150,37 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-          {onOpenSubscriptionModal && (
-            <button
-              type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_20k')}
-              className={`hidden sm:inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium whitespace-nowrap transition-colors duration-150 shrink-0 ${
-                hasActivePlan
-                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20'
-                  : 'bg-[#141722] hover:bg-[#1C2030] text-slate-200 border border-[#1E2230]'
-              }`}
-            >
-              <KeyRound
-                className={`w-3.5 h-3.5 ${hasActivePlan ? 'text-emerald-400' : 'text-blue-400'}`}
-              />
-              <span>
-                {hasActivePlan
-                  ? `Gói 20k (${subscription?.daysRemaining ?? 30}d)`
-                  : 'Mua gói 20k/tháng'}
-              </span>
-            </button>
-          )}
-
           {/* User Account / Discord Login Button */}
           {user ? (
             <button
               type="button"
               onClick={onOpenLoginModal}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md text-xs font-medium whitespace-nowrap bg-[#141722] hover:bg-[#1C2030] text-slate-200 border border-[#1E2230] transition-colors duration-150 shrink-0"
+              className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg text-xs font-medium whitespace-nowrap bg-[#1a231f] hover:bg-[#212c27] text-[#f2f5f1] border border-[#2d3b33] hover:border-[#3b4c42] transition-colors duration-150 shrink-0 cursor-pointer"
               aria-label={`Tài khoản @${user.username}`}
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-              <span className="max-w-[100px] truncate">@{user.username}</span>
+              {user.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.username}
+                  className="w-5 h-5 rounded-full object-cover border border-[#2d3b33] shrink-0"
+                />
+              ) : (
+                <span className="w-5 h-5 rounded-full bg-[#8e96e8] text-[#111714] text-[11px] font-bold grid place-items-center">
+                  {(user.username || 'U')[0].toUpperCase()}
+                </span>
+              )}
+              <span className="max-w-[120px] truncate font-medium">@{user.username}</span>
+              <span className="w-2 h-2 rounded-full bg-[#72b991]" title="Đã liên kết" />
             </button>
           ) : (
             <button
               type="button"
               onClick={onOpenLoginModal}
-              className="inline-flex items-center gap-2 h-8 px-3 rounded-xl bg-white hover:bg-[#F2F3F5] text-black font-bold transition-all duration-150 active:scale-95 shadow-sm border border-white/40 shrink-0 cursor-pointer"
-              title="Đăng nhập tài khoản Discord (OAuth2 hoặc Token)"
+              className="inline-flex items-center gap-2 h-8 px-3.5 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-xs transition-colors duration-150 shrink-0 cursor-pointer"
+              title="Đăng nhập tài khoản Discord"
             >
-              <DiscordIcon className="w-4 h-4 text-black shrink-0" />
-              <div className="text-[11px] font-bold leading-[1.1] text-black text-left select-none">
-                <div>Đăng</div>
-                <div>nhập</div>
-              </div>
+              <DiscordIcon className="w-4 h-4 text-white shrink-0" />
+              <span>Đăng nhập Discord</span>
             </button>
           )}
 
@@ -205,9 +188,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={onEnterDashboard}
-              className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-md text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 border border-blue-500/50 transition-colors duration-150 whitespace-nowrap shrink-0"
+              className="btn-primary h-8 px-4 text-xs font-semibold shrink-0"
             >
-              <span>dash.arychi.xyz</span>
+              <span>Vào Dashboard ✨</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </button>
           )}
@@ -215,7 +198,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen((v) => !v)}
-            className="lg:hidden inline-flex items-center justify-center w-8 h-8 rounded-md bg-[#141722] border border-[#1E2230] text-slate-300 hover:text-white transition-colors"
+            className="lg:hidden inline-flex items-center justify-center w-8 h-8 rounded-lg bg-[#1a231f] border border-[#2d3b33] text-[#9aa8a0] hover:text-[#f2f5f1] transition-colors"
             aria-label="Mở menu điều hướng"
             aria-expanded={mobileMenuOpen}
           >
@@ -226,7 +209,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-[#1E2230] bg-[#07080C]">
+        <div className="lg:hidden border-t border-[#2d3b33] bg-[#111714]">
           <div className="page py-3 space-y-2">
             <nav aria-label="Điều hướng di động" className="space-y-1">
               {sectionLinks.map((item) => {
@@ -236,20 +219,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                     key={item.href}
                     href={item.href}
                     onClick={(e) => handleNavClick(e, item.href)}
-                    className={`flex items-center justify-between h-9 px-3 rounded-md text-sm font-medium transition-colors ${
+                    className={`flex items-center justify-between h-9 px-3 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'text-white bg-[#141722] font-semibold'
-                        : 'text-slate-300 hover:text-white hover:bg-[#141722]'
+                        ? 'text-[#f2f5f1] bg-[#1a231f] border border-[#2d3b33]'
+                        : 'text-[#9aa8a0] hover:text-[#f2f5f1] hover:bg-[#1a231f]'
                     }`}
                   >
                     <span>{item.label}</span>
-                    <ChevronRight className="w-4 h-4 text-slate-500" />
+                    <ChevronRight className="w-4 h-4 text-[#67756d]" />
                   </a>
                 );
               })}
             </nav>
 
-            <div className="pt-2 border-t border-[#1E2230] space-y-2">
+            <div className="pt-2 border-t border-[#2d3b33] space-y-2">
               {!user && (
                 <button
                   type="button"
@@ -257,28 +240,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setMobileMenuOpen(false);
                     handleDiscordLogin();
                   }}
-                  className="w-full flex items-center justify-center gap-2 h-9 px-3 rounded-xl bg-white hover:bg-[#F2F3F5] text-black font-bold text-xs"
+                  className="w-full flex items-center justify-center gap-2 h-9 px-3 rounded-lg bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium text-xs"
                 >
-                  <DiscordIcon className="w-4 h-4 text-black" />
+                  <DiscordIcon className="w-4 h-4 text-white" />
                   <span>Đăng nhập Discord (OAuth2)</span>
-                </button>
-              )}
-
-              {onOpenSubscriptionModal && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenSubscriptionModal('monthly_20k');
-                  }}
-                  className="w-full flex items-center justify-center gap-2 h-9 px-3 rounded-md bg-[#141722] hover:bg-[#1C2030] text-slate-200 border border-[#1E2230] text-xs font-medium"
-                >
-                  <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-                  <span>
-                    {hasActivePlan
-                      ? `Gói 20k (${subscription?.daysRemaining ?? 30}d)`
-                      : 'Mua gói 20k/tháng'}
-                  </span>
                 </button>
               )}
 
@@ -289,9 +254,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setMobileMenuOpen(false);
                     onEnterDashboard();
                   }}
-                  className="w-full flex items-center justify-center gap-2 h-9 px-3 rounded-md bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold"
+                  className="w-full flex items-center justify-center gap-2 h-9 px-3 rounded-lg bg-[#8e96e8] text-[#111714] font-semibold text-xs"
                 >
-                  <span>Vào dash.arychi.xyz</span>
+                  <span>Vào Dashboard ✨</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </button>
               )}

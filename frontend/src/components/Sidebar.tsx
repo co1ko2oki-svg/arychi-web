@@ -3,24 +3,22 @@ import {
   ArrowLeft,
   BookOpen,
   Cpu,
-  KeyRound,
   LayoutDashboard,
   Menu,
-  ShieldCheck,
   Sparkles,
   Terminal,
   Tv,
   X,
 } from 'lucide-react';
-import { AuthUser, PlanTierId, UserSubscription } from '../types';
+import { AuthUser } from '../types';
 import { NavTabId } from './Navbar';
 import { StatusDot } from './ui';
+import { BOT_AVATAR_URL } from '../constants/brand';
 
 interface SidebarProps {
   activeTab: NavTabId;
   onSelectTab: (tab: NavTabId) => void;
-  user: AuthUser;
-  subscription: UserSubscription;
+  user?: AuthUser | null;
   hasQuestToken: boolean;
   hasStreamTokens: boolean;
   questConnected: boolean;
@@ -28,7 +26,6 @@ interface SidebarProps {
   runningQuestsCount: number;
   streamPlaying: boolean;
   onOpenLoginModal: () => void;
-  onOpenSubscriptionModal: (planId?: PlanTierId) => void;
   onBackToLanding: () => void;
 }
 
@@ -36,7 +33,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   onSelectTab,
   user,
-  subscription,
   hasQuestToken,
   hasStreamTokens,
   questConnected,
@@ -44,12 +40,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   runningQuestsCount,
   streamPlaying,
   onOpenLoginModal,
-  onOpenSubscriptionModal,
   onBackToLanding,
 }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navItems: Array<{
+  const userNavItems: Array<{
     id: NavTabId;
     label: string;
     tokenHint: string;
@@ -59,136 +54,165 @@ export const Sidebar: React.FC<SidebarProps> = ({
   }> = [
     {
       id: 'home',
-      label: 'Tổng quan & Token',
-      tokenHint: 'Quản lý Backend',
+      label: 'Tổng quan & Tiện ích',
+      tokenHint: 'Trạng thái & Quản lý',
       tokenReady: hasQuestToken && hasStreamTokens,
       icon: LayoutDashboard,
     },
     {
       id: 'quests',
-      label: 'Discord Quests',
-      tokenHint: hasQuestToken ? 'Đã nhập 1 Token' : 'Yêu cầu 1 Token',
+      label: 'Discord Quests ✨',
+      tokenHint: hasQuestToken ? 'Sẵn sàng cày quà' : 'Cần 1 Token',
       tokenReady: hasQuestToken,
       icon: Sparkles,
       badge:
         runningQuestsCount > 0 ? (
-          <span className="px-1.5 py-0.5 rounded bg-blue-600 text-white text-2xs font-mono">
-            {runningQuestsCount}
+          <span className="px-2 py-0.5 rounded-md bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30 text-xs font-mono font-bold">
+            {runningQuestsCount} đang chạy
           </span>
         ) : undefined,
     },
     {
       id: 'stream',
-      label: 'Treo Stream Voice',
-      tokenHint: hasStreamTokens ? 'Đã nhập 2 Token' : 'Cần 2 Token (Chính+Phụ)',
+      label: 'Treo Stream Voice 🎧',
+      tokenHint: hasStreamTokens ? 'Đã sẵn sàng phát' : 'Cần 2 Token',
       tokenReady: hasStreamTokens,
       icon: Tv,
-      badge: streamPlaying ? <StatusDot tone="error" /> : undefined,
+      badge: streamPlaying ? <span className="w-2 h-2 rounded-full bg-[#72b991] animate-ping" /> : undefined,
     },
     {
       id: 'badges',
-      label: 'Giờ chơi (Science)',
-      tokenHint: hasQuestToken ? 'Đã nhập 1 Token' : 'Yêu cầu 1 Token',
+      label: 'Cày Giờ Chơi Game 🎮',
+      tokenHint: hasQuestToken ? 'Hồ sơ Discord' : 'Cần 1 Token',
       tokenReady: hasQuestToken,
       icon: Cpu,
     },
-    {
-      id: 'logs',
-      label: 'Nhật ký Backend',
-      tokenHint: 'WebSocket Logs',
-      tokenReady: true,
-      icon: Terminal,
-    },
-    {
-      id: 'about',
-      label: 'Tài liệu kỹ thuật',
-      tokenHint: 'Kiến trúc & Cổng',
-      tokenReady: true,
-      icon: BookOpen,
-    },
   ];
+
+  const adminNavItems: Array<{
+    id: NavTabId;
+    label: string;
+    tokenHint: string;
+    tokenReady: boolean;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: React.ReactNode;
+  }> =
+    user?.role === 'admin'
+      ? [
+          {
+            id: 'logs',
+            label: 'Nhật ký Hệ thống',
+            tokenHint: 'Chỉ Quản trị viên',
+            tokenReady: true,
+            icon: Terminal,
+          },
+          {
+            id: 'about',
+            label: 'Tài liệu Kỹ thuật',
+            tokenHint: 'Kiến trúc & Cổng',
+            tokenReady: true,
+            icon: BookOpen,
+          },
+        ]
+      : [];
 
   const handleSelect = (id: NavTabId) => {
     onSelectTab(id);
     setMobileOpen(false);
   };
 
+  const renderNavButton = (item: typeof userNavItems[0]) => {
+    const Icon = item.icon;
+    const active = activeTab === item.id;
+    return (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => handleSelect(item.id)}
+        className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg text-left transition-colors ${
+          active
+            ? 'bg-[#212c27] text-[#f2f5f1] font-semibold border border-[#3b4c42]'
+            : 'text-[#9aa8a0] hover:bg-[#1a231f] hover:text-[#f2f5f1]'
+        }`}
+      >
+        <div className="flex items-center gap-2.5 min-w-0">
+          <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-[#8e96e8]' : 'text-[#9aa8a0]'}`} />
+          <div className="min-w-0">
+            <span className="block text-[13px] truncate">{item.label}</span>
+            <span
+              className={`block text-xs font-mono truncate ${
+                active ? 'text-[#8e96e8]' : item.tokenReady ? 'text-[#72b991]' : 'text-[#67756d]'
+              }`}
+            >
+              {item.tokenHint}
+            </span>
+          </div>
+        </div>
+        {item.badge}
+      </button>
+    );
+  };
+
   const sidebarContent = (
     <div className="flex flex-col h-full justify-between p-4 space-y-6">
-      <div className="space-y-5">
-        <div className="flex items-center justify-between pb-4 border-b border-line">
-          <div className="flex items-center gap-2.5">
-            <span className="grid place-items-center w-7 h-7 rounded-lg bg-blue-600 text-white text-[13px] font-bold border border-blue-400/30">
-              A
-            </span>
-            <div>
-              <span className="text-sm font-bold text-white block leading-none">Arychi Dash</span>
-              <span className="text-2xs font-mono text-blue-300">dash.arychi.xyz</span>
+      <div className="space-y-4">
+        {/* Brand header */}
+        <div className="pb-4 border-b border-[#2d3b33] space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg overflow-hidden border border-[#2d3b33] shrink-0 bg-[#1a231f]">
+                <img
+                  src={BOT_AVATAR_URL}
+                  alt="Arychi Bot"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <span className="text-sm font-bold text-[#f2f5f1] block leading-none">Arychi Suite</span>
+                <span className="text-xs font-mono text-[#8e96e8]">dash.arychi.xyz</span>
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="lg:hidden btn-ghost btn-sm px-1.5"
+              aria-label="Đóng menu"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setMobileOpen(false)}
-            className="lg:hidden btn-ghost btn-sm px-1.5"
-            aria-label="Đóng menu"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
 
-        <div className="p-3 rounded-lg bg-[#141722] border border-line space-y-1.5">
-          <div className="flex items-center justify-between text-2xs font-mono">
-            <span className="text-blue-300 font-semibold flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              ĐÃ XÁC MINH LẦN 2
+          <div className="flex items-center justify-between text-xs pt-1">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-medium">
+              Hoạt động 24/7 ✨
             </span>
-            <span className="text-slate-200">20K/THÁNG</span>
+            <span className="text-[#9aa8a0] text-xs font-mono">
+              Bản quyền <strong className="text-[#f2f5f1] font-semibold">Chính thức</strong>
+            </span>
           </div>
-          <p className="text-xs text-slate-300 font-mono">
-            Thời hạn còn: <strong className="text-white">{subscription.daysRemaining ?? 30} ngày</strong>
-          </p>
         </div>
 
-        <nav aria-label="Chức năng Backend cột trái" className="space-y-1">
-          <p className="px-2 pb-1 text-2xs font-mono uppercase tracking-wider text-slate-300">
-            CHỨC NĂNG HỆ THỐNG
+        <nav aria-label="Chức năng chính" className="space-y-1">
+          <p className="px-2 pb-1 text-xs font-mono uppercase tracking-wider text-[#67756d]">
+            CHỨC NĂNG DÀNH CHO BẠN
           </p>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                  active
-                    ? 'bg-blue-600 text-white font-semibold'
-                    : 'text-slate-300 hover:bg-[#141722] hover:text-white'
-                }`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className={`w-4 h-4 shrink-0 ${active ? 'text-white' : 'text-blue-300'}`} />
-                  <div className="min-w-0">
-                    <span className="block text-[13px] truncate">{item.label}</span>
-                    <span
-                      className={`block text-2xs font-mono truncate ${
-                        active ? 'text-slate-100' : item.tokenReady ? 'text-blue-300' : 'text-slate-300'
-                      }`}
-                    >
-                      {item.tokenHint}
-                    </span>
-                  </div>
-                </div>
-                {item.badge}
-              </button>
-            );
-          })}
+          {userNavItems.map(renderNavButton)}
+
+          {adminNavItems.length > 0 && (
+            <div className="pt-3 mt-3 border-t border-[#2d3b33] space-y-1">
+              <p className="px-2 pb-1 text-xs font-mono uppercase tracking-wider text-[#d7ad69] flex items-center gap-1.5">
+                <span>👑</span>
+                <span>QUẢN TRỊ VIÊN (ADMIN)</span>
+              </p>
+              {adminNavItems.map(renderNavButton)}
+            </div>
+          )}
         </nav>
       </div>
 
-      <div className="pt-4 border-t border-line space-y-3">
-        <div className="flex items-center justify-between text-xs font-mono text-slate-300">
+      <div className="pt-4 border-t border-[#2d3b33] space-y-3">
+        {/* Daemon status row */}
+        <div className="flex items-center justify-between px-1 text-xs font-mono text-[#9aa8a0]">
           <span className="inline-flex items-center gap-1.5">
             <StatusDot tone={questConnected ? 'ok' : 'error'} />
             Quest :3001
@@ -199,34 +223,49 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </div>
 
-        <div className="p-3 rounded-lg bg-[#141722] border border-line space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs font-semibold text-white truncate">@{user.username}</span>
-            <span className="text-2xs font-mono text-blue-300 uppercase">{user.provider}</span>
+        {/* User profile row */}
+        <div className="flex items-center justify-between gap-3 px-1 py-1 bg-[#1a231f] rounded-lg border border-[#2d3b33] p-2">
+          <div className="min-w-0 flex items-center gap-2">
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user?.username || 'user'}
+                className="w-8 h-8 rounded-full object-cover border border-[#2d3b33] shrink-0"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-[#8e96e8] text-[#111714] font-bold text-xs grid place-items-center shrink-0">
+                {(user?.username || 'U')[0].toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0">
+              <div className="text-xs font-semibold text-[#f2f5f1] truncate max-w-[100px] flex items-center gap-1">
+                <span>@{user?.username || 'khách'}</span>
+                {user?.role === 'admin' && (
+                  <span className="text-[#d7ad69] text-xs" title="Quản trị viên">
+                    👑
+                  </span>
+                )}
+              </div>
+              <div className="text-[11px] font-mono text-[#72b991]">
+                {user?.role === 'admin' ? 'Admin' : 'Thành viên'}
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_20k')}
-              className="btn-secondary btn-sm flex-1 text-xs"
-            >
-              <KeyRound className="w-3 h-3 text-blue-300" />
-              <span>+Tháng</span>
-            </button>
-            <button
-              type="button"
-              onClick={onOpenLoginModal}
-              className="btn-ghost btn-sm text-xs"
-            >
-              Đổi Acc
-            </button>
-          </div>
+
+          <button
+            type="button"
+            onClick={onOpenLoginModal}
+            className="btn-ghost btn-sm text-xs px-2 py-1 rounded-md text-[#9aa8a0] hover:text-[#f2f5f1]"
+            title="Đổi tài khoản"
+          >
+            Đổi Acc
+          </button>
         </div>
 
         <button
           type="button"
           onClick={onBackToLanding}
-          className="btn-ghost w-full justify-start text-xs text-slate-300 hover:text-white"
+          className="btn-ghost w-full justify-start text-xs text-[#9aa8a0] hover:text-[#f2f5f1] rounded-lg"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Về trang chủ arychi.xyz</span>
@@ -237,12 +276,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      <div className="lg:hidden sticky top-0 z-40 h-14 px-4 bg-[#07080C] border-b border-line flex items-center justify-between">
+      <div className="lg:hidden sticky top-0 z-40 h-14 px-4 bg-[#111714]/95 backdrop-blur-md border-b border-[#2d3b33] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="grid place-items-center w-7 h-7 rounded-lg bg-blue-600 text-white text-xs font-bold">
-            A
-          </span>
-          <span className="text-sm font-bold text-white">dash.arychi.xyz</span>
+          <div className="w-7 h-7 rounded-lg overflow-hidden border border-[#2d3b33] shrink-0 bg-[#1a231f]">
+            <img
+              src={BOT_AVATAR_URL}
+              alt="Arychi Bot"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <span className="text-sm font-bold text-[#f2f5f1]">Arychi Suite ✨</span>
         </div>
         <button
           type="button"
@@ -250,20 +293,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="btn-secondary btn-sm"
         >
           <Menu className="w-4 h-4" />
-          <span>Menu cột trái</span>
+          <span>Menu</span>
         </button>
       </div>
 
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div className="fixed inset-0 bg-black/75" onClick={() => setMobileOpen(false)} />
-          <aside className="relative w-72 max-w-[85vw] bg-[#0B0D14] border-r border-line h-full overflow-y-auto">
+          <aside className="relative w-72 max-w-[85vw] bg-[#111714] border-r border-[#2d3b33] h-full overflow-y-auto">
             {sidebarContent}
           </aside>
         </div>
       )}
 
-      <aside className="hidden lg:block w-68 shrink-0 bg-[#0B0D14] border-r border-line min-h-screen sticky top-0 h-screen overflow-y-auto">
+      <aside className="hidden lg:block w-64 shrink-0 bg-[#111714] border-r border-[#2d3b33] min-h-screen sticky top-0 h-screen overflow-y-auto">
         {sidebarContent}
       </aside>
     </>

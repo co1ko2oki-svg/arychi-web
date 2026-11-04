@@ -1,280 +1,509 @@
 import React, { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Copy, Eye, EyeOff, KeyRound, Loader2 } from 'lucide-react';
-import { AccountTokens, AuthUser, PlanTierId, UserSubscription } from '../types';
+import {
+  CheckCircle2,
+  Clock,
+  Cookie,
+  Eye,
+  EyeOff,
+  Flame,
+  Gamepad2,
+  KeyRound,
+  Loader2,
+  Pause,
+  Play,
+  RotateCcw,
+  Sparkles,
+  Trophy,
+} from 'lucide-react';
+import { AccountTokens, AuthUser } from '../types';
 import { questApi } from '../services/api';
 import { useToast } from './Toast';
-import { PageHeader, SegmentedControl, StatusDot } from './ui';
+import { PageHeader, StatusDot } from './ui';
 
-type Mode = 'playtime' | 'played' | 'both';
-
-const modeDescription: Record<Mode, string> = {
-  playtime: 'Gửi heartbeat liên tục để cộng số giờ chơi vào hồ sơ.',
-  played: 'Đánh dấu 1.000 game là đã chơi, không cộng giờ.',
-  both: 'Cộng giờ chơi và đánh dấu thêm 500 game đã chơi.',
-};
+const PRESET_HOURS = [
+  { value: 50, label: '50h' },
+  { value: 100, label: '100h' },
+  { value: 250, label: '250h' },
+  { value: 500, label: '500h' },
+  { value: 1000, label: '1.000h' },
+];
 
 interface BadgeDashboardProps {
   user?: AuthUser | null;
-  subscription?: UserSubscription | null;
   sessionToken?: string;
   token?: string;
   onSaveQuestToken?: (newToken: string, updatedTokens?: Partial<AccountTokens>) => void;
   onOpenLoginModal?: () => void;
-  onOpenSubscriptionModal?: (planId?: PlanTierId) => void;
 }
 
 export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
   user = null,
-  subscription = null,
-  sessionToken = '',
   token = '',
   onSaveQuestToken,
-  onOpenLoginModal = () => {},
-  onOpenSubscriptionModal = () => {},
 }) => {
   const { toast } = useToast();
-  const [tokenInput, setTokenInput] = useState(token || user?.tokens?.questToken || '');
+
+  // Credentials state (Token + Cookie)
+  const [tokenInput, setTokenInput] = useState(() => {
+    return token || user?.tokens?.questToken || localStorage.getItem('arychi_discord_token') || '';
+  });
+  const [cookieInput, setCookieInput] = useState(() => {
+    return localStorage.getItem('arychi_discord_cookie') || '';
+  });
   const [showToken, setShowToken] = useState(false);
-  const [savingToken, setSavingToken] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [hours, setHours] = useState('50');
-  const [threads, setThreads] = useState('2');
-  const [mode, setMode] = useState<Mode>('playtime');
+  const [showCookie, setShowCookie] = useState(false);
+  const [savingCreds, setSavingCreds] = useState(false);
 
+  // Playtime settings
+  const [hours, setHours] = useState<number>(100);
+  const [customHours, setCustomHours] = useState<string>('100');
+
+  // Boosting state
+  const [isBoosting, setIsBoosting] = useState(false);
+  const [activeJob, setActiveJob] = useState<any>(null);
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
+
+  // Sync token prop from parent
   useEffect(() => {
-    if (token) {
+    if (token && !tokenInput) {
       setTokenInput(token);
-    } else if (user?.tokens?.questToken) {
-      setTokenInput(user.tokens.questToken);
     }
-  }, [token, user?.tokens?.questToken]);
+  }, [token]);
 
-  const parsedHours = Math.max(1, Math.min(5000, parseInt(hours, 10) || 1));
-  const parsedThreads = Math.max(1, Math.min(10, parseInt(threads, 10) || 1));
+  // Active token computation (only real non-empty string)
+  const activeToken = (tokenInput.trim() || token || user?.tokens?.questToken || '').trim();
+  const hasValidToken = Boolean(activeToken && !activeToken.includes('...'));
+  const hasCookie = Boolean(cookieInput.trim() && !cookieInput.includes('...'));
 
-  const handleSaveToken = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = tokenInput.trim();
-    if (!trimmed) {
-      toast.warning('Vui lòng nhập 1 Token tài khoản Discord');
+  // Check active boost job ONLY if user actually has a real token
+  useEffect(() => {
+    if (!hasValidToken) {
+      setIsBoosting(false);
+      setActiveJob(null);
       return;
     }
-    setSavingToken(true);
+
+    questApi
+      .getBadgeStatus(activeToken)
+      .then((res) => {
+        if (res.job && res.running) {
+          setIsBoosting(true);
+          setActiveJob(res.job);
+        } else {
+          setIsBoosting(false);
+          setActiveJob(null);
+        }
+      })
+      .catch(() => {
+        setIsBoosting(false);
+        setActiveJob(null);
+      });
+  }, [hasValidToken, activeToken]);
+
+  const handleSaveCredentials = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const tok = tokenInput.trim();
+    const cook = cookieInput.trim();
+
+    if (!tok) {
+      toast.warning('Vui lòng nhập Discord User Token trước khi bấm Lưu');
+      return;
+    }
+
+    setSavingCreds(true);
     try {
-      const activeSession = sessionToken || user?.sessionToken || '';
-      if (activeSession) {
-        await questApi.saveAccountTokens(activeSession, { questToken: trimmed });
+      await questApi.saveBadgeCredentials({
+        token: tok,
+        cookie: cook,
+      });
+
+      localStorage.setItem('arychi_discord_token', tok);
+      onSaveQuestToken?.(tok, { questToken: tok });
+
+      if (cook) {
+        localStorage.setItem('arychi_discord_cookie', cook);
+      } else {
+        localStorage.removeItem('arychi_discord_cookie');
       }
-      onSaveQuestToken?.(trimmed, { questToken: trimmed });
-      toast.success('Đã lưu 1 Token Discord cho Science Telemetry');
+
+      toast.success('Đã lưu Token & Cookie thành công! ✨');
     } catch (err: any) {
-      toast.error(err?.message || 'Token Discord không hợp lệ');
+      toast.error(err?.message || 'Không thể lưu thông tin xác thực');
     } finally {
-      setSavingToken(false);
+      setSavingCreds(false);
     }
   };
 
-  const getCommand = () => {
-    const base = 'cd badge-farm && python spoofer.py';
-    if (mode === 'playtime') return `${base} --hours ${parsedHours} --threads ${parsedThreads}`;
-    if (mode === 'played') return `${base} --mark-played 1000`;
-    return `${base} --hours ${parsedHours} --threads ${parsedThreads} --mark-played 500`;
+  const handleHourPreset = (h: number) => {
+    setHours(h);
+    setCustomHours(String(h));
   };
 
-  const copyCommand = async () => {
-    if (!user) {
-      toast.warning('Vui lòng đăng nhập OAuth2 trước');
-      onOpenLoginModal();
+  const handleCustomHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.replace(/\D/g, '');
+    setCustomHours(val);
+    const parsed = parseInt(val, 10);
+    if (!isNaN(parsed) && parsed > 0 && parsed <= 5000) {
+      setHours(parsed);
+    }
+  };
+
+  // NÚT 1: Cày giờ chơi hồ sơ
+  const handleStartPlaytime = async () => {
+    if (!hasValidToken) {
+      toast.warning('Vui lòng nhập và lưu Discord User Token ở phía trên trước');
       return;
     }
-    if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng kích hoạt gói 20.000đ/tháng để sử dụng Science Telemetry');
-      onOpenSubscriptionModal('monthly_20k');
-      return;
-    }
-    if (!token && !tokenInput.trim()) {
-      toast.warning('Vui lòng nhập 1 Token Acc Discord ở khung cấu hình trước');
-      return;
-    }
+
+    setLoadingAction('playtime');
     try {
-      await navigator.clipboard.writeText(getCommand());
-      setCopied(true);
-      toast.success('Đã sao chép lệnh khởi chạy');
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error('Trình duyệt không cho phép truy cập clipboard');
+      const res = await questApi.startBadgeFarm({
+        token: activeToken,
+        mode: 'playtime',
+        hours,
+        games: [],
+        cookie: cookieInput.trim() || undefined,
+      });
+
+      setIsBoosting(true);
+      setActiveJob(res.job);
+      toast.success(`Đã kích hoạt cày ${hours} giờ chơi cho toàn bộ kho game! ✨`);
+    } catch (err: any) {
+      toast.error(err?.message || 'Không thể kích hoạt cày giờ chơi');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  // NÚT 2: Đánh dấu 1.000+ game đã chơi
+  const handleMarkPlayed = async () => {
+    if (!hasValidToken) {
+      toast.warning('Vui lòng nhập và lưu Discord User Token ở phía trên trước');
+      return;
+    }
+
+    setLoadingAction('played');
+    try {
+      const res = await questApi.startBadgeFarm({
+        token: activeToken,
+        mode: 'played',
+        hours: 1,
+        games: [],
+        cookie: cookieInput.trim() || undefined,
+      });
+
+      setIsBoosting(true);
+      setActiveJob(res.job);
+      toast.success('Đã bắt đầu đánh dấu 1.000+ game vào hồ sơ Discord! ✨');
+    } catch (err: any) {
+      toast.error(err?.message || 'Không thể đánh dấu game');
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleStopBoosting = async () => {
+    setLoadingAction('stop');
+    try {
+      await questApi.stopBadgeFarm(activeToken);
+      setIsBoosting(false);
+      setActiveJob(null);
+      toast.info('Đã tạm dừng tiến trình');
+    } catch (err: any) {
+      toast.error(err?.message || 'Không thể dừng tiến trình');
+    } finally {
+      setLoadingAction(null);
     }
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        title="Giờ chơi hồ sơ (Yêu cầu 1 Token)"
-        description={
-          <>
-            Science Telemetry gửi sự kiện chơi game kèm chữ ký Windows PE lên{' '}
-            <code className="inline-code">/api/v9/science</code> để cộng giờ chơi và mở khóa mốc game.
-          </>
-        }
+        title="Cày Giờ Chơi &amp; Game Hồ Sơ 🎮"
+        description="Tự động tăng số giờ chơi và mở khóa hơn 1.000+ tựa game hiển thị lung linh trên hồ sơ Discord cá nhân của bạn."
         meta={
           <>
-            <span>Module Python 3</span>
-            <span>
-              Script <code className="font-mono">badge-farm/spoofer.py</code>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#8e96e8]">
+              <Sparkles className="w-3.5 h-3.5" />
+              Tự động 1.000+ Game
+            </span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#72b991]">
+              <StatusDot tone="ok" />
+              Chạy nền máy chủ 24/7
             </span>
           </>
         }
       />
 
-      <form onSubmit={handleSaveToken} className="surface p-5 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <KeyRound className="w-4 h-4 text-blue-400" />
-            <h2 className="text-sm font-bold text-white">
-              Cấu hình 1 Token Acc Discord cho Science Telemetry
-            </h2>
+      {/* Active Boost Banner - ONLY shown if real token is active and job is running */}
+      {hasValidToken && isBoosting && activeJob && (
+        <div className="surface p-4 border border-[#72b991]/40 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="w-3 h-3 rounded-full bg-[#72b991] animate-ping shrink-0" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-[#f2f5f1]">
+                  {activeJob.mode === 'played'
+                    ? 'Đang đánh dấu 1.000+ game vào hồ sơ'
+                    : `Đang cày ${activeJob.targetHours || hours} giờ chơi cho toàn bộ game`}
+                </span>
+                <span className="px-2 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] text-[11px] font-mono font-semibold">
+                  ĐANG CHẠY
+                </span>
+              </div>
+              <p className="text-xs text-[#9aa8a0] truncate mt-0.5">
+                {activeJob.statusMessage || 'Hệ thống đang gửi tín hiệu phiên chơi định kỳ cho Discord.'}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-300">
-              <StatusDot tone={token ? 'ok' : 'warn'} />
-              {token ? 'ĐÃ CÓ 1 TOKEN' : 'YÊU CẦU 1 TOKEN'}
+
+          <button
+            type="button"
+            onClick={handleStopBoosting}
+            disabled={loadingAction === 'stop'}
+            className="btn-danger btn-sm shrink-0"
+          >
+            {loadingAction === 'stop' ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Pause className="w-3.5 h-3.5" />
+            )}
+            <span>Tạm dừng</span>
+          </button>
+        </div>
+      )}
+
+      {/* Credentials Form (Token + Cookie) */}
+      <form onSubmit={handleSaveCredentials} className="surface p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2d3b33] pb-3">
+          <div>
+            <span className="eyebrow text-[#8e96e8]">Xác thực tài khoản</span>
+            <h2 className="text-base font-bold text-[#f2f5f1] mt-0.5">
+              Cấu hình Token &amp; Cookie Discord
+            </h2>
+            <p className="text-xs text-[#9aa8a0] mt-0.5">
+              Cung cấp Token và Cookie để máy chủ gửi telemetry đồng bộ giờ chơi.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 text-xs font-mono">
+            <span className="inline-flex items-center gap-1.5 text-[#9aa8a0]">
+              <StatusDot tone={hasValidToken ? 'ok' : 'error'} />
+              {hasValidToken ? 'Token Sẵn Sàng' : 'Thiếu Token'}
             </span>
-            <button
-              type="button"
-              onClick={() => setShowToken((v) => !v)}
-              className="btn-ghost btn-sm"
-            >
-              {showToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              <span>{showToken ? 'Ẩn' : 'Hiện'}</span>
-            </button>
+            <span className="inline-flex items-center gap-1.5 text-[#9aa8a0]">
+              <StatusDot tone={hasCookie ? 'ok' : 'warn'} />
+              {hasCookie ? 'Cookie Sẵn Sàng' : 'Chưa có Cookie'}
+            </span>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2.5">
-          <input
-            type={showToken ? 'text' : 'password'}
-            value={tokenInput}
-            onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="Dán Discord User Token của tài khoản cần cày giờ chơi..."
-            className="input font-mono flex-1"
-            autoComplete="off"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="badge-token" className="field-label flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-[#8e96e8]" />
+                <span>Discord User Token (Bắt buộc)</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowToken((v) => !v)}
+                className="text-[11px] text-[#8e96e8] hover:text-[#f2f5f1] flex items-center gap-1"
+              >
+                {showToken ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                <span>{showToken ? 'Ẩn' : 'Hiện'}</span>
+              </button>
+            </div>
+            <input
+              id="badge-token"
+              type={showToken ? 'text' : 'password'}
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              placeholder="Dán Discord User Token của bạn..."
+              className="input font-mono text-xs"
+              autoComplete="off"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="badge-cookie" className="field-label flex items-center gap-1.5">
+                <Cookie className="w-3.5 h-3.5 text-[#72b991]" />
+                <span>Discord Cookie (cf_clearance - Khuyên dùng)</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowCookie((v) => !v)}
+                className="text-[11px] text-[#72b991] hover:text-[#f2f5f1] flex items-center gap-1"
+              >
+                {showCookie ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                <span>{showCookie ? 'Ẩn' : 'Hiện'}</span>
+              </button>
+            </div>
+            <input
+              id="badge-cookie"
+              type={showCookie ? 'text' : 'password'}
+              value={cookieInput}
+              onChange={(e) => setCookieInput(e.target.value)}
+              placeholder="Dán cf_clearance hoặc toàn bộ cookie Discord..."
+              className="input font-mono text-xs"
+              autoComplete="off"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-1">
+          <p className="text-[11px] text-[#9aa8a0] font-mono">
+            {!hasValidToken ? (
+              <span className="text-[#d7ad69]">⚠️ Vui lòng nhập Token Discord trước khi khởi chạy</span>
+            ) : (
+              <span className="text-[#72b991]">✓ Token sẵn sàng, bạn có thể khởi chạy cày giờ chơi</span>
+            )}
+          </p>
+
           <button
             type="submit"
-            disabled={savingToken || !tokenInput.trim()}
-            className="btn-primary shrink-0"
+            disabled={savingCreds || !tokenInput.trim()}
+            className="btn-primary btn-sm px-4"
           >
-            {savingToken ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
+            {savingCreds ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-3.5 h-3.5" />
             )}
-            <span>Lưu Token</span>
+            <span>Lưu Thông Tin Xác Thực</span>
           </button>
         </div>
       </form>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-x-12 gap-y-10">
-        <div className="space-y-7 min-w-0">
-          <fieldset>
-            <legend className="field-label">Chế độ</legend>
-            <div className="inline-flex p-0.5 rounded-lg border border-line">
-              <SegmentedControl
-                ariaLabel="Chế độ chạy"
-                value={mode}
-                onChange={setMode}
-                options={[
-                  { value: 'playtime', label: 'Cộng giờ chơi' },
-                  { value: 'played', label: 'Đánh dấu đã chơi' },
-                  { value: 'both', label: 'Cả hai' },
-                ]}
-              />
+      {/* 2 Simple Action Cards (As requested by user: "chỉ cần nút chạy 2 cái thoi") */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* NÚT 1: Cày giờ chơi hồ sơ */}
+        <div className="surface p-6 flex flex-col justify-between space-y-5">
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-lg bg-[#161e1a] border border-[#2d3b33] flex items-center justify-center text-[#8e96e8]">
+                <Clock className="w-5 h-5" />
+              </div>
+              <span className="px-2.5 py-1 rounded-md bg-[#8e96e8]/15 border border-[#8e96e8]/30 text-[#8e96e8] text-xs font-mono font-semibold">
+                Toàn bộ 1.000+ Game
+              </span>
             </div>
-            <p className="field-hint">{modeDescription[mode]}</p>
-          </fieldset>
 
-          {mode !== 'played' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-lg">
-              <div>
-                <label htmlFor="badge-hours" className="field-label">
-                  Số giờ
-                </label>
-                <input
-                  id="badge-hours"
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={5000}
-                  value={hours}
-                  onChange={(e) => setHours(e.target.value)}
-                  className="input font-mono tabular-nums"
-                />
-                <p className="field-hint">Từ 1 đến 5.000 giờ</p>
-              </div>
-              <div>
-                <label htmlFor="badge-threads" className="field-label">
-                  Luồng song song
-                </label>
-                <input
-                  id="badge-threads"
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={10}
-                  value={threads}
-                  onChange={(e) => setThreads(e.target.value)}
-                  className="input font-mono tabular-nums"
-                />
-                <p className="field-hint">Từ 1 đến 10 luồng</p>
-              </div>
+            <div>
+              <h3 className="text-base font-bold text-[#f2f5f1]">Cày Giờ Chơi Hồ Sơ</h3>
+              <p className="text-xs text-[#9aa8a0] mt-1 leading-relaxed">
+                Gửi tín hiệu giữ phiên chơi ngầm định kỳ cho toàn bộ kho 1.000+ tựa game để tăng số giờ chơi hiển thị lung linh trên Discord cá nhân.
+              </p>
             </div>
-          )}
 
-          <div>
-            <p className="field-label">Lệnh khởi chạy</p>
-            <div className="surface overflow-hidden">
-              <div className="flex items-center justify-between h-10 pl-4 pr-1.5 border-b border-line">
-                <span className="text-xs text-slate-300">Terminal · thư mục gốc Arychi</span>
-                <button
-                  type="button"
-                  onClick={copyCommand}
-                  className="btn-ghost btn-sm"
-                  aria-live="polite"
-                >
-                  {copied ? (
-                    <Check className="w-3.5 h-3.5 text-blue-300" />
-                  ) : (
-                    <Copy className="w-3.5 h-3.5" />
-                  )}
-                  {copied ? 'Đã chép' : 'Sao chép'}
-                </button>
+            {/* Hour presets */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between text-xs text-[#9aa8a0]">
+                <span>Chọn số giờ cày:</span>
+                <span className="font-mono text-[#8e96e8]">
+                  Mục tiêu: <strong className="text-[#f2f5f1]">{hours} giờ</strong>
+                </span>
               </div>
-              <pre className="px-4 py-4 font-mono text-[13px] text-white overflow-x-auto leading-relaxed">
-                <span className="text-slate-300 select-none">$ </span>
-                {getCommand()}
-              </pre>
+
+              <div className="grid grid-cols-5 gap-2">
+                {PRESET_HOURS.map((p) => {
+                  const isSel = hours === p.value;
+                  return (
+                    <button
+                      key={p.value}
+                      type="button"
+                      onClick={() => handleHourPreset(p.value)}
+                      className={`py-1.5 rounded-lg text-center text-xs font-semibold border transition-all ${
+                        isSel
+                          ? 'bg-[#8e96e8] text-[#111714] border-[#8e96e8]'
+                          : 'bg-[#161e1a] text-[#9aa8a0] border-[#2d3b33] hover:text-[#f2f5f1] hover:border-[#3b4c42]'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center gap-2 pt-1 text-xs">
+                <span className="text-[#9aa8a0] shrink-0">Hoặc tự nhập:</span>
+                <input
+                  type="text"
+                  value={customHours}
+                  onChange={handleCustomHoursChange}
+                  placeholder="100"
+                  className="input font-mono text-xs h-7 w-20 text-center"
+                />
+                <span className="text-[#9aa8a0]">(Từ 1 đến 5.000 giờ)</span>
+              </div>
             </div>
           </div>
+
+          <button
+            type="button"
+            onClick={handleStartPlaytime}
+            disabled={loadingAction === 'playtime' || !hasValidToken}
+            className="btn-primary h-10 w-full font-semibold"
+          >
+            {loadingAction === 'playtime' ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4" />
+            )}
+            <span>Bắt đầu cày {hours}h (1.000+ Game) ✨</span>
+          </button>
         </div>
 
-        <aside className="space-y-6 text-[13px] leading-relaxed">
-          <div>
-            <h2 className="text-[15px] font-semibold text-white mb-2">Cách hoạt động</h2>
-            <p className="text-slate-300">
-              Script gửi các sự kiện <code className="inline-code">launch_game</code> và{' '}
-              <code className="inline-code">running_game_heartbeat</code> kèm Windows PE Fingerprint
-              hợp lệ. Discord ghi nhận số giờ này vào lịch sử chơi của tài khoản mà không cần cài
-              hoặc mở game thật.
-            </p>
+        {/* NÚT 2: Đánh dấu 1.000+ game đã chơi */}
+        <div className="surface p-6 flex flex-col justify-between space-y-5">
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-lg bg-[#161e1a] border border-[#2d3b33] flex items-center justify-center text-[#72b991]">
+                <Gamepad2 className="w-5 h-5" />
+              </div>
+              <span className="px-2.5 py-1 rounded-md bg-[#72b991]/15 border border-[#72b991]/30 text-[#72b991] text-xs font-mono font-semibold">
+                Đánh Dấu 1-Click
+              </span>
+            </div>
+
+            <div>
+              <h3 className="text-base font-bold text-[#f2f5f1]">Đánh Dấu 1.000+ Game Đã Chơi</h3>
+              <p className="text-xs text-[#9aa8a0] mt-1 leading-relaxed">
+                Đánh dấu toàn bộ 1.000+ tựa game trong hệ thống là đã từng chơi trên tài khoản để mở khóa danh sách game khổng lồ trong trang cá nhân Discord mà không cần mở game thật.
+              </p>
+            </div>
+
+            <div className="space-y-2 pt-2 border-t border-[#2d3b33] text-xs font-mono">
+              <div className="flex items-center justify-between text-[#9aa8a0]">
+                <span>Số lượng game:</span>
+                <span className="text-[#f2f5f1] font-semibold">Hơn 1.000+ tựa game</span>
+              </div>
+              <div className="flex items-center justify-between text-[#9aa8a0]">
+                <span>Thời gian mô phỏng:</span>
+                <span className="text-[#72b991]">1 phút / game (Tự động)</span>
+              </div>
+              <div className="flex items-center justify-between text-[#9aa8a0]">
+                <span>Kết quả hồ sơ:</span>
+                <span className="text-[#8e96e8]">Hiện danh sách game Discord</span>
+              </div>
+            </div>
           </div>
-          <div className="pl-3 border-l-2 border-blue-500">
-            <p className="font-medium text-white">Kết quả hiển thị sau 24–48 giờ</p>
-            <p className="mt-1 text-slate-300">
-              Discord xử lý telemetry theo lô. Huy hiệu và danh sách game trên hồ sơ thường xuất
-              hiện sau 24 đến 48 giờ kể từ khi gửi xong heartbeat.
-            </p>
-          </div>
-        </aside>
+
+          <button
+            type="button"
+            onClick={handleMarkPlayed}
+            disabled={loadingAction === 'played' || !hasValidToken}
+            className="btn-mint h-10 w-full font-semibold"
+          >
+            {loadingAction === 'played' ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4" />
+            )}
+            <span>Đánh dấu 1.000+ Game đã chơi ✨</span>
+          </button>
+        </div>
       </div>
     </div>
   );

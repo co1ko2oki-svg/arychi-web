@@ -1,25 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import {
   CheckCircle2,
+  Clock,
   Eye,
   EyeOff,
-  FolderOpen,
+  Flame,
   KeyRound,
   Loader2,
+  Lock,
+  Music,
   Play,
+  Radio,
   RefreshCw,
+  Repeat,
   Square,
+  Tv,
 } from 'lucide-react';
-import { AccountTokens, AuthUser, PlanTierId, StreamStatus, UserSubscription } from '../types';
+import { AccountTokens, AuthUser, StreamStatus } from '../types';
 import { questApi, streamApi } from '../services/api';
 import { useToast } from './Toast';
-import { ConfirmDialog } from './ConfirmDialog';
-import { EmptyState, PageHeader, Section, StatusDot, Switch } from './ui';
+import { PageHeader, StatusDot } from './ui';
 import { formatPing } from './format';
 
 interface StreamDashboardProps {
   user?: AuthUser | null;
-  subscription?: UserSubscription | null;
   sessionToken?: string;
   onUpdateAccountTokens?: (tokens: Partial<AccountTokens>) => void;
   status: StreamStatus | null;
@@ -27,12 +31,41 @@ interface StreamDashboardProps {
   onRefresh: () => void;
   streamConnected: boolean;
   onOpenLoginModal: () => void;
-  onOpenSubscriptionModal: (planId?: PlanTierId) => void;
 }
+
+// 10 Official Discord Stream Badge Tiers (Matching official Discord stream hours)
+const STREAM_TIERS = [
+  { targetHours: 1, label: '1 giờ', title: 'Người mới', color: '#9aa8a0', isLocked: false },
+  { targetHours: 5, label: '5 giờ', title: 'Chim non', color: '#8ec07c', isLocked: false },
+  { targetHours: 20, label: '20 giờ', title: 'Đột phá', color: '#72b991', isLocked: false },
+  { targetHours: 75, label: '75 giờ', title: 'Nổi bật', color: '#4ec9b0', isLocked: false },
+  { targetHours: 150, label: '150 giờ', title: 'Người tạo xu hướng', color: '#56b6c2', isLocked: false },
+  { targetHours: 300, label: '300 giờ', title: 'Tiêu điểm', color: '#61afef', isLocked: false },
+  { targetHours: 500, label: '500 giờ', title: 'Ngôi sao', color: '#8e96e8', isLocked: false },
+  { targetHours: 1000, label: '1.000 giờ', title: 'Cảm giác', color: '#d172e8', isLocked: false },
+  { targetHours: 2000, label: '2.000 giờ', title: 'Nhà tiên tri', color: '#e06c75', isLocked: true },
+  { targetHours: 5000, label: '5.000+ giờ', title: 'Xuất thần', color: '#d7ad69', isLocked: true },
+];
+
+const PREDEFINED_SOURCES = [
+  {
+    id: 'lofi',
+    title: 'Lofi Beats Chill Stream',
+    desc: 'Nhạc thư giãn 24/7 nhẹ nhàng cho phòng thoại',
+    url: 'https://www.youtube.com/watch?v=jfKfPfyJRdk',
+    icon: Music,
+  },
+  {
+    id: 'cozy-game',
+    title: 'Cozy Gaming Ambient Loop',
+    desc: 'Gameplay ấm áp, chill thư thái phong cách anime',
+    url: 'https://www.youtube.com/watch?v=5qap5aO4i9A',
+    icon: Flame,
+  },
+];
 
 export const StreamDashboard: React.FC<StreamDashboardProps> = ({
   user = null,
-  subscription = null,
   sessionToken = '',
   onUpdateAccountTokens,
   status,
@@ -40,7 +73,6 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
   onRefresh,
   streamConnected,
   onOpenLoginModal,
-  onOpenSubscriptionModal,
 }) => {
   const { toast } = useToast();
   const [mainToken, setMainToken] = useState(user?.tokens?.streamMainToken || '');
@@ -63,10 +95,6 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
 
   const [query, setQuery] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
-  const [videos, setVideos] = useState<Array<{ name: string; size: string | number; formattedSize?: string }>>([]);
-  const [scanned, setScanned] = useState(false);
-  const [loadingVideos, setLoadingVideos] = useState(false);
-  const [pendingPlayTarget, setPendingPlayTarget] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.tokens) {
@@ -81,11 +109,18 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
   }, [user?.tokens]);
 
   const playing = Boolean(status?.stream.playing);
-  const stateLabel = !streamConnected ? 'Ngoại tuyến' : playing ? 'Đang phát' : 'Đang chờ';
-
   const hasBothStreamTokens =
     Boolean(mainToken.trim() && viewerToken.trim()) ||
     Boolean(status?.config?.hasMainToken && status?.config?.hasViewerToken);
+
+  // Compute total stream hours for badge progression
+  const totalMinutes = status?.farm?.totalMinutesWatched || 0;
+  const currentHours = Math.floor(totalMinutes / 60);
+
+  // Find next badge tier
+  const nextTier = STREAM_TIERS.find((t) => t.targetHours > currentHours) || STREAM_TIERS[STREAM_TIERS.length - 1];
+  const hoursRemaining = Math.max(0, nextTier.targetHours - currentHours);
+  const progressPercent = Math.min(100, Math.round((currentHours / nextTier.targetHours) * 100));
 
   const handleSaveTwoStreamTokens = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,150 +166,93 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         adminIds: adminIds.trim(),
       });
 
-      toast.success('Đã lưu cấu hình Stream Bot vào Database & kích hoạt StreamBot');
+      toast.success('Đã lưu cài đặt Stream thành công ✨');
       onRefresh();
     } catch (err: any) {
-      toast.error(err?.message || 'Lỗi khi lưu 2 Token cho Treo Stream');
+      toast.error(err?.message || 'Lỗi khi lưu cài đặt cho Treo Stream');
     } finally {
       setSavingTokens(false);
     }
   };
 
-  const requireAccess = () => {
-    if (!user) {
-      toast.warning('Vui lòng đăng nhập OAuth2 trước');
-      onOpenLoginModal();
-      return false;
-    }
-    if (!subscription || subscription.isActive === false) {
-      toast.warning('Vui lòng kích hoạt gói 20.000đ/tháng để sử dụng Treo Stream');
-      onOpenSubscriptionModal('monthly_20k');
-      return false;
-    }
+  const handlePlaySource = async (urlToPlay: string) => {
     if (!hasBothStreamTokens) {
-      toast.warning('Vui lòng nhập đủ 2 Token (1 Token Chính + 1 Token Phụ) ở khung cấu hình bên dưới');
-      return false;
+      toast.warning('Vui lòng lưu đủ 2 Token (1 Chính + 1 Phụ) trước khi phát');
+      return;
     }
-    return true;
-  };
-
-  const executePlay = async (target: string) => {
     setActionLoading(true);
-    setPendingPlayTarget(null);
     try {
-      await streamApi.playVideo(target);
-      toast.success(`Đang truyền phát: ${target}`);
+      await streamApi.playVideo(urlToPlay);
+      toast.success('Đã gửi yêu cầu phát video');
       setQuery('');
       onRefresh();
     } catch (err: any) {
-      toast.error(`Lỗi phát video: ${err?.message || err}`);
+      toast.error(err?.message || 'Không thể phát video');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const requestPlay = (videoUrl?: string) => {
-    if (!requireAccess()) return;
-    if (!streamConnected) {
-      toast.warning('Dịch vụ StreamBot (:3000) đang ngoại tuyến');
-      return;
-    }
-    const target = (videoUrl || query).trim();
-    if (!target) {
-      toast.warning('Vui lòng nhập URL YouTube/Twitch hoặc chọn file video');
-      return;
-    }
-    if (playing) {
-      setPendingPlayTarget(target);
-    } else {
-      executePlay(target);
-    }
-  };
-
-  const handleStop = async () => {
-    if (!requireAccess()) return;
-    if (!streamConnected) return;
+  const handleStopStream = async () => {
     setActionLoading(true);
     try {
-      await streamApi.stopStream();
-      toast.info('Đã dừng phát video trong phòng thoại');
+      await streamApi.stopVideo();
+      toast.info('Đã dừng phát video');
       onRefresh();
     } catch (err: any) {
-      toast.error(`Lỗi dừng stream: ${err?.message || err}`);
+      toast.error(err?.message || 'Không thể dừng stream');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleToggleFarm = async () => {
-    if (!requireAccess()) return;
-    if (!streamConnected) {
-      toast.warning('Dịch vụ StreamBot (:3000) đang ngoại tuyến');
-      return;
-    }
-    if (!status) return;
-    const nextState = !status.farm.autoWatch;
+  const handleToggleLoop = async () => {
     setActionLoading(true);
     try {
-      await streamApi.toggleFarm(nextState);
-      toast.success(nextState ? 'Đã bật tự động xem stream (Token Phụ)' : 'Đã tắt tự động xem stream');
+      const nextLoop = !status?.stream.isLooping;
+      await streamApi.toggleLoop(nextLoop);
+      toast.success(nextLoop ? 'Đã bật phát lặp lại' : 'Đã tắt phát lặp lại');
       onRefresh();
     } catch (err: any) {
-      toast.error(`Lỗi chuyển đổi Viewer Farm: ${err?.message || err}`);
+      toast.error(err?.message || 'Không thể đổi chế độ loop');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const loadVideoLibrary = async () => {
-    setLoadingVideos(true);
+  const handleToggleAutoWatch = async () => {
+    setActionLoading(true);
     try {
-      const data = await streamApi.getVideos();
-      const list = data.videos || [];
-      setVideos(list);
-      setScanned(true);
-      toast.success(`Tìm thấy ${list.length} file trong thư mục video`);
+      const nextWatch = !status?.farm?.autoWatch;
+      await streamApi.toggleFarm(nextWatch);
+      toast.success(nextWatch ? 'Đã bật tự động xem kênh' : 'Đã tắt tự động xem');
+      onRefresh();
     } catch (err: any) {
-      toast.error(`Lỗi quét thư mục video: ${err?.message || err}`);
+      toast.error(err?.message || 'Không thể đổi trạng thái cày giờ');
     } finally {
-      setLoadingVideos(false);
+      setActionLoading(false);
     }
   };
-
-  const details: Array<[string, React.ReactNode]> = [
-    ['Acc Chính (Streamer)', streamConnected ? status?.bot.tag || 'Chưa kết nối' : '—'],
-    ['Acc Phụ (Viewer Farm)', streamConnected ? status?.farm.viewerTag || 'Chưa kết nối' : '—'],
-    [
-      'Gateway',
-      streamConnected ? (
-        status?.bot.isReady ? (
-          <span className="text-blue-300">Sẵn sàng</span>
-        ) : (
-          'Chờ đăng nhập 2 Token'
-        )
-      ) : (
-        '—'
-      ),
-    ],
-    ['Độ trễ', formatPing(streamConnected, status?.bot.ping)],
-    ['Codec', `${status?.config.videoCodec || 'H264'} / Opus`],
-    ['Kênh thoại', status?.stream.channelInfo?.channelId || videoChannelId || '—'],
-    ['Lặp lại', status?.stream.isLooping ? 'Bật' : 'Tắt'],
-  ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        title="Treo Stream Voice (Yêu cầu 2 Token)"
-        description="Cấu hình 1 Token Chính (phát luồng video) và 1 Token Phụ (tự động vào xem stream để cày giờ)."
+        title="Treo Stream Voice & Cày Huy Hiệu 5.000 Giờ 🎧"
+        description="Phát video liên tục 24/7 vào phòng thoại Discord với tài khoản phụ tự động xem để chinh phục 10 cấp huy hiệu Stream."
         meta={
           <>
-            <span className="inline-flex items-center gap-1.5">
-              <StatusDot tone={!streamConnected ? 'warn' : playing ? 'error' : 'ok'} />
-              <span className="text-slate-200">{stateLabel}</span>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#f2f5f1]">
+              <StatusDot tone={streamConnected ? (playing ? 'ok' : 'ok') : 'error'} />
+              Stream {streamConnected ? (playing ? 'Đang phát 🎵' : 'Sẵn sàng 🟢') : 'Ngoại tuyến 🔴'}
             </span>
-            <span>Cổng :3000</span>
-            <span>Độ trễ {formatPing(streamConnected, status?.bot.ping)}</span>
+            {status?.bot?.ping !== undefined && (
+              <span className="text-xs font-mono text-[#9aa8a0]">
+                Ping: {formatPing(streamConnected, status.bot.ping)}
+              </span>
+            )}
+            <span className="text-xs font-mono text-[#72b991]">
+              Thời gian đã tích lũy: {currentHours} giờ ({totalMinutes} phút)
+            </span>
           </>
         }
         actions={
@@ -282,30 +260,120 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             type="button"
             onClick={onRefresh}
             disabled={loading}
-            className="btn-ghost"
-            title="Tải lại trạng thái StreamBot"
+            className="btn-secondary btn-sm"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Làm mới
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Làm mới</span>
           </button>
         }
       />
 
-      <form onSubmit={handleSaveTwoStreamTokens} className="surface p-6 space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-line">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <KeyRound className="w-4 h-4 text-blue-400" />
-              <h2 className="text-base font-bold text-white">
-                Cấu hình 2 Token Acc Discord cho Treo Stream (1 Chính + 1 Phụ)
-              </h2>
+      {/* 5,000-Hour Discord Stream Badge Tracker Card (Matching Image 3) */}
+      <div className="surface p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span className="eyebrow text-[#8e96e8]">Mục tiêu 5.000 giờ</span>
+            <h2 className="text-lg font-bold text-[#f2f5f1] mt-0.5">Tiến trình của bạn</h2>
+            <p className="text-xs text-[#9aa8a0] mt-1">
+              Stream thêm nhiều giờ cho người dùng khác để tăng cấp độ huy hiệu này.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-mono font-bold text-[#f2f5f1]">
+              {hoursRemaining > 0 ? `${hoursRemaining} giờ nữa` : 'Đã đạt cấp tối đa!'}
+            </span>
+          </div>
+        </div>
+
+        {/* Visual Progress Bar */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-mono text-[#9aa8a0]">
+            <div className="flex items-center gap-1.5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8e96e8" strokeWidth="2" className="w-4 h-4">
+                <rect width="20" height="14" x="2" y="3" rx="2" />
+                <line x1="8" x2="16" y1="21" y2="21" />
+                <line x1="12" x2="12" y1="17" y2="21" />
+              </svg>
+              <span>Hiện tại: {currentHours} giờ</span>
             </div>
-            <p className="text-xs text-slate-300">
-              Nhập 1 Token Chính để phát video vào kênh thoại và 1 Token Phụ để tự động vào xem stream tích lũy giờ.
+            <div className="flex items-center gap-1.5">
+              <span>Cấp kế tiếp: {nextTier.title} ({nextTier.targetHours}h)</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke={nextTier.color} strokeWidth="2" className="w-4 h-4">
+                <rect width="20" height="14" x="2" y="3" rx="2" />
+                <line x1="8" x2="16" y1="21" y2="21" />
+                <line x1="12" x2="12" y1="17" y2="21" />
+              </svg>
+            </div>
+          </div>
+
+          <div className="h-2 w-full bg-[#161e1a] rounded-full overflow-hidden border border-[#2d3b33]">
+            <div
+              className="h-full bg-[#8e96e8] transition-all duration-500 rounded-full"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* 10 Badge Tier Icons Grid (Matching User Screenshot Image 3) */}
+        <div className="pt-3 border-t border-[#2d3b33] grid grid-cols-2 sm:grid-cols-5 gap-3">
+          {STREAM_TIERS.map((tier) => {
+            const isEarned = currentHours >= tier.targetHours;
+            const isNext = nextTier.targetHours === tier.targetHours;
+            return (
+              <div
+                key={tier.title}
+                className={`p-3 rounded-lg border text-center transition-all ${
+                  isEarned
+                    ? 'bg-[#1a231f] border-[#72b991]/40'
+                    : isNext
+                    ? 'bg-[#212c27] border-[#8e96e8]'
+                    : 'bg-[#161e1a] border-[#2d3b33] opacity-65'
+                }`}
+              >
+                {/* Computer Monitor Icon with Exact Discord Colors */}
+                <div className="w-8 h-8 mx-auto flex items-center justify-center">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill={isEarned ? `${tier.color}20` : 'none'}
+                    stroke={tier.color}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="w-6 h-6"
+                  >
+                    <rect width="20" height="14" x="2" y="3" rx="2" />
+                    <line x1="8" x2="16" y1="21" y2="21" />
+                    <line x1="12" x2="12" y1="17" y2="21" />
+                  </svg>
+                </div>
+                <div className="text-xs font-semibold text-[#f2f5f1] mt-1.5 truncate">
+                  {tier.title}
+                </div>
+                <div className="text-[11px] font-mono text-[#9aa8a0] flex items-center justify-center gap-1 mt-0.5">
+                  {tier.isLocked && !isEarned && <span className="text-[10px]">🔒</span>}
+                  <span>{tier.label}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Stream Config Form */}
+      <form onSubmit={handleSaveTwoStreamTokens} className="surface p-6 space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#2d3b33] pb-4">
+          <div>
+            <span className="eyebrow text-[#8e96e8]">Cấu hình kết nối</span>
+            <h2 className="text-base font-bold text-[#f2f5f1] mt-0.5">
+              Cài đặt 2 Token &amp; Kênh thoại Discord
+            </h2>
+            <p className="text-xs text-[#9aa8a0] mt-0.5">
+              Token Chính dùng để phát video, Token Phụ tự động vào xem kênh để tích lũy giờ stream.
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-blue-300">
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#8e96e8]">
               <StatusDot tone={hasBothStreamTokens ? 'ok' : 'warn'} />
               {hasBothStreamTokens ? 'ĐÃ CÓ ĐỦ 2 TOKEN' : 'CẦN NHẬP 2 TOKEN'}
             </span>
@@ -330,7 +398,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
               type={showTokens ? 'text' : 'password'}
               value={mainToken}
               onChange={(e) => setMainToken(e.target.value)}
-              placeholder="Nhập Discord Token của acc chính phát stream..."
+              placeholder="Nhập Discord User Token của acc phát..."
               className="input font-mono"
               autoComplete="off"
             />
@@ -346,7 +414,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
               type={showTokens ? 'text' : 'password'}
               value={viewerToken}
               onChange={(e) => setViewerToken(e.target.value)}
-              placeholder="Nhập Discord Token của acc phụ cày giờ xem..."
+              placeholder="Nhập Discord User Token của acc xem..."
               className="input font-mono"
               autoComplete="off"
             />
@@ -354,7 +422,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-line">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-[#2d3b33]">
           <div>
             <label htmlFor="stream-guild-id" className="field-label">
               Server ID (GUILD_ID)
@@ -422,7 +490,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
               type="text"
               value={adminIds}
               onChange={(e) => setAdminIds(e.target.value)}
-              placeholder="Discord ID admin (cách nhau dấu phẩy hoặc JSON [])"
+              placeholder="Discord ID admin (cách nhau dấu phẩy)"
               className="input font-mono"
             />
           </div>
@@ -437,187 +505,169 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             ) : (
               <CheckCircle2 className="w-4 h-4" />
             )}
-            <span>Lưu cấu hình vào Database</span>
+            <span>Lưu cài đặt Stream ✨</span>
           </button>
         </div>
       </form>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_300px] gap-x-12 gap-y-10">
-        <div className="space-y-10 min-w-0">
-          <div className="surface p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-              <div className="min-w-0 space-y-1.5">
-                <p className="text-xs font-medium text-slate-300 flex items-center gap-2">
-                  {playing && <StatusDot tone="error" />}
-                  {playing ? 'Đang phát' : 'Không có nội dung đang phát'}
-                </p>
-                <p
-                  className={`text-lg font-semibold tracking-tight break-words ${
-                    playing ? 'text-white' : 'text-slate-300'
-                  }`}
-                >
-                  {playing
-                    ? status?.stream.currentQueueItem?.title || 'Đang truyền phát media'
-                    : 'Kênh thoại đang trống'}
-                </p>
-                {playing && status?.stream.currentQueueItem?.url && (
-                  <p className="text-xs text-slate-300 font-mono truncate">
-                    {status.stream.currentQueueItem.url}
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={handleStop}
-                disabled={actionLoading || !streamConnected || !playing}
-                className="btn-danger shrink-0"
-              >
-                <Square className="w-3 h-3 fill-current" />
-                Dừng phát
-              </button>
-            </div>
-
-            <form
-              className="mt-6 pt-5 border-t border-line"
-              onSubmit={(e) => {
-                e.preventDefault();
-                requestPlay();
-              }}
-            >
-              <label htmlFor="stream-query" className="field-label">
-                Phát nội dung mới (sau khi đã nhập đủ 2 Token Chính &amp; Phụ)
-              </label>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  id="stream-query"
-                  type="text"
-                  value={query}
-                  disabled={!streamConnected}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="https://youtube.com/watch?v=… hoặc tên file"
-                  className="input"
-                />
-                <button
-                  type="submit"
-                  disabled={actionLoading || !streamConnected || !query.trim()}
-                  className="btn-primary shrink-0"
-                >
-                  {actionLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Play className="w-3.5 h-3.5 fill-current" />
-                  )}
-                  Phát
-                </button>
-              </div>
-              <p className="field-hint">
-                Hỗ trợ YouTube, Twitch, liên kết trực tiếp hoặc tên file trong thư mục stream/videos/.
-              </p>
-            </form>
+      {/* Video Source Selection & Playback Controls */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-6">
+        {/* Left Column: Predefined Sources & Custom URL */}
+        <div className="surface p-6 space-y-5">
+          <div className="border-b border-[#2d3b33] pb-3">
+            <span className="eyebrow text-[#8e96e8]">Chọn nguồn video</span>
+            <h3 className="text-base font-bold text-[#f2f5f1] mt-0.5">
+              Nguồn phát video liên tục
+            </h3>
+            <p className="text-xs text-[#9aa8a0] mt-0.5">
+              Chọn từ 2 nguồn video có sẵn tối ưu hoặc nhập URL bất kỳ của bạn.
+            </p>
           </div>
 
-          <Section
-            title="Thư viện cục bộ"
-            description={
-              <>
-                File media trong <code className="inline-code">stream/videos/</code>
-              </>
-            }
-            action={
+          {/* 2 Predefined Video Sources */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {PREDEFINED_SOURCES.map((source) => {
+              const Icon = source.icon;
+              return (
+                <div
+                  key={source.id}
+                  className="p-4 rounded-lg bg-[#161e1a] border border-[#2d3b33] hover:border-[#3b4c42] transition-colors flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-md bg-[#1a231f] border border-[#2d3b33] flex items-center justify-center text-[#8e96e8]">
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <h4 className="text-xs font-bold text-[#f2f5f1]">{source.title}</h4>
+                    </div>
+                    <p className="text-[12px] text-[#9aa8a0]">{source.desc}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePlaySource(source.url)}
+                    disabled={actionLoading || !hasBothStreamTokens}
+                    className="btn-secondary btn-sm w-full"
+                  >
+                    <Play className="w-3.5 h-3.5 text-[#72b991]" />
+                    <span>Phát nguồn này</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Custom URL Input */}
+          <div className="pt-3 border-t border-[#2d3b33] space-y-2">
+            <label htmlFor="custom-video-url" className="field-label">
+              Hoặc nhập URL tùy chọn (YouTube, Twitch, liên kết trực tiếp)
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="custom-video-url"
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="input font-mono text-xs"
+              />
               <button
                 type="button"
-                onClick={loadVideoLibrary}
-                disabled={loadingVideos || !streamConnected}
-                className="btn-secondary btn-sm"
+                onClick={() => query.trim() && handlePlaySource(query.trim())}
+                disabled={actionLoading || !query.trim() || !hasBothStreamTokens}
+                className="btn-primary btn-sm px-4 shrink-0"
               >
-                <RefreshCw className={`w-3.5 h-3.5 ${loadingVideos ? 'animate-spin' : ''}`} />
-                Quét thư mục
+                <Play className="w-3.5 h-3.5" />
+                <span>Phát</span>
               </button>
-            }
-          >
-            {videos.length === 0 ? (
-              <div className="border border-dashed border-line rounded-lg">
-                <EmptyState
-                  icon={<FolderOpen className="w-5 h-5" />}
-                  title={scanned ? 'Thư mục không có file media' : 'Chưa quét thư mục'}
-                  description={
-                    scanned
-                      ? 'Chép file video vào stream/videos/ rồi quét lại.'
-                      : 'Nhấn “Quét thư mục” để liệt kê các file có thể phát.'
-                  }
-                />
-              </div>
-            ) : (
-              <ul className="border-y border-line divide-y divide-line">
-                {videos.map((vid) => (
-                  <li key={vid.name} className="flex items-center justify-between gap-4 py-2.5">
-                    <div className="min-w-0">
-                      <p className="text-[13px] text-white truncate">{vid.name}</p>
-                      <p className="text-xs text-slate-300 tabular-nums">
-                        {vid.formattedSize || String(vid.size)}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => requestPlay(vid.name)}
-                      disabled={!streamConnected || actionLoading}
-                      className="btn-ghost btn-sm shrink-0"
-                      aria-label={`Phát ${vid.name}`}
-                    >
-                      <Play className="w-3 h-3 fill-current" />
-                      Phát
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Section>
+            </div>
+          </div>
         </div>
 
-        <aside className="space-y-8">
-          <div>
-            <div className="flex items-start justify-between gap-4">
+        {/* Right Column: Live Playback Status & Controls */}
+        <div className="surface p-6 space-y-5 flex flex-col justify-between">
+          <div className="space-y-4">
+            <div className="border-b border-[#2d3b33] pb-3 flex items-center justify-between">
               <div>
-                <h2 className="text-[15px] font-semibold text-white">Viewer Farm (Token Phụ)</h2>
-                <p className="mt-1 text-[13px] text-slate-300 leading-relaxed">
-                  Tự động dùng Token Phụ giữ kết nối xem stream của Token Chính để tích lũy thời gian xem.
+                <span className="eyebrow text-[#8e96e8]">Trạng thái luồng</span>
+                <h3 className="text-base font-bold text-[#f2f5f1] mt-0.5">
+                  {playing ? 'Đang phát trực tiếp 🎵' : 'Kênh thoại đang trống'}
+                </h3>
+              </div>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono bg-[#161e1a] border border-[#2d3b33]">
+                <StatusDot tone={playing ? 'ok' : 'warn'} />
+                {playing ? 'LIVE' : 'IDLE'}
+              </span>
+            </div>
+
+            {status?.stream?.currentQueueItem && (
+              <div className="p-3 bg-[#161e1a] rounded-lg border border-[#2d3b33] space-y-1">
+                <span className="text-[11px] font-mono text-[#9aa8a0]">Đang phát:</span>
+                <p className="text-xs font-semibold text-[#f2f5f1] truncate">
+                  {status.stream.currentQueueItem.title}
                 </p>
               </div>
-              <Switch
-                checked={Boolean(status?.farm.autoWatch)}
-                onChange={handleToggleFarm}
-                disabled={actionLoading || !streamConnected || !status}
-                label="Bật Viewer Farm"
-              />
+            )}
+
+            <div className="space-y-2 text-xs font-mono">
+              <div className="flex items-center justify-between text-[#9aa8a0]">
+                <span>Phát lặp lại (Loop):</span>
+                <span className={status?.stream.isLooping ? 'text-[#72b991]' : 'text-[#67756d]'}>
+                  {status?.stream.isLooping ? 'BẬT' : 'TẮT'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[#9aa8a0]">
+                <span>Tự động xem kênh (Viewer):</span>
+                <span className={status?.farm?.autoWatch ? 'text-[#72b991]' : 'text-[#67756d]'}>
+                  {status?.farm?.autoWatch ? 'ĐANG CHẠY' : 'DỪNG'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[#9aa8a0]">
+                <span>Phiên hiện tại:</span>
+                <span className="text-[#f2f5f1]">
+                  {status?.farm?.formattedSessionTime || '0 phút'}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div>
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
-              Thông tin dịch vụ &amp; 2 Token
-            </h2>
-            <dl className="divide-y divide-line border-y border-line text-[13px]">
-              {details.map(([k, v]) => (
-                <div key={k} className="flex items-center justify-between gap-4 py-2.5">
-                  <dt className="text-slate-300">{k}</dt>
-                  <dd className="text-white font-mono text-xs truncate text-right">{v}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </aside>
-      </div>
+          <div className="pt-4 border-t border-[#2d3b33] space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleToggleLoop}
+                disabled={actionLoading}
+                className={`btn-secondary btn-sm ${status?.stream.isLooping ? 'border-[#72b991] text-[#72b991]' : ''}`}
+              >
+                <Repeat className="w-3.5 h-3.5" />
+                <span>{status?.stream.isLooping ? 'Tắt Loop' : 'Bật Loop'}</span>
+              </button>
 
-      <ConfirmDialog
-        isOpen={pendingPlayTarget !== null}
-        title="Thay thế nội dung đang phát?"
-        message={`Kênh thoại đang phát một luồng khác. Phát "${pendingPlayTarget}" sẽ ngắt luồng hiện tại.`}
-        confirmText="Phát thay thế"
-        cancelText="Hủy"
-        variant="warning"
-        onConfirm={() => pendingPlayTarget && executePlay(pendingPlayTarget)}
-        onCancel={() => setPendingPlayTarget(null)}
-      />
+              <button
+                type="button"
+                onClick={handleToggleAutoWatch}
+                disabled={actionLoading}
+                className={`btn-secondary btn-sm ${status?.farm?.autoWatch ? 'border-[#72b991] text-[#72b991]' : ''}`}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>{status?.farm?.autoWatch ? 'Tắt Viewer' : 'Bật Viewer'}</span>
+              </button>
+            </div>
+
+            {playing && (
+              <button
+                type="button"
+                onClick={handleStopStream}
+                disabled={actionLoading}
+                className="btn-danger btn-sm w-full"
+              >
+                <Square className="w-3.5 h-3.5" />
+                <span>Dừng phát Stream</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

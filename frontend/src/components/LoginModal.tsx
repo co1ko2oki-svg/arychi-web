@@ -76,7 +76,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={user ? 'Tài khoản Discord đã kết nối' : 'Đăng nhập tài khoản Discord'}
-      description="Đăng nhập tài khoản Discord qua OAuth2 để mua gói 20.000đ/tháng và truy cập hệ thống quản trị dash.arychi.xyz."
+      description="Đăng nhập tài khoản Discord qua OAuth2 để đồng bộ và truy cập bảng điều khiển dash.arychi.xyz."
     >
       {user && (
         <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-line">
@@ -118,17 +118,17 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
       {user ? (
         <div className="space-y-3">
-          <div className="p-3.5 rounded-lg bg-[#0E1017] border border-line space-y-2">
+          <div className="p-3.5 rounded-xl bg-[#0E1017] border border-line space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs text-slate-300">Cổng đăng nhập:</span>
-              <span className="text-xs font-mono font-medium text-white">
+              <span className="text-xs font-mono font-medium text-purple-300">
                 Discord Bot OAuth2
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-slate-300">Trạng thái Database:</span>
+              <span className="text-xs text-slate-300">Trạng thái tài khoản:</span>
               <span className="text-xs font-medium text-emerald-400 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Đã lưu vào MySQL (arychi_db)
+                <CheckCircle2 className="w-3.5 h-3.5" /> Đã kết nối an toàn 💖
               </span>
             </div>
           </div>
@@ -192,7 +192,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <div className="space-y-1.5 text-slate-300">
               <div className="flex items-start gap-2">
                 <span className="font-mono text-blue-300 font-bold">1.</span>
-                <span>Đăng nhập bằng Discord OAuth2 &amp; kích hoạt gói 20.000đ/tháng tại đây.</span>
+                <span>Đăng nhập bằng Discord OAuth2 để kết nối tài khoản.</span>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-mono text-blue-300 font-bold">2.</span>

@@ -17,7 +17,7 @@ import { PageHeader, ProgressBar, Section, StatusDot, Switch } from './ui';
 import { formatPing, levelClass, levelLabel, parseLog } from './format';
 
 interface DashboardOverviewProps {
-  user: AuthUser;
+  user?: AuthUser | null;
   subscription?: UserSubscription | null;
   token: string;
   questConnected: boolean;
@@ -64,9 +64,9 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const claimableQuests = quests.filter((q) => q.status.completed && !q.status.claimed).length;
   const streamPlaying = Boolean(streamStatus?.stream.playing);
 
-  const hasQuestToken = Boolean(token || user.tokens?.questToken);
+  const hasQuestToken = Boolean(token || user?.tokens?.questToken);
   const hasStreamTokens = Boolean(
-    (user.tokens?.streamMainToken && user.tokens?.streamViewerToken) ||
+    (user?.tokens?.streamMainToken && user?.tokens?.streamViewerToken) ||
       (streamStatus?.config?.hasMainToken && streamStatus?.config?.hasViewerToken)
   );
 
@@ -162,156 +162,251 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
   const recentLogs = logs.slice(-6).reverse();
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PageHeader
-        title="Bảng điều khiển — dash.arychi.xyz"
-        description="Đã xác minh gói 20.000đ/tháng lần thứ 2 từ Database. Quản lý Token cho từng module bên cột trái."
+        title="Bảng điều khiển cá nhân ✨"
+        description={`Xin chào @${user?.username || 'bạn'}! Chúc bạn có những phút giây săn quà và giải trí thật vui vẻ nha 🌸`}
         meta={
           <>
-            <span className="text-white font-semibold">@{user.username}</span>
-            <span className="inline-flex items-center gap-1.5 text-blue-300 font-mono">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Gói 20k/tháng (Còn {subscription?.daysRemaining ?? 30} ngày)
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-[#8e96e8] font-semibold text-xs">
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={user.username}
+                  className="w-4 h-4 rounded-full object-cover"
+                />
+              ) : (
+                <span>🌟</span>
+              )}
+              <span>@{user?.username || 'khách'}</span>
             </span>
-            <span className="inline-flex items-center gap-1.5">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-mono text-xs">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#72b991]" />
+              Thành viên chính thức
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#9aa8a0]">
               <StatusDot tone={questConnected ? 'ok' : 'error'} />
-              Quest :3001 {questConnected ? 'Online' : 'Offline'}
+              Quests {questConnected ? 'Sẵn sàng 🟢' : 'Ngoại tuyến 🔴'}
             </span>
-            <span className="inline-flex items-center gap-1.5">
-              <StatusDot tone={streamConnected ? (streamPlaying ? 'error' : 'ok') : 'warn'} />
-              Stream :3000 {streamConnected ? (streamPlaying ? 'Live' : 'Standby') : 'Offline'}
+            <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#9aa8a0]">
+              <StatusDot tone={streamConnected ? (streamPlaying ? 'ok' : 'ok') : 'warn'} />
+              Stream {streamConnected ? (streamPlaying ? 'Đang phát 🎵' : 'Chờ lệnh 🟢') : 'Ngoại tuyến 🔴'}
             </span>
           </>
         }
         actions={
-          <>
-            <button
-              type="button"
-              onClick={() => onOpenSubscriptionModal('monthly_20k')}
-              className="btn-secondary"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-blue-400" />
-              <span>Gia hạn (+20k/tháng)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onRefreshQuests();
-                onRefreshStream();
-                toast.info('Đã đồng bộ dữ liệu');
-              }}
-              disabled={loadingQuests}
-              className="btn-ghost"
-            >
-              <RefreshCw className={`w-4 h-4 ${loadingQuests ? 'animate-spin' : ''}`} />
-              Đồng bộ
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={() => {
+              onRefreshQuests();
+              onRefreshStream();
+              toast.info('Đã làm mới dữ liệu thành công ✨');
+            }}
+            disabled={loadingQuests}
+            className="btn-secondary btn-sm"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loadingQuests ? 'animate-spin' : ''}`} />
+            <span>Đồng bộ</span>
+          </button>
         }
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="surface p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
+      {/* 2 Khối tính năng cốt lõi */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Khối Quests */}
+        <div className="surface p-6 rounded-xl flex flex-col justify-between space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-semibold text-blue-300">
-                CẤU HÌNH TOKEN 01 • QUESTS &amp; GIỜ CHƠI
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                <span>✨</span>
+                <span>DISCORD QUESTS (1 TOKEN)</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-white">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono text-white bg-white/[0.05]">
                 <StatusDot tone={hasQuestToken ? 'ok' : 'warn'} />
-                {hasQuestToken ? 'ĐÃ NHẬP 1 TOKEN' : 'CHƯA NHẬP TOKEN'}
+                {hasQuestToken ? 'Đã sẵn sàng' : 'Chưa có Token'}
               </span>
             </div>
-            <h2 className="text-base font-bold text-white">
-              Discord Quests &amp; Science Telemetry (1 Token)
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Sử dụng 1 Token tài khoản Discord để đồng bộ danh sách nhiệm vụ, gửi heartbeat 30s và cày giờ chơi hồ sơ.
-            </p>
+
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                Săn Quà Quests Tự Động 🎯
+              </h2>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                Hệ thống tự động nhận và cày 100% nhiệm vụ game Discord để nhận avatar, khung và vật phẩm miễn phí.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="px-3 py-1 rounded-md bg-white/[0.04] border border-white/[0.06] text-xs text-slate-200 font-mono">
+                🎉 {totalQuests} nhiệm vụ
+              </span>
+              {claimableQuests > 0 && (
+                <span className="px-3 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-400 font-semibold">
+                  🎁 {claimableQuests} quà chờ nhận!
+                </span>
+              )}
+            </div>
           </div>
-          <div className="pt-3 border-t border-line flex items-center justify-between">
-            <span className="text-xs font-mono text-slate-300">
-              {hasQuestToken ? `${totalQuests} nhiệm vụ đã đồng bộ` : 'Yêu cầu nhập 1 Token'}
-            </span>
-            <button
-              type="button"
-              onClick={() => onNavigateTab('quests')}
-              className="btn-primary btn-sm"
-            >
-              <span>{hasQuestToken ? 'Mở Discord Quests' : 'Nhập 1 Token ngay'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+
+          <div className="pt-3 border-t border-white/[0.06] space-y-2.5">
+            <div className="flex items-center gap-2">
+              {!hasQuestToken ? (
+                <button
+                  type="button"
+                  onClick={() => onNavigateTab('quests')}
+                  className="btn-primary flex-1"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Nhập 1 Token ngay ✨</span>
+                </button>
+              ) : runningJobs.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={handleStopAll}
+                  disabled={questActionLoading.all}
+                  className="btn-danger flex-1"
+                >
+                  <Square className="w-3 h-3 fill-current" />
+                  <span>Dừng tất cả ({runningJobs.length})</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleStartAll}
+                  disabled={questActionLoading.all}
+                  className="btn-primary flex-1"
+                >
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                  <span>Chạy toàn bộ Quests 🚀</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => onNavigateTab('quests')}
+                className="btn-secondary text-xs px-3.5"
+                title="Mở bảng chi tiết danh sách nhiệm vụ"
+              >
+                <span>Chi tiết</span>
+                <ArrowRight className="w-3 h-3 text-slate-400" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="surface p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-2">
+        {/* Khối Stream Voice */}
+        <div className="surface p-6 rounded-xl flex flex-col justify-between space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-mono font-semibold text-blue-300">
-                CẤU HÌNH TOKEN 02 • TREO STREAM VOICE
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <span>🎧</span>
+                <span>TREO STREAM VOICE (2 TOKEN)</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-mono text-white">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono text-white bg-white/[0.05]">
                 <StatusDot tone={hasStreamTokens ? 'ok' : 'warn'} />
-                {hasStreamTokens ? 'ĐÃ NHẬP 2 TOKEN' : 'CẦN 2 TOKEN (CHÍNH+PHỤ)'}
+                {hasStreamTokens ? 'Đã sẵn sàng' : 'Cần 2 Token'}
               </span>
             </div>
-            <h2 className="text-base font-bold text-white">
-              Treo Stream &amp; Viewer Farm (1 Token Chính + 1 Token Phụ)
-            </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
-              Riêng tính năng Treo Stream bắt buộc nhập 2 Token: 1 Token Chính (phát stream) và 1 Token Phụ (xem stream).
-            </p>
+
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                Phát Nhạc Voice &amp; Cày Giờ Xem 🎵
+              </h2>
+              <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                Phát video YouTube/Twitch trực tiếp vào phòng thoại Discord cho bạn bè và cày giờ xem tài khoản phụ.
+              </p>
+            </div>
+
+            <form onSubmit={handlePlayStream} className="flex gap-2 pt-1">
+              <input
+                type="text"
+                value={streamInput}
+                onChange={(e) => setStreamInput(e.target.value)}
+                placeholder="Dán link YouTube, Twitch hoặc tên bài hát..."
+                className="input flex-1 text-xs px-4"
+              />
+              <button
+                type="submit"
+                disabled={streamActionLoading || !streamInput.trim()}
+                className="btn-primary shrink-0 px-4"
+              >
+                {streamActionLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Play className="w-3.5 h-3.5 fill-current" />
+                )}
+                <span>Phát</span>
+              </button>
+            </form>
           </div>
-          <div className="pt-3 border-t border-line flex items-center justify-between">
-            <span className="text-xs font-mono text-slate-300">
-              {hasStreamTokens ? `Streamer: ${streamStatus?.bot.tag || 'Sẵn sàng'}` : 'Yêu cầu 2 Token'}
-            </span>
+
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <Switch
+                checked={Boolean(streamStatus?.farm.autoWatch)}
+                onChange={handleToggleFarm}
+                disabled={streamActionLoading || !streamConnected}
+                label="Bật cày giờ xem (Viewer Farm)"
+              />
+              <span className="text-xs text-slate-300">
+                Tự động cày giờ xem
+              </span>
+            </div>
+
             <button
               type="button"
               onClick={() => onNavigateTab('stream')}
-              className="btn-primary btn-sm"
+              className="btn-ghost btn-sm text-xs text-pink-300 hover:text-pink-200 rounded-full"
             >
-              <span>{hasStreamTokens ? 'Mở Treo Stream' : 'Nhập 2 Token Stream'}</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Cấu hình 2 Token</span>
+              <ArrowRight className="w-3 h-3" />
             </button>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="surface-interactive p-4">
-          <p className="text-xs font-medium text-slate-300">Nhiệm vụ khả dụng</p>
+        <div className="surface-interactive p-4 rounded-2xl border border-line/60">
+          <p className="text-xs font-medium text-purple-300 flex items-center gap-1.5">
+            <span>🎯</span> Nhiệm vụ có sẵn
+          </p>
           <p className="mt-2 text-2xl font-bold text-white tabular-nums">{totalQuests}</p>
-          <p className="mt-1 text-xs font-mono text-slate-300">Từ Discord API</p>
+          <p className="mt-1 text-xs font-mono text-slate-400">Từ Discord Quests</p>
         </div>
 
-        <div className="surface-interactive p-4">
-          <p className="text-xs font-medium text-slate-300">Đang thực thi</p>
+        <div className="surface-interactive p-4 rounded-2xl border border-line/60">
+          <p className="text-xs font-medium text-indigo-300 flex items-center gap-1.5">
+            <span>⚡</span> Đang cày tự động
+          </p>
           <div className="mt-2 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-blue-300 tabular-nums">{runningJobs.length}</span>
-            {runningJobs.length > 0 && <StatusDot tone="brand" />}
+            <span className="text-2xl font-bold text-indigo-300 tabular-nums">{runningJobs.length}</span>
+            {runningJobs.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />}
           </div>
-          <p className="mt-1 text-xs font-mono text-slate-300">Heartbeat 30s</p>
+          <p className="mt-1 text-xs font-mono text-slate-400">Tiến trình chạy ngầm</p>
         </div>
 
-        <div className="surface-interactive p-4">
-          <p className="text-xs font-medium text-slate-300">Đã hoàn thành</p>
+        <div className="surface-interactive p-4 rounded-2xl border border-line/60">
+          <p className="text-xs font-medium text-pink-300 flex items-center gap-1.5">
+            <span>🎁</span> Đã hoàn thành
+          </p>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold text-white tabular-nums">{completedQuests}</span>
             {claimableQuests > 0 && (
-              <span className="text-xs text-blue-300 tabular-nums">({claimableQuests} chờ claim)</span>
+              <span className="text-xs text-pink-300 tabular-nums font-semibold">({claimableQuests} quà chờ nhận ✨)</span>
             )}
           </div>
-          <p className="mt-1 text-xs font-mono text-slate-300">Sẵn sàng nhận thưởng</p>
+          <p className="mt-1 text-xs font-mono text-slate-400">Sẵn sàng nhận thưởng</p>
         </div>
 
-        <div className="surface-interactive p-4">
-          <p className="text-xs font-medium text-slate-300">StreamBot Voice</p>
-          <p className="mt-2 text-sm font-bold text-white truncate">
-            {streamPlaying ? 'Đang phát video' : streamConnected ? 'Đang chờ' : 'Ngoại tuyến'}
+        <div className="surface-interactive p-4 rounded-2xl border border-line/60">
+          <p className="text-xs font-medium text-emerald-300 flex items-center gap-1.5">
+            <span>🎧</span> Phòng Voice Bot
           </p>
-          <p className="mt-1 text-xs text-slate-300 font-mono">
-            Độ trễ {formatPing(streamConnected, streamStatus?.bot.ping)}
+          <p className="mt-2 text-sm font-bold text-white truncate">
+            {streamPlaying ? 'Đang phát video 🎵' : streamConnected ? 'Đang chờ phát 🟢' : 'Ngoại tuyến 🔴'}
+          </p>
+          <p className="mt-1 text-xs text-slate-400 font-mono">
+            {formatPing(streamConnected, streamStatus?.bot.ping)}
           </p>
         </div>
       </div>
@@ -360,162 +455,82 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </Section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="surface p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-[15px] font-semibold text-white">Treo Stream Voice (2 Token)</h2>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Phát media trực tiếp vào kênh thoại bằng Token Chính &amp; xem bằng Token Phụ
-              </p>
+      {/* Khung mẹo sử dụng siêu dễ thương dành cho User */}
+      <div className="surface p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-br from-[#121124] to-[#161426] space-y-3">
+        <div className="flex items-center gap-2 text-purple-300 font-semibold text-sm">
+          <span>✨</span>
+          <span>Mẹo nhỏ săn quà &amp; giải trí siêu tốc</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
+            <p className="font-semibold text-white flex items-center gap-1.5">
+              <span>🎯</span> 1. Cày Quests 1-Click
+            </p>
+            <p className="text-slate-400 leading-relaxed">
+              Nhập Token tài khoản Discord rồi bấm "Chạy toàn bộ Quests", hệ thống tự cày 100% nhiệm vụ lấy quà avatar, khung và vật phẩm game.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
+            <p className="font-semibold text-white flex items-center gap-1.5">
+              <span>🎧</span> 2. Treo Voice Xem Stream
+            </p>
+            <p className="text-slate-400 leading-relaxed">
+              Dán link video YouTube hoặc Twitch yêu thích để nghe nhạc cùng bạn bè trong phòng thoại và tự động tích lũy giờ xem.
+            </p>
+          </div>
+          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
+            <p className="font-semibold text-white flex items-center gap-1.5">
+              <span>💖</span> 3. Bảo mật an toàn
+            </p>
+            <p className="text-slate-400 leading-relaxed">
+              Toàn bộ dữ liệu của bạn được mã hóa an toàn trên hệ thống. Bạn có thể đổi token hoặc gia hạn bất cứ lúc nào một cách dễ dàng.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Chỉ hiển thị Nhật ký Kỹ thuật cho Quản trị viên (Admin) */}
+      {user?.role === 'admin' && (
+        <div className="surface overflow-hidden rounded-2xl border border-amber-500/30">
+          <div className="flex items-center justify-between px-4 h-10 border-b border-line bg-amber-500/5">
+            <div className="flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-amber-400" />
+              <h2 className="text-[13px] font-medium text-amber-300 flex items-center gap-1.5">
+                <span>👑</span>
+                <span>Nhật ký sự kiện trực tiếp (Chỉ Quản trị viên)</span>
+              </h2>
             </div>
             <button
               type="button"
-              onClick={() => onNavigateTab('stream')}
-              className="link text-xs"
+              onClick={() => onNavigateTab('logs')}
+              className="link text-xs text-amber-300 hover:text-amber-200"
             >
-              Cấu hình 2 Token
+              Toàn bộ nhật ký ({logs.length})
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <form onSubmit={handlePlayStream} className="flex gap-2">
-            <input
-              type="text"
-              value={streamInput}
-              onChange={(e) => setStreamInput(e.target.value)}
-              placeholder="Nhập URL YouTube, Twitch hoặc tên file..."
-              className="input flex-1"
-            />
-            <button
-              type="submit"
-              disabled={streamActionLoading || !streamInput.trim()}
-              className="btn-primary shrink-0"
-            >
-              {streamActionLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Play className="w-3.5 h-3.5 fill-current" />
-              )}
-              Phát
-            </button>
-          </form>
-
-          <div className="flex items-center justify-between pt-3 border-t border-line">
-            <div>
-              <p className="text-[13px] font-medium text-white">Viewer Farm (Token Phụ)</p>
-              <p className="text-xs text-slate-300">Giữ tài khoản phụ trong voice để cày giờ xem</p>
-            </div>
-            <Switch
-              checked={Boolean(streamStatus?.farm.autoWatch)}
-              onChange={handleToggleFarm}
-              disabled={streamActionLoading || !streamConnected}
-              label="Bật Viewer Farm"
-            />
-          </div>
-        </div>
-
-        <div className="surface p-5 flex flex-col justify-between space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-[15px] font-semibold text-white">Discord Quests (1 Token)</h2>
-                <p className="text-xs text-slate-300 mt-0.5">
-                  Tự động hóa hoàn thành nhiệm vụ Discord
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => onNavigateTab('quests')}
-                className="link text-xs"
-              >
-                Mở bảng nhiệm vụ
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <dl className="divide-y divide-line text-[13px]">
-              <div className="py-2 flex items-center justify-between">
-                <dt className="text-slate-300">Nhiệm vụ trên tài khoản</dt>
-                <dd className="text-white font-mono text-xs tabular-nums">{totalQuests}</dd>
-              </div>
-              <div className="py-2 flex items-center justify-between">
-                <dt className="text-slate-300">Chờ nhận thưởng</dt>
-                <dd className="text-blue-300 font-mono text-xs tabular-nums">{claimableQuests}</dd>
-              </div>
-              <div className="py-2 flex items-center justify-between">
-                <dt className="text-slate-300">Quest Daemon (:3001)</dt>
-                <dd className="text-xs font-mono">
-                  {questConnected ? (
-                    <span className="text-blue-300">Kết nối</span>
-                  ) : (
-                    <span className="text-rose-300">Ngoại tuyến</span>
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {runningJobs.length > 0 ? (
-              <button
-                type="button"
-                onClick={handleStopAll}
-                disabled={questActionLoading.all}
-                className="btn-danger flex-1"
-              >
-                Dừng tất cả ({runningJobs.length})
-              </button>
+          <div className="p-4 font-mono text-[13px] space-y-2 max-h-56 overflow-y-auto leading-relaxed">
+            {recentLogs.length === 0 ? (
+              <p className="text-slate-400 italic py-2">Chưa có sự kiện nào được ghi nhận...</p>
             ) : (
-              <button
-                type="button"
-                onClick={handleStartAll}
-                disabled={questActionLoading.all}
-                className="btn-primary flex-1"
-              >
-                Chạy toàn bộ Quests
-              </button>
+              recentLogs.map((log, index) => {
+                const p = parseLog(log);
+                return (
+                  <div key={index} className="flex items-baseline gap-2.5 text-xs sm:text-[13px]">
+                    <span className="text-slate-400 select-none shrink-0 tabular-nums">{p.time}</span>
+                    <span className={`font-semibold shrink-0 ${levelClass[p.level]}`}>
+                      [{levelLabel[p.level]}]
+                    </span>
+                    <span className="text-slate-400 shrink-0 truncate max-w-[90px]">{p.source}</span>
+                    <span className="text-slate-100 break-words min-w-0">{p.message}</span>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
-      </div>
-
-      <div className="surface overflow-hidden">
-        <div className="flex items-center justify-between px-4 h-10 border-b border-line">
-          <div className="flex items-center gap-2">
-            <Terminal className="w-4 h-4 text-blue-300" />
-            <h2 className="text-[13px] font-medium text-white">Nhật ký sự kiện trực tiếp</h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => onNavigateTab('logs')}
-            className="link text-xs"
-          >
-            Toàn bộ nhật ký ({logs.length})
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        <div className="p-4 font-mono text-xs space-y-1.5 max-h-48 overflow-y-auto leading-relaxed">
-          {recentLogs.length === 0 ? (
-            <p className="text-slate-300 italic py-2">Chưa có sự kiện nào được ghi nhận...</p>
-          ) : (
-            recentLogs.map((log, index) => {
-              const p = parseLog(log);
-              return (
-                <div key={index} className="flex items-baseline gap-2.5 text-[11px]">
-                  <span className="text-slate-300 select-none shrink-0 tabular-nums">{p.time}</span>
-                  <span className={`font-semibold shrink-0 ${levelClass[p.level]}`}>
-                    [{levelLabel[p.level]}]
-                  </span>
-                  <span className="text-slate-300 shrink-0 truncate max-w-[80px]">{p.source}</span>
-                  <span className="text-white break-words min-w-0">{p.message}</span>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 };
