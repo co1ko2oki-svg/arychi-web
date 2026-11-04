@@ -247,7 +247,7 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
                     ? 'Đang đánh dấu 1.000+ game vào hồ sơ'
                     : `Đang cày ${activeJob.targetHours || hours} giờ chơi cho toàn bộ game`}
                 </span>
-                <span className="px-2 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] text-[11px] font-mono font-semibold">
+                <span className="px-2.5 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] text-xs font-mono font-semibold">
                   ĐANG CHẠY
                 </span>
               </div>
@@ -308,7 +308,7 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowToken((v) => !v)}
-                className="text-[11px] text-[#8e96e8] hover:text-[#f2f5f1] flex items-center gap-1"
+                className="text-xs text-[#8e96e8] hover:text-[#f2f5f1] flex items-center gap-1"
               >
                 {showToken ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                 <span>{showToken ? 'Ẩn' : 'Hiện'}</span>
@@ -334,7 +334,7 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowCookie((v) => !v)}
-                className="text-[11px] text-[#72b991] hover:text-[#f2f5f1] flex items-center gap-1"
+                className="text-xs text-[#72b991] hover:text-[#f2f5f1] flex items-center gap-1"
               >
                 {showCookie ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                 <span>{showCookie ? 'Ẩn' : 'Hiện'}</span>
@@ -353,13 +353,19 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <p className="text-[11px] text-[#9aa8a0] font-mono">
+          <div className="text-xs font-mono">
             {!hasValidToken ? (
-              <span className="text-[#d7ad69]">⚠️ Vui lòng nhập Token Discord trước khi khởi chạy</span>
+              <span className="text-[#d7ad69] flex items-center gap-1.5 font-medium">
+                <span>⚠️</span>
+                <span>Vui lòng nhập Token Discord trước khi khởi chạy</span>
+              </span>
             ) : (
-              <span className="text-[#72b991]">✓ Token sẵn sàng, bạn có thể khởi chạy cày giờ chơi</span>
+              <span className="text-[#72b991] flex items-center gap-1.5 font-medium">
+                <span>✓</span>
+                <span>Token sẵn sàng, bạn có thể khởi chạy cày giờ chơi</span>
+              </span>
             )}
-          </p>
+          </div>
 
           <button
             type="submit"
