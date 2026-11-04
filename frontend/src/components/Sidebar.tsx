@@ -187,8 +187,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <span className="w-2 h-2 rounded-full bg-[#72b991]" />
               <span>Hoạt động 24/7</span>
             </span>
-            <span className="text-[#cbd5e1] whitespace-nowrap">
-              Bản quyền <strong className="text-[#f2f5f1] font-semibold">Chính thức</strong>
+            <span className="text-[#8e96e8] font-semibold whitespace-nowrap">
+              Chính thức ✨
             </span>
           </div>
         </div>
