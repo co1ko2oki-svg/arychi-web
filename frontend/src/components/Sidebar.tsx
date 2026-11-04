@@ -67,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Sparkles,
       badge:
         runningQuestsCount > 0 ? (
-          <span className="px-2 py-0.5 rounded-md bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30 text-xs font-mono font-bold">
+          <span className="px-2.5 py-1 rounded-md bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30 text-xs font-mono font-bold">
             {runningQuestsCount} đang chạy
           </span>
         ) : undefined,
@@ -141,7 +141,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <span className="block text-[13px] truncate">{item.label}</span>
             <span
               className={`block text-xs font-mono truncate ${
-                active ? 'text-[#8e96e8]' : item.tokenReady ? 'text-[#72b991]' : 'text-[#67756d]'
+                active ? 'text-[#8e96e8]' : item.tokenReady ? 'text-[#72b991]' : 'text-[#9aa8a0]'
               }`}
             >
               {item.tokenHint}
@@ -193,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <nav aria-label="Chức năng chính" className="space-y-1">
-          <p className="px-2 pb-1.5 text-xs font-mono uppercase tracking-wider text-[#9aa8a0]">
+          <p className="px-2 pb-1.5 text-xs font-mono uppercase tracking-wider text-[#cbd5e1] font-semibold">
             CHỨC NĂNG DÀNH CHO BẠN
           </p>
           {userNavItems.map(renderNavButton)}
@@ -223,14 +223,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </span>
         </div>
 
-        {/* User profile row */}
-        <div className="flex items-center justify-between gap-3 p-2.5 bg-[#161e1a] rounded-lg border border-[#2d3b33]">
+        {/* User profile row (Unboxed to avoid nested card) */}
+        <div className="flex items-center justify-between gap-3 p-2 rounded-lg bg-transparent hover:bg-[#1a231f]/60 transition-colors">
           <div className="min-w-0 flex items-center gap-2">
             {user?.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={user?.username || 'user'}
-                className="w-8 h-8 rounded-full object-cover border border-[#2d3b33] shrink-0"
+                className="w-8 h-8 rounded-full object-cover shrink-0"
               />
             ) : (
               <div className="w-8 h-8 rounded-full bg-[#8e96e8] text-[#111714] font-bold text-xs grid place-items-center shrink-0">
@@ -246,7 +246,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   </span>
                 )}
               </div>
-              <div className="text-[11px] font-mono text-[#72b991]">
+              <div className="text-xs font-mono text-[#72b991]">
                 {user?.role === 'admin' ? 'Admin' : 'Thành viên'}
               </div>
             </div>

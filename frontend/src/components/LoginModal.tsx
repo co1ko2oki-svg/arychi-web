@@ -95,7 +95,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <p className="text-sm font-semibold text-white truncate">@{user.username}</p>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-mono bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-mono bg-blue-500/10 text-blue-300 border border-blue-500/20">
                   <Bot className="w-3 h-3" />
                   Discord Linked
                 </span>
@@ -196,7 +196,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-mono text-blue-300 font-bold">2.</span>
-                <span>Chuyển sang trung tâm điều khiển <code className="text-white font-mono bg-white/[0.08] px-1 py-0.5 rounded">dash.arychi.xyz</code> để nhập Token Quest &amp; Token Stream.</span>
+                <span>Chuyển sang trung tâm điều khiển <code className="text-white font-mono bg-white/[0.08] px-1.5 py-1 rounded">dash.arychi.xyz</code> để nhập Token Quest &amp; Token Stream.</span>
               </div>
             </div>
           </div>

@@ -223,11 +223,11 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
         description="Tự động tăng số giờ chơi và mở khóa hơn 1.000+ tựa game hiển thị lung linh trên hồ sơ Discord cá nhân của bạn."
         meta={
           <>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#8e96e8]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#8e96e8]">
               <Sparkles className="w-3.5 h-3.5" />
               Tự động 1.000+ Game
             </span>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#72b991]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#72b991]">
               <StatusDot tone="ok" />
               Chạy nền máy chủ 24/7
             </span>
@@ -247,7 +247,7 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
                     ? 'Đang đánh dấu 1.000+ game vào hồ sơ'
                     : `Đang cày ${activeJob.targetHours || hours} giờ chơi cho toàn bộ game`}
                 </span>
-                <span className="px-2.5 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] text-xs font-mono font-semibold">
+                <span className="px-2.5 py-1 rounded-md bg-[#72b991]/15 text-[#72b991] text-xs font-mono font-semibold">
                   ĐANG CHẠY
                 </span>
               </div>
@@ -353,7 +353,7 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
         </div>
 
         <div className="flex items-center justify-between pt-1">
-          <div className="text-xs font-mono">
+          <div className="text-sm">
             {!hasValidToken ? (
               <span className="text-[#d7ad69] flex items-center gap-1.5 font-medium">
                 <span>⚠️</span>

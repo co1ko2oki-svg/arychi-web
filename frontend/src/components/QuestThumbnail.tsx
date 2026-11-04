@@ -89,7 +89,7 @@ export const QuestThumbnail: React.FC<QuestThumbnailProps> = ({
           ) : (
             <Gamepad2 className={`${iconSizeClass} text-[#72b991]`} />
           )}
-          <span className="text-[9px] font-bold font-mono text-[#9aa8a0] mt-0.5 leading-none">
+          <span className="text-xs font-bold font-mono text-[#9aa8a0] mt-0.5 leading-none">
             {initial}
           </span>
         </div>

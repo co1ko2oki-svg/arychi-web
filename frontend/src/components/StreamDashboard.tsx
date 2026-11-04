@@ -241,7 +241,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
         description="Phát video liên tục 24/7 vào phòng thoại Discord với tài khoản phụ tự động xem để chinh phục 10 cấp huy hiệu Stream."
         meta={
           <>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#f2f5f1]">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-mono text-[#f2f5f1]">
               <StatusDot tone={streamConnected ? (playing ? 'ok' : 'ok') : 'error'} />
               Stream {streamConnected ? (playing ? 'Đang phát 🎵' : 'Sẵn sàng 🟢') : 'Ngoại tuyến 🔴'}
             </span>
@@ -315,7 +315,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
           </div>
         </div>
 
-        {/* 10 Badge Tier Icons Grid (Matching User Screenshot Image 3) */}
+        {/* 10 Badge Tier Icons Grid (Unboxed to eliminate nested card borders) */}
         <div className="pt-3 border-t border-[#2d3b33] grid grid-cols-2 sm:grid-cols-5 gap-3">
           {STREAM_TIERS.map((tier) => {
             const isEarned = currentHours >= tier.targetHours;
@@ -323,12 +323,12 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             return (
               <div
                 key={tier.title}
-                className={`p-3 rounded-lg border text-center transition-all ${
+                className={`p-2.5 rounded-lg text-center transition-colors ${
                   isEarned
-                    ? 'bg-[#1a231f] border-[#72b991]/40'
+                    ? 'bg-[#72b991]/15 text-[#72b991]'
                     : isNext
-                    ? 'bg-[#212c27] border-[#8e96e8]'
-                    : 'bg-[#161e1a] border-[#2d3b33] opacity-65'
+                    ? 'bg-[#8e96e8]/20 ring-1 ring-[#8e96e8]/50 text-[#f2f5f1]'
+                    : 'hover:bg-[#212c27]/60 text-[#9aa8a0] opacity-80'
                 }`}
               >
                 {/* Computer Monitor Icon with Exact Discord Colors */}
@@ -350,7 +350,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
                 <div className="text-xs font-semibold text-[#f2f5f1] mt-1.5 truncate">
                   {tier.title}
                 </div>
-                <div className="text-xs font-mono text-[#9aa8a0] tabular-nums flex items-center justify-center gap-1 mt-0.5">
+                <div className="text-xs font-mono text-[#cbd5e1] font-semibold tabular-nums flex items-center justify-center gap-1 mt-0.5">
                   {tier.isLocked && !isEarned && <span className="text-xs">🔒</span>}
                   <span>{tier.label}</span>
                 </div>
@@ -368,7 +368,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             <h2 className="text-base font-bold text-[#f2f5f1] mt-0.5">
               Cài đặt 2 Token &amp; Kênh thoại Discord
             </h2>
-            <p className="text-xs text-[#9aa8a0] mt-0.5 max-w-2xl leading-relaxed">
+            <p className="text-xs text-[#cbd5e1] mt-0.5 max-w-xl leading-relaxed">
               Token Chính dùng để phát video, Token Phụ tự động vào xem kênh để tích lũy giờ stream.
             </p>
           </div>
@@ -524,14 +524,14 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             </p>
           </div>
 
-          {/* 2 Predefined Video Sources */}
+          {/* 2 Predefined Video Sources (Unboxed to eliminate nested card borders) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {PREDEFINED_SOURCES.map((source) => {
               const Icon = source.icon;
               return (
                 <div
                   key={source.id}
-                  className="p-4 rounded-lg bg-[#161e1a] border border-[#2d3b33] hover:border-[#3b4c42] transition-colors flex flex-col justify-between space-y-3"
+                  className="p-4 rounded-lg bg-[#212c27]/40 hover:bg-[#212c27]/70 transition-colors flex flex-col justify-between space-y-3"
                 >
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
@@ -540,7 +540,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
                       </div>
                       <h4 className="text-xs font-bold text-[#f2f5f1]">{source.title}</h4>
                     </div>
-                    <p className="text-[12px] text-[#9aa8a0]">{source.desc}</p>
+                    <p className="text-xs text-[#9aa8a0] leading-relaxed">{source.desc}</p>
                   </div>
 
                   <button
@@ -594,15 +594,15 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
                   {playing ? 'Đang phát trực tiếp 🎵' : 'Kênh thoại đang trống'}
                 </h3>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono bg-[#161e1a] border border-[#2d3b33]">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono bg-[#161e1a] border border-[#2d3b33]">
                 <StatusDot tone={playing ? 'ok' : 'warn'} />
                 {playing ? 'LIVE' : 'IDLE'}
               </span>
             </div>
 
             {status?.stream?.currentQueueItem && (
-              <div className="p-3 bg-[#161e1a] rounded-lg border border-[#2d3b33] space-y-1">
-                <span className="text-[11px] font-mono text-[#9aa8a0]">Đang phát:</span>
+              <div className="p-3 bg-[#212c27]/40 rounded-lg space-y-1">
+                <span className="text-xs font-mono text-[#cbd5e1]">Đang phát:</span>
                 <p className="text-xs font-semibold text-[#f2f5f1] truncate">
                   {status.stream.currentQueueItem.title}
                 </p>
@@ -610,19 +610,19 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             )}
 
             <div className="space-y-2 text-xs font-mono">
-              <div className="flex items-center justify-between text-[#9aa8a0]">
+              <div className="flex items-center justify-between text-[#cbd5e1]">
                 <span>Phát lặp lại (Loop):</span>
-                <span className={status?.stream.isLooping ? 'text-[#72b991]' : 'text-[#67756d]'}>
+                <span className={status?.stream.isLooping ? 'text-[#72b991]' : 'text-[#9aa8a0]'}>
                   {status?.stream.isLooping ? 'BẬT' : 'TẮT'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[#9aa8a0]">
+              <div className="flex items-center justify-between text-[#cbd5e1]">
                 <span>Tự động xem kênh (Viewer):</span>
-                <span className={status?.farm?.autoWatch ? 'text-[#72b991]' : 'text-[#67756d]'}>
+                <span className={status?.farm?.autoWatch ? 'text-[#72b991]' : 'text-[#9aa8a0]'}>
                   {status?.farm?.autoWatch ? 'ĐANG CHẠY' : 'DỪNG'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-[#9aa8a0]">
+              <div className="flex items-center justify-between text-[#cbd5e1]">
                 <span>Phiên hiện tại:</span>
                 <span className="text-[#f2f5f1]">
                   {status?.farm?.formattedSessionTime || '0 phút'}

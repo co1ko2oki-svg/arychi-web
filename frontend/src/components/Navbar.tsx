@@ -122,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Sparkles className="w-4 h-4 text-[#8e96e8]" />
           </div>
           <span className="text-[15px] font-bold tracking-tight text-[#f2f5f1]">Arychi Suite</span>
-          <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-md bg-[#72b991]/15 border border-[#72b991]/30 text-xs font-mono font-medium text-[#72b991]">
+          <span className="hidden sm:inline-block px-2.5 py-1 rounded-md bg-[#72b991]/15 border border-[#72b991]/30 text-xs font-mono font-medium text-[#72b991]">
             Official Bot ✨
           </span>
         </a>
@@ -165,7 +165,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   className="w-5 h-5 rounded-full object-cover border border-[#2d3b33] shrink-0"
                 />
               ) : (
-                <span className="w-5 h-5 rounded-full bg-[#8e96e8] text-[#111714] text-[11px] font-bold grid place-items-center">
+                <span className="w-5 h-5 rounded-full bg-[#8e96e8] text-[#111714] text-xs font-bold grid place-items-center">
                   {(user.username || 'U')[0].toUpperCase()}
                 </span>
               )}
@@ -226,7 +226,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     }`}
                   >
                     <span>{item.label}</span>
-                    <ChevronRight className="w-4 h-4 text-[#67756d]" />
+                    <ChevronRight className="w-4 h-4 text-[#9aa8a0]" />
                   </a>
                 );
               })}

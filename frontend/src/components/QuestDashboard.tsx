@@ -95,7 +95,7 @@ const CircularProgress: React.FC<{ percent: number; isRunning?: boolean }> = ({ 
           fill="transparent"
         />
       </svg>
-      <span className="absolute text-[11px] font-bold font-mono text-[#f2f5f1] tabular-nums">
+      <span className="absolute text-xs font-bold font-mono text-[#f2f5f1] tabular-nums">
         {safePercent.toFixed(0)}%
       </span>
     </div>
@@ -346,7 +346,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
 
     if (isExpired) {
       return (
-        <span className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-xs font-mono text-[#67756d] bg-[#161e1a] border border-[#2d3b33]">
+        <span className="inline-flex items-center justify-center h-8 px-3 rounded-lg text-xs font-mono text-[#9aa8a0] bg-[#161e1a] border border-[#2d3b33]">
           Đã hết hạn
         </span>
       );
@@ -404,10 +404,10 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
           </span>
         </div>
 
-        {/* User Badge Bar */}
-        <div className="p-3 rounded-lg bg-[#161e1a] border border-[#2d3b33] flex items-center justify-between">
+        {/* User Badge Bar (Unboxed to eliminate nested card borders) */}
+        <div className="p-2.5 rounded-lg bg-[#212c27]/40 flex items-center justify-between">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#1a231f] border border-[#2d3b33] shrink-0">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#1a231f] shrink-0">
               <img
                 src={user?.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}
                 alt=""
@@ -418,7 +418,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
               <p className="text-xs font-bold text-[#f2f5f1] truncate">
                 {user?.username ? `@${user.username}` : 'Tài khoản Discord'}
               </p>
-              <p className="text-xs font-mono text-[#9aa8a0] truncate">
+              <p className="text-xs font-mono text-[#cbd5e1] truncate">
                 {maskedToken}
               </p>
             </div>
@@ -431,7 +431,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
           </div>
         </div>
 
-        {/* Quest Cards List */}
+        {/* Quest Cards List (Clean list items without nested card borders) */}
         <div className="space-y-3 pt-1">
           {filteredQuests.length === 0 ? (
             <div className="py-12 text-center text-xs text-[#9aa8a0]">
@@ -451,10 +451,10 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
               return (
                 <div
                   key={quest.id}
-                  className={`relative overflow-hidden rounded-lg border transition-all p-3.5 flex items-center justify-between gap-4 min-h-[82px] group ${
+                  className={`relative overflow-hidden rounded-lg transition-colors p-3.5 flex items-center justify-between gap-4 min-h-[82px] group ${
                     isRunning
-                      ? 'border-[#8e96e8] bg-[#212c27]'
-                      : 'border-[#2d3b33] hover:border-[#3b4c42] bg-[#161e1a]'
+                      ? 'bg-[#212c27] ring-1 ring-[#8e96e8]'
+                      : 'bg-[#212c27]/40 hover:bg-[#212c27]/70'
                   }`}
                 >
                   {bannerUrl && (
@@ -477,7 +477,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                           ▶
                         </span>
                       ) : (
-                        <span className="w-5 h-5 rounded bg-[#1a231f] border border-[#2d3b33] text-[#67756d] flex items-center justify-center text-xs">
+                        <span className="w-5 h-5 rounded bg-[#1a231f] border border-[#2d3b33] text-[#9aa8a0] flex items-center justify-center text-xs">
                           ☐
                         </span>
                       )}
@@ -485,7 +485,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
 
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-1.5">
-                        <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#1a231f] text-[#9aa8a0] border border-[#2d3b33]">
+                        <span className="px-2.5 py-1 rounded text-xs font-mono font-bold bg-[#1a231f] text-[#cbd5e1] border border-[#2d3b33]">
                           {isVideo ? 'VIDEO' : 'GAME'}
                         </span>
                         <h4 className="text-xs font-bold text-[#f2f5f1] truncate max-w-[200px]" title={quest.name}>
@@ -493,30 +493,30 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                         </h4>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#9aa8a0] font-mono">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#cbd5e1] font-mono font-medium">
                         {expiry && (
                           <span className={expiry.tone}>
                             HSD {expiry.label}
                           </span>
                         )}
                         <span>•</span>
-                        <span className="text-[#8e96e8]">
+                        <span className="text-[#8e96e8] font-semibold">
                           {quest.rewards.name || '200 Orbs'}
                         </span>
                       </div>
 
                       <div className="pt-0.5">
                         {isRunning ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#8e96e8]" />
                             <span>{activeJob?.message || `Đang chạy (${activeJob?.currentSeconds || 0}s)`}</span>
                           </span>
                         ) : isCompleted ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
                             <span>✨ Đã hoàn thành</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono text-[#9aa8a0] bg-[#1a231f] border border-[#2d3b33]">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold text-[#cbd5e1] bg-[#1a231f] border border-[#2d3b33]">
                             <span>⏳ Sẵn sàng</span>
                           </span>
                         )}
@@ -542,11 +542,11 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
   // FULL-WIDTH TABLE COMPONENT
   const renderQuestsTable = () => {
     return (
-      <div className="surface rounded-xl overflow-hidden border border-[#2d3b33]">
+      <div className="rounded-xl overflow-hidden border border-[#2d3b33] bg-[#161e1a]">
         <div className="overflow-x-auto">
           <div className="min-w-[800px]">
             {/* Table Header */}
-            <div className="grid grid-cols-[minmax(280px,3fr)_95px_minmax(120px,1.5fr)_110px_minmax(140px,1.8fr)_125px] gap-4 px-5 h-11 items-center border-b border-[#2d3b33] text-xs font-semibold uppercase tracking-wider text-[#9aa8a0] bg-[#161e1a]">
+            <div className="grid grid-cols-[minmax(280px,3fr)_95px_minmax(120px,1.5fr)_110px_minmax(140px,1.8fr)_125px] gap-4 px-5 h-11 items-center border-b border-[#2d3b33] text-xs font-semibold uppercase tracking-wider text-[#cbd5e1] bg-[#161e1a]">
               <span>NHIỆM VỤ</span>
               <span>LOẠI</span>
               <span>PHẦN THƯỞNG</span>
@@ -614,12 +614,12 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                       {/* Cột 2: LOẠI */}
                       <div className="text-xs text-[#9aa8a0] flex items-center gap-1.5">
                         {isVideo ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#8e96e8]/15 text-[#8e96e8] border border-[#8e96e8]/30 font-medium">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#8e96e8]/15 text-[#8e96e8] border border-[#8e96e8]/30 font-medium">
                             <Video className="w-3 h-3 text-[#8e96e8]" />
                             <span>Video</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-medium">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-medium">
                             <Gamepad2 className="w-3 h-3 text-[#72b991]" />
                             <span>Game</span>
                           </span>

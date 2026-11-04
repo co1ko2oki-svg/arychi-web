@@ -11,7 +11,7 @@
   --line-strong: #3b4c42;
   --ink: #f2f5f1;
   --ink-soft: #9aa8a0;
-  --ink-faint: #67756d;
+  --ink-faint: #9aa8a0;
   --accent: #8e96e8;
   --accent-soft: rgba(142, 150, 232, 0.15);
   --mint: #72b991;
@@ -331,7 +331,7 @@
     transition: border-color 150ms ease, background-color 150ms ease;
   }
   .input::placeholder {
-    color: #67756d;
+    color: #9aa8a0;
   }
   .input:hover {
     border-color: #3b4c42;

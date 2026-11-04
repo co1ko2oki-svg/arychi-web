@@ -335,7 +335,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           {STREAM_BADGE_TIERS.map((tier) => (
             <div
               key={tier.title}
-              className="bg-[#161e1a] border border-[#2d3b33] rounded-lg p-3 text-center space-y-2 hover:border-[#3b4c42] transition-colors"
+              className="p-2.5 rounded-lg text-center space-y-1.5 hover:bg-[#212c27]/60 transition-colors"
             >
               {/* Computer monitor icon */}
               <div className="w-8 h-8 mx-auto flex items-center justify-center">
@@ -354,8 +354,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </svg>
               </div>
               <div className="text-xs font-semibold text-[#f2f5f1] truncate">{tier.title}</div>
-              <div className="text-[11px] font-mono text-[#9aa8a0] flex items-center justify-center gap-1">
-                {tier.isLocked && <span className="text-[10px]">🔒</span>}
+              <div className="text-xs font-mono text-[#cbd5e1] font-semibold flex items-center justify-center gap-1">
+                {tier.isLocked && <span className="text-xs">🔒</span>}
                 <span>{tier.hours}</span>
               </div>
             </div>
@@ -447,7 +447,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </div>
                     <h3 className="text-base font-bold text-[#f2f5f1]">{feat.title}</h3>
                   </div>
-                  <span className="text-[11px] font-mono text-[#8e96e8] shrink-0">{feat.tag}</span>
+                  <span className="text-xs font-mono text-[#8e96e8] shrink-0 font-semibold">{feat.tag}</span>
                 </div>
                 <p className="text-[13px] text-[#9aa8a0] leading-relaxed">{feat.desc}</p>
               </div>
@@ -505,7 +505,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </button>
                 {isOpen && (
                   <div className="px-5 pb-5 pt-2 border-t border-[#2d3b33]">
-                    <p className="text-[13px] text-[#9aa8a0] leading-relaxed">{faq.a}</p>
+                    <p className="text-[13px] text-[#9aa8a0] leading-relaxed max-w-2xl">{faq.a}</p>
                   </div>
                 )}
               </div>
