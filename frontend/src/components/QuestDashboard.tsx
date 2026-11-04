@@ -417,7 +417,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className={filteredQuests.length === 1 ? 'max-w-3xl' : 'grid grid-cols-1 lg:grid-cols-2 gap-5'}>
         {filteredQuests.map((quest) => {
           const activeJob = jobs.get(quest.id);
           const isRunning = isJobActive(activeJob);
@@ -431,99 +431,109 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
           return (
             <div
               key={quest.id}
-              className={`surface overflow-hidden rounded-xl border transition-all duration-200 flex flex-col justify-between group ${
+              className={`surface overflow-hidden rounded-2xl border transition-all duration-300 relative group ${
                 isRunning
-                  ? 'border-[#8e96e8] bg-[#212c27]/70 shadow-[0_0_15px_rgba(142,150,232,0.12)]'
-                  : 'border-[#2d3b33] hover:border-[#3b4c42] bg-[#1a231f]'
+                  ? 'border-[#8e96e8] bg-[#1a231f] shadow-[0_0_25px_rgba(142,150,232,0.15)]'
+                  : 'border-[#2d3b33] hover:border-[#3b4c42] bg-[#161e1a]'
               }`}
             >
-              {/* Header with Artwork backdrop */}
-              <div className="relative p-4 pb-3 overflow-hidden">
-                {bannerUrl && (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-35 transition-opacity duration-300 pointer-events-none"
-                    style={{ backgroundImage: `url(${bannerUrl})` }}
-                  />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-b from-[#1a231f]/70 via-[#1a231f]/95 to-[#1a231f] pointer-events-none" />
+              {/* Immersive Backdrop Artwork */}
+              {bannerUrl && (
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-15 group-hover:opacity-25 transition-opacity duration-500 pointer-events-none"
+                  style={{ backgroundImage: `url(${bannerUrl})` }}
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-r from-[#161e1a] via-[#161e1a]/90 to-[#161e1a]/60 pointer-events-none" />
 
-                <div className="relative z-10 flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <QuestThumbnail quest={quest} size="md" className="shrink-0 rounded-lg shadow-md" />
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#161e1a] text-[#8e96e8] border border-[#2d3b33]">
-                          {isVideo ? 'VIDEO' : 'GAME'}
+              <div className="relative z-10 p-5 sm:p-6 space-y-4">
+                {/* Top Section: App Icon, Metadata, Progress Gauge */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <QuestThumbnail quest={quest} size="lg" className="shrink-0 shadow-lg ring-1 ring-white/10" />
+                    <div className="min-w-0 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#8e96e8]/15 text-[#8e96e8] border border-[#8e96e8]/30">
+                          {isVideo ? '📺 VIDEO QUEST' : '🎮 GAME QUEST'}
                         </span>
                         {expiry && (
-                          <span className={`text-xs font-mono ${expiry.tone}`}>
-                            HSD {expiry.label}
+                          <span className={`text-xs font-mono px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] ${expiry.tone}`}>
+                            ⏳ {expiry.label}
                           </span>
                         )}
                       </div>
-                      <h4 className="text-sm font-bold text-[#f2f5f1] truncate mt-1" title={quest.name}>
+
+                      <h3 className="text-base sm:text-lg font-bold text-[#f2f5f1] tracking-tight leading-snug">
                         {quest.name}
-                      </h4>
-                      <p className="text-xs text-[#9aa8a0] truncate">
+                      </h3>
+
+                      <p className="text-xs text-[#9aa8a0]">
                         {quest.application.name}
                       </p>
                     </div>
                   </div>
 
-                  <div className="shrink-0">
+                  <div className="shrink-0 hidden sm:block">
                     <CircularProgress percent={progress} isRunning={isRunning} />
                   </div>
                 </div>
-              </div>
 
-              {/* Middle Bar: Rewards & Status */}
-              <div className="px-4 py-2.5 bg-[#161e1a]/80 border-t border-b border-[#2d3b33] flex items-center justify-between gap-2 text-xs">
-                <div className="flex items-center gap-1.5 min-w-0">
-                  <span className="shrink-0">🎁</span>
-                  <span className="truncate font-medium text-[#cbd5e1]" title={quest.rewards.name}>
-                    {quest.rewards.name || '200 Orbs'}
-                  </span>
-                </div>
-
-                <div className="shrink-0">
-                  {isRunning ? (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#8e96e8]" />
-                      <span>{activeJob?.message || `Đang chạy (${activeJob?.currentSeconds || 0}s)`}</span>
-                    </span>
-                  ) : isCompleted ? (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
-                      <span>✨ Đã xong</span>
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold text-[#cbd5e1] bg-[#161e1a] border border-[#2d3b33]">
-                      <span>⏳ Sẵn sàng</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Footer: Progress bar & Action button */}
-              <div className="p-4 pt-3 flex items-center justify-between gap-3 bg-[#1a231f]">
-                <div className="flex-1 min-w-0 pr-1">
-                  <div className="flex items-center justify-between text-xs font-mono text-[#9aa8a0] mb-1">
-                    <span>Tiến độ</span>
-                    <span className={`font-semibold ${isRunning ? 'text-[#8e96e8]' : isCompleted ? 'text-[#72b991]' : 'text-[#f2f5f1]'}`}>
-                      {progress.toFixed(0)}%
-                    </span>
+                {/* Reward Callout Box: Large, clear, never truncated! */}
+                <div className="p-3 sm:p-3.5 rounded-xl bg-[#111714]/80 border border-[#2d3b33] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="text-lg shrink-0">🎁</span>
+                    <div className="min-w-0">
+                      <span className="text-xs font-mono text-[#9aa8a0] block leading-none">Phần thưởng độc quyền</span>
+                      <span className="text-sm font-semibold text-[#f2f5f1] block mt-0.5 break-words" title={quest.rewards.name}>
+                        {quest.rewards.name || '200 Discord Orbs'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="h-1.5 w-full bg-[#161e1a] rounded-full overflow-hidden border border-[#2d3b33]">
-                    <div
-                      className={`h-full transition-all duration-300 rounded-full ${
-                        isCompleted ? 'bg-[#72b991]' : isRunning ? 'bg-[#8e96e8]' : 'bg-[#3b4c42]'
-                      }`}
-                      style={{ width: `${progress}%` }}
-                    />
+
+                  <div className="shrink-0">
+                    {isRunning ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
+                        <span className="w-2 h-2 rounded-full bg-[#8e96e8]" />
+                        <span>Đang chạy ({activeJob?.currentSeconds || 0}s)</span>
+                      </span>
+                    ) : isCompleted ? (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
+                        <span>✨ Đã hoàn thành</span>
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-mono font-semibold text-[#cbd5e1] bg-white/[0.05] border border-white/[0.08]">
+                        <span>⏳ Sẵn sàng cày</span>
+                      </span>
+                    )}
                   </div>
                 </div>
 
-                <div className="shrink-0">
-                  {renderAction(quest, isRunning, isCompleted, isExpired)}
+                {/* Bottom Row: Linear Progress bar & Full Action Button */}
+                <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between text-xs font-mono text-[#9aa8a0] mb-1.5">
+                      <span>Tiến độ nhiệm vụ</span>
+                      <span className={`font-semibold ${isRunning ? 'text-[#8e96e8]' : isCompleted ? 'text-[#72b991]' : 'text-[#f2f5f1]'}`}>
+                        {progress.toFixed(0)}%
+                      </span>
+                    </div>
+                    <div className="h-2 w-full bg-[#111714] rounded-full overflow-hidden border border-[#2d3b33]">
+                      <div
+                        className={`h-full transition-all duration-500 rounded-full ${
+                          isCompleted
+                            ? 'bg-[#72b991]'
+                            : isRunning
+                            ? 'bg-gradient-to-r from-[#8e96e8] to-[#72b991]'
+                            : 'bg-[#3b4c42]'
+                        }`}
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="shrink-0 pt-1 sm:pt-0">
+                    {renderAction(quest, isRunning, isCompleted, isExpired)}
+                  </div>
                 </div>
               </div>
             </div>

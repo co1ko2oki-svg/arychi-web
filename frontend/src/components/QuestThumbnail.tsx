@@ -9,15 +9,15 @@ interface QuestThumbnailProps {
 }
 
 const sizeClasses = {
-  sm: 'w-8 h-8 rounded-md',
-  md: 'w-9 h-9 rounded-lg',
-  lg: 'w-11 h-11 rounded-lg',
+  sm: 'w-8 h-8 rounded-lg',
+  md: 'w-11 h-11 rounded-xl',
+  lg: 'w-14 h-14 rounded-2xl',
 };
 
 const iconSizes = {
   sm: 'w-4 h-4',
-  md: 'w-4.5 h-4.5',
-  lg: 'w-5 h-5',
+  md: 'w-5 h-5',
+  lg: 'w-7 h-7',
 };
 
 export const QuestThumbnail: React.FC<QuestThumbnailProps> = ({
@@ -45,8 +45,18 @@ export const QuestThumbnail: React.FC<QuestThumbnailProps> = ({
     add(quest.assets?.banner);
     add(quest.rewards?.assetUrl);
 
+    if (quest.id) {
+      add(`https://cdn.discordapp.com/quest-assets/${quest.id}/${quest.id}.png`);
+      add(`https://cdn.discordapp.com/assets/quests/${quest.id}/dark/hero.png`);
+    }
+    if (quest.application?.id) {
+      add(`https://cdn.discordapp.com/app-icons/${quest.application.id}/icon.png?size=256`);
+    }
+
     return list;
   }, [
+    quest.id,
+    quest.application?.id,
     quest.application?.iconUrl,
     quest.assets?.gameTile,
     quest.assets?.hero,
@@ -61,7 +71,6 @@ export const QuestThumbnail: React.FC<QuestThumbnailProps> = ({
   const allCandidatesFailed = candidateIndex >= candidateUrls.length;
 
   const handleImageError = () => {
-    // Gracefully try next candidate URL in priority chain
     setCandidateIndex((prev) => prev + 1);
     setHasLoaded(false);
   };
@@ -73,26 +82,19 @@ export const QuestThumbnail: React.FC<QuestThumbnailProps> = ({
   const containerSizeClass = sizeClasses[size];
   const iconSizeClass = iconSizes[size];
 
-  // If no candidate exists or all failed, render a clean SVG badge
+  // If no candidate exists or all failed, render a clean, high-contrast SVG badge
   if (allCandidatesFailed || !currentUrl) {
-    const initial = (quest.name || quest.application.name || 'Q').charAt(0).toUpperCase();
-
     return (
       <div
-        className={`${containerSizeClass} flex items-center justify-center shrink-0 bg-[#161e1a] border border-[#2d3b33] text-[#9aa8a0] relative overflow-hidden select-none ${className}`}
+        className={`${containerSizeClass} flex items-center justify-center shrink-0 bg-gradient-to-br from-[#212c27] via-[#1a231f] to-[#141b17] border border-[#3b4c42] relative overflow-hidden select-none shadow-sm ${className}`}
         title={quest.name}
         aria-hidden="true"
       >
-        <div className="flex flex-col items-center justify-center">
-          {isVideo ? (
-            <Video className={`${iconSizeClass} text-[#8e96e8]`} />
-          ) : (
-            <Gamepad2 className={`${iconSizeClass} text-[#72b991]`} />
-          )}
-          <span className="text-xs font-bold font-mono text-[#9aa8a0] mt-0.5 leading-none">
-            {initial}
-          </span>
-        </div>
+        {isVideo ? (
+          <Video className={`${iconSizeClass} text-[#8e96e8]`} />
+        ) : (
+          <Gamepad2 className={`${iconSizeClass} text-[#72b991]`} />
+        )}
       </div>
     );
   }
