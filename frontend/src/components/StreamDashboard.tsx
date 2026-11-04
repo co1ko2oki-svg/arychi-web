@@ -350,8 +350,8 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
                 <div className="text-xs font-semibold text-[#f2f5f1] mt-1.5 truncate">
                   {tier.title}
                 </div>
-                <div className="text-[11px] font-mono text-[#9aa8a0] flex items-center justify-center gap-1 mt-0.5">
-                  {tier.isLocked && !isEarned && <span className="text-[10px]">🔒</span>}
+                <div className="text-xs font-mono text-[#9aa8a0] tabular-nums flex items-center justify-center gap-1 mt-0.5">
+                  {tier.isLocked && !isEarned && <span className="text-xs">🔒</span>}
                   <span>{tier.label}</span>
                 </div>
               </div>
@@ -368,7 +368,7 @@ export const StreamDashboard: React.FC<StreamDashboardProps> = ({
             <h2 className="text-base font-bold text-[#f2f5f1] mt-0.5">
               Cài đặt 2 Token &amp; Kênh thoại Discord
             </h2>
-            <p className="text-xs text-[#9aa8a0] mt-0.5">
+            <p className="text-xs text-[#9aa8a0] mt-0.5 max-w-2xl leading-relaxed">
               Token Chính dùng để phát video, Token Phụ tự động vào xem kênh để tích lũy giờ stream.
             </p>
           </div>

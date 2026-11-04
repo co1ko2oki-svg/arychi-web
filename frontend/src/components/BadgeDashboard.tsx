@@ -239,7 +239,7 @@ export const BadgeDashboard: React.FC<BadgeDashboardProps> = ({
       {hasValidToken && isBoosting && activeJob && (
         <div className="surface p-4 border border-[#72b991]/40 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <span className="w-3 h-3 rounded-full bg-[#72b991] animate-ping shrink-0" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#72b991] shrink-0" />
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-bold text-[#f2f5f1]">

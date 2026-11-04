@@ -56,6 +56,7 @@ export interface QuestDTO {
   assets: {
     hero: string | null;
     banner: string | null;
+    gameTile?: string | null;
   };
   status: {
     enrolled: boolean;

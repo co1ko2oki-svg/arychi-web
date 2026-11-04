@@ -297,18 +297,33 @@ func UpdateLatestBuildVersion(force bool) int {
 }
 
 func GetAppIconURL(appID string, iconHash *string) *string {
-	if appID == "" || iconHash == nil || *iconHash == "" {
+	if appID == "" || iconHash == nil || strings.TrimSpace(*iconHash) == "" {
 		return nil
 	}
-	u := fmt.Sprintf("https://cdn.discordapp.com/app-icons/%s/%s.png?size=256", appID, *iconHash)
+	hash := strings.TrimSpace(*iconHash)
+	if strings.HasPrefix(hash, "http://") || strings.HasPrefix(hash, "https://") {
+		return &hash
+	}
+	hash = strings.TrimSuffix(hash, ".png")
+	hash = strings.TrimSuffix(hash, ".jpg")
+	hash = strings.TrimSuffix(hash, ".webp")
+	u := fmt.Sprintf("https://cdn.discordapp.com/app-icons/%s/%s.png?size=256", appID, hash)
 	return &u
 }
 
 func GetQuestAssetURL(questID string, assetHash *string) *string {
-	if questID == "" || assetHash == nil || *assetHash == "" {
+	if questID == "" || assetHash == nil || strings.TrimSpace(*assetHash) == "" {
 		return nil
 	}
-	u := fmt.Sprintf("https://cdn.discordapp.com/quest-assets/%s/%s.png", questID, *assetHash)
+	hash := strings.TrimSpace(*assetHash)
+	if strings.HasPrefix(hash, "http://") || strings.HasPrefix(hash, "https://") {
+		return &hash
+	}
+	if strings.Contains(hash, ".") {
+		u := fmt.Sprintf("https://cdn.discordapp.com/quest-assets/%s/%s", questID, hash)
+		return &u
+	}
+	u := fmt.Sprintf("https://cdn.discordapp.com/quest-assets/%s/%s.png", questID, hash)
 	return &u
 }
 

@@ -107,7 +107,7 @@
     border: 1px solid #2d3b33;
     border-radius: 0.875rem;
     box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.3);
-    transition: border-color 150ms ease, background-color 150ms ease;
+    transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .surface-interactive {
@@ -115,13 +115,29 @@
     border: 1px solid #2d3b33;
     border-radius: 0.875rem;
     box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.3);
-    transition: border-color 150ms ease, background-color 150ms ease, transform 150ms ease;
+    transition: border-color 180ms cubic-bezier(0.16, 1, 0.3, 1), background-color 180ms cubic-bezier(0.16, 1, 0.3, 1), transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
   }
 
   .surface-interactive:hover {
     background-color: #212c27;
     border-color: #3b4c42;
     transform: translateY(-1px);
+  }
+
+  .fade-in {
+    animation: fadeIn 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .icon-badge {

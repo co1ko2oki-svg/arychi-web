@@ -53,8 +53,9 @@ type QuestDTORewards struct {
 }
 
 type QuestDTOAssets struct {
-	Hero   *string `json:"hero"`
-	Banner *string `json:"banner"`
+	Hero     *string `json:"hero"`
+	Banner   *string `json:"banner"`
+	GameTile *string `json:"gameTile"`
 }
 
 type QuestDTOStatus struct {
@@ -94,6 +95,8 @@ type QuestConfigData struct {
 		Hero         *string `json:"hero"`
 		QuestBarHero *string `json:"quest_bar_hero"`
 		Banner       *string `json:"banner"`
+		GameTile     *string `json:"game_tile"`
+		Logotype     *string `json:"logotype"`
 	} `json:"assets"`
 	Messages struct {
 		QuestName string `json:"quest_name"`
@@ -263,6 +266,7 @@ func (q *Quest) ToDTO() QuestDTO {
 	appID := cfg.Application.ID
 	iconURL := rest.GetAppIconURL(appID, cfg.Application.Icon)
 
+	gameTileAsset := cfg.Assets.GameTile
 	heroAsset := cfg.Assets.Hero
 	if heroAsset == nil || *heroAsset == "" {
 		heroAsset = cfg.Assets.QuestBarHero
@@ -270,6 +274,18 @@ func (q *Quest) ToDTO() QuestDTO {
 	bannerAsset := cfg.Assets.Banner
 	if bannerAsset == nil || *bannerAsset == "" {
 		bannerAsset = cfg.Assets.Hero
+	}
+
+	gameTileURL := rest.GetQuestAssetURL(q.data.ID, gameTileAsset)
+	heroURL := rest.GetQuestAssetURL(q.data.ID, heroAsset)
+	bannerURL := rest.GetQuestAssetURL(q.data.ID, bannerAsset)
+
+	if iconURL == nil || *iconURL == "" {
+		if gameTileURL != nil && *gameTileURL != "" {
+			iconURL = gameTileURL
+		} else if heroURL != nil && *heroURL != "" {
+			iconURL = heroURL
+		}
 	}
 
 	rewardName := "Reward"
@@ -324,8 +340,9 @@ func (q *Quest) ToDTO() QuestDTO {
 			AssetURL: rest.GetQuestAssetURL(q.data.ID, rewardAsset),
 		},
 		Assets: QuestDTOAssets{
-			Hero:   rest.GetQuestAssetURL(q.data.ID, heroAsset),
-			Banner: rest.GetQuestAssetURL(q.data.ID, bannerAsset),
+			Hero:     heroURL,
+			Banner:   bannerURL,
+			GameTile: gameTileURL,
 		},
 		Status: QuestDTOStatus{
 			Enrolled:  enrolled,

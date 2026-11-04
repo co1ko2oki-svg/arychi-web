@@ -22,6 +22,7 @@ import { AccountTokens, AuthUser, QuestDTO, QuestJob } from '../types';
 import { questApi } from '../services/api';
 import { useToast } from './Toast';
 import { EmptyState, PageHeader, ProgressBar, SegmentedControl, StatusDot } from './ui';
+import { QuestThumbnail } from './QuestThumbnail';
 
 interface QuestDashboardProps {
   user?: AuthUser | null;
@@ -398,7 +399,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
           </div>
 
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-[#72b991]/15 border border-[#72b991]/30 text-[#72b991]">
-            <span className="w-2 h-2 rounded-full bg-[#72b991] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-[#72b991]" />
             <span>LIVE</span>
           </span>
         </div>
@@ -417,7 +418,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
               <p className="text-xs font-bold text-[#f2f5f1] truncate">
                 {user?.username ? `@${user.username}` : 'Tài khoản Discord'}
               </p>
-              <p className="text-[11px] font-mono text-[#9aa8a0] truncate">
+              <p className="text-xs font-mono text-[#9aa8a0] truncate">
                 {maskedToken}
               </p>
             </div>
@@ -458,20 +459,21 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                 >
                   {bannerUrl && (
                     <div
-                      className="absolute inset-0 bg-cover bg-center opacity-20 pointer-events-none"
+                      className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
                       style={{ backgroundImage: `url(${bannerUrl})` }}
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-r from-[#161e1a] via-[#161e1a]/95 to-transparent pointer-events-none" />
 
                   <div className="relative z-10 flex items-center gap-3 min-w-0 pr-2">
-                    <div className="shrink-0">
+                    <div className="shrink-0 flex items-center gap-2">
+                      <QuestThumbnail quest={quest} size="sm" />
                       {isCompleted ? (
                         <span className="w-5 h-5 rounded bg-[#72b991]/20 border border-[#72b991]/40 text-[#72b991] flex items-center justify-center text-xs">
                           ✓
                         </span>
                       ) : isRunning ? (
-                        <span className="w-5 h-5 rounded bg-[#8e96e8]/20 border border-[#8e96e8]/40 text-[#8e96e8] flex items-center justify-center text-xs animate-pulse">
+                        <span className="w-5 h-5 rounded bg-[#8e96e8]/20 border border-[#8e96e8]/40 text-[#8e96e8] flex items-center justify-center text-xs">
                           ▶
                         </span>
                       ) : (
@@ -483,7 +485,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
 
                     <div className="min-w-0 space-y-0.5">
                       <div className="flex items-center gap-1.5">
-                        <span className="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-[#1a231f] text-[#9aa8a0] border border-[#2d3b33]">
+                        <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#1a231f] text-[#9aa8a0] border border-[#2d3b33]">
                           {isVideo ? 'VIDEO' : 'GAME'}
                         </span>
                         <h4 className="text-xs font-bold text-[#f2f5f1] truncate max-w-[200px]" title={quest.name}>
@@ -491,7 +493,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                         </h4>
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] text-[#9aa8a0] font-mono">
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#9aa8a0] font-mono">
                         {expiry && (
                           <span className={expiry.tone}>
                             HSD {expiry.label}
@@ -505,16 +507,16 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
 
                       <div className="pt-0.5">
                         {isRunning ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#8e96e8] animate-ping" />
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#8e96e8]" />
                             <span>{activeJob?.message || `Đang chạy (${activeJob?.currentSeconds || 0}s)`}</span>
                           </span>
                         ) : isCompleted ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
                             <span>✨ Đã hoàn thành</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono text-[#9aa8a0] bg-[#1a231f] border border-[#2d3b33]">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-mono text-[#9aa8a0] bg-[#1a231f] border border-[#2d3b33]">
                             <span>⏳ Sẵn sàng</span>
                           </span>
                         )}
@@ -594,15 +596,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
                     >
                       {/* Cột 1: NHIỆM VỤ */}
                       <div className="flex items-center gap-3 min-w-0">
-                        <img
-                          src={
-                            quest.application.iconUrl ||
-                            quest.rewards.assetUrl ||
-                            'https://cdn.discordapp.com/embed/avatars/0.png'
-                          }
-                          alt=""
-                          className="w-9 h-9 rounded-lg object-cover bg-[#161e1a] shrink-0 border border-[#2d3b33]"
-                        />
+                        <QuestThumbnail quest={quest} size="md" />
                         <div className="min-w-0">
                           <p className="text-sm font-semibold text-[#f2f5f1] truncate" title={quest.name}>
                             {quest.name}
@@ -686,7 +680,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
               <span>{counts.available} đang mở ({counts.all} tổng)</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-semibold text-[#72b991]">
-              <span className="w-2 h-2 rounded-full bg-[#72b991] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#72b991]" />
               <span>{runningJobs.length} đang chạy</span>
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-xs font-semibold text-[#f2f5f1]">

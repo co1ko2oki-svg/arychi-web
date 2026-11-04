@@ -78,7 +78,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       tokenHint: hasStreamTokens ? 'Đã sẵn sàng phát' : 'Cần 2 Token',
       tokenReady: hasStreamTokens,
       icon: Tv,
-      badge: streamPlaying ? <span className="w-2 h-2 rounded-full bg-[#72b991] animate-ping" /> : undefined,
+      badge: streamPlaying ? <span className="w-2 h-2 rounded-full bg-[#72b991]" title="Đang phát" /> : undefined,
     },
     {
       id: 'badges',
@@ -193,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         <nav aria-label="Chức năng chính" className="space-y-1">
-          <p className="px-2 pb-1 text-xs font-mono uppercase tracking-wider text-[#67756d]">
+          <p className="px-2 pb-1.5 text-xs font-mono uppercase tracking-wider text-[#9aa8a0]">
             CHỨC NĂNG DÀNH CHO BẠN
           </p>
           {userNavItems.map(renderNavButton)}
@@ -224,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* User profile row */}
-        <div className="flex items-center justify-between gap-3 px-1 py-1 bg-[#1a231f] rounded-lg border border-[#2d3b33] p-2">
+        <div className="flex items-center justify-between gap-3 p-2.5 bg-[#161e1a] rounded-lg border border-[#2d3b33]">
           <div className="min-w-0 flex items-center gap-2">
             {user?.avatarUrl ? (
               <img

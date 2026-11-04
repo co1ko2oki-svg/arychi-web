@@ -168,7 +168,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         description={`Xin chào @${user?.username || 'bạn'}! Chúc bạn có những phút giây săn quà và giải trí thật vui vẻ nha 🌸`}
         meta={
           <>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#1a231f] border border-[#2d3b33] text-[#8e96e8] font-semibold text-xs">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#1a231f] border border-[#2d3b33] text-[#8e96e8] font-semibold text-xs">
               {user?.avatarUrl ? (
                 <img
                   src={user.avatarUrl}
@@ -380,7 +380,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
           </p>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-2xl font-bold text-indigo-300 tabular-nums">{runningJobs.length}</span>
-            {runningJobs.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-400 animate-ping" />}
+            {runningJobs.length > 0 && <span className="w-2 h-2 rounded-full bg-indigo-400" />}
           </div>
           <p className="mt-1 text-xs font-mono text-slate-400">Tiến trình chạy ngầm</p>
         </div>
@@ -455,34 +455,34 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         </Section>
       )}
 
-      {/* Khung mẹo sử dụng siêu dễ thương dành cho User */}
-      <div className="surface p-5 rounded-2xl border border-purple-500/20 bg-gradient-to-br from-[#121124] to-[#161426] space-y-3">
-        <div className="flex items-center gap-2 text-purple-300 font-semibold text-sm">
+      {/* Khung mẹo sử dụng dành cho User */}
+      <div className="surface p-5 space-y-3">
+        <div className="flex items-center gap-2 text-[#8e96e8] font-semibold text-sm">
           <span>✨</span>
           <span>Mẹo nhỏ săn quà &amp; giải trí siêu tốc</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs text-slate-300">
-          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
-            <p className="font-semibold text-white flex items-center gap-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs divide-y md:divide-y-0 md:divide-x divide-[#2d3b33]">
+          <div className="space-y-1.5 md:pr-3 pt-2 md:pt-0">
+            <p className="font-semibold text-[#f2f5f1] flex items-center gap-1.5">
               <span>🎯</span> 1. Cày Quests 1-Click
             </p>
-            <p className="text-slate-400 leading-relaxed">
+            <p className="text-[#9aa8a0] leading-relaxed">
               Nhập Token tài khoản Discord rồi bấm "Chạy toàn bộ Quests", hệ thống tự cày 100% nhiệm vụ lấy quà avatar, khung và vật phẩm game.
             </p>
           </div>
-          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
-            <p className="font-semibold text-white flex items-center gap-1.5">
+          <div className="space-y-1.5 md:px-3 pt-3 md:pt-0">
+            <p className="font-semibold text-[#f2f5f1] flex items-center gap-1.5">
               <span>🎧</span> 2. Treo Voice Xem Stream
             </p>
-            <p className="text-slate-400 leading-relaxed">
+            <p className="text-[#9aa8a0] leading-relaxed">
               Dán link video YouTube hoặc Twitch yêu thích để nghe nhạc cùng bạn bè trong phòng thoại và tự động tích lũy giờ xem.
             </p>
           </div>
-          <div className="p-3.5 rounded-xl bg-white/[0.03] border border-white/[0.06] space-y-1.5">
-            <p className="font-semibold text-white flex items-center gap-1.5">
+          <div className="space-y-1.5 md:pl-3 pt-3 md:pt-0">
+            <p className="font-semibold text-[#f2f5f1] flex items-center gap-1.5">
               <span>💖</span> 3. Bảo mật an toàn
             </p>
-            <p className="text-slate-400 leading-relaxed">
+            <p className="text-[#9aa8a0] leading-relaxed">
               Toàn bộ dữ liệu của bạn được mã hóa an toàn trên hệ thống. Bạn có thể đổi token hoặc gia hạn bất cứ lúc nào một cách dễ dàng.
             </p>
           </div>

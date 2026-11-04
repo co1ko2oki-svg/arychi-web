@@ -229,29 +229,29 @@ const AppContent: React.FC = () => {
     window.location.hash = `#${tab}`;
   };
 
-  const loadQuests = useCallback(async () => {
+  const loadQuests = useCallback(async (silent = false) => {
     if (!token && !user?.tokens?.questToken) return;
     const activeToken = token || user?.tokens?.questToken || '';
-    setLoadingQuests(true);
+    if (!silent) setLoadingQuests(true);
     try {
       const data = await questApi.getQuests(activeToken);
       setQuests(data.quests || []);
     } catch {
       // Ignore transient errors
     } finally {
-      setLoadingQuests(false);
+      if (!silent) setLoadingQuests(false);
     }
   }, [token, user?.tokens?.questToken]);
 
-  const loadStreamStatus = useCallback(async () => {
-    setLoadingStream(true);
+  const loadStreamStatus = useCallback(async (silent = false) => {
+    if (!silent) setLoadingStream(true);
     try {
       const st = await streamApi.getStatus();
       setStreamStatus(st);
     } catch {
       // Ignore transient errors
     } finally {
-      setLoadingStream(false);
+      if (!silent) setLoadingStream(false);
     }
   }, []);
 
@@ -274,7 +274,21 @@ const AppContent: React.FC = () => {
             const data = JSON.parse(event.data);
             if (data.type === 'job_progress' && data.payload) {
               const incoming = data.payload as QuestJob;
-              setJobs((prev) => new Map(prev).set(incoming.questId, incoming));
+              setJobs((prev) => {
+                const existing = prev.get(incoming.questId);
+                if (
+                  existing &&
+                  existing.currentSeconds === incoming.currentSeconds &&
+                  existing.status === incoming.status &&
+                  existing.progressPercent === incoming.progressPercent &&
+                  existing.message === incoming.message
+                ) {
+                  return prev; // No change, keep same Map reference to prevent re-render
+                }
+                const next = new Map(prev);
+                next.set(incoming.questId, incoming);
+                return next;
+              });
             } else if (data.type === 'initial_state' && data.payload) {
               if (data.payload.quests) setQuests(data.payload.quests);
               if (data.payload.logs) {
@@ -339,8 +353,8 @@ const AppContent: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    loadStreamStatus();
-    const interval = setInterval(loadStreamStatus, 10000);
+    loadStreamStatus(false);
+    const interval = setInterval(() => loadStreamStatus(true), 10000);
     return () => clearInterval(interval);
   }, [loadStreamStatus]);
 
