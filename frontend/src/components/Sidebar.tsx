@@ -182,11 +182,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
-          <div className="flex items-center justify-between text-xs pt-1">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-medium">
-              Hoạt động 24/7 ✨
+          <div className="flex items-center justify-between text-xs pt-1 font-mono">
+            <span className="inline-flex items-center gap-1.5 text-[#72b991] font-medium whitespace-nowrap">
+              <span className="w-2 h-2 rounded-full bg-[#72b991]" />
+              <span>Hoạt động 24/7</span>
             </span>
-            <span className="text-[#9aa8a0] text-xs font-mono">
+            <span className="text-[#cbd5e1] whitespace-nowrap">
               Bản quyền <strong className="text-[#f2f5f1] font-semibold">Chính thức</strong>
             </span>
           </div>
