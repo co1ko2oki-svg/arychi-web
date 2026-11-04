@@ -2,19 +2,17 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Check,
   CheckCircle2,
-  Clock,
   Eye,
   EyeOff,
   Gamepad2,
   KeyRound,
+  LayoutGrid,
   List,
   Loader2,
   Play,
-  Radio,
   RefreshCw,
   Search,
   Sparkles,
-  Split,
   Square,
   Video,
 } from 'lucide-react';
@@ -37,7 +35,7 @@ interface QuestDashboardProps {
 }
 
 type QuestFilter = 'available' | 'all' | 'running' | 'completed' | 'video' | 'game' | 'expired';
-type ViewMode = 'table' | 'live' | 'split';
+type ViewMode = 'cards' | 'table';
 
 const isJobActive = (job?: QuestJob) => job?.status === 'running' || job?.status === 'enrolling';
 
@@ -119,7 +117,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
   const [savingToken, setSavingToken] = useState(false);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<QuestFilter>('available');
-  const [viewMode, setViewMode] = useState<ViewMode>('split');
+  const [viewMode, setViewMode] = useState<ViewMode>('cards');
   const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -385,156 +383,152 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
     return `${effectiveToken.slice(0, 10)}...${effectiveToken.slice(-4)}`;
   }, [effectiveToken]);
 
-  // LIVE ACTIVITY CARDS DRAWER (Right Rail)
-  const renderLiveActivitySpace = () => {
+  // CARDS GRID COMPONENT (Dạng Thẻ - Giao diện trực quan hiện đại)
+  const renderQuestsGrid = () => {
+    if (!effectiveToken) {
+      return (
+        <EmptyState
+          title="Chưa nhập Token tài khoản Discord"
+          description="Vui lòng dán 1 Token Discord vào ô cấu hình phía trên và bấm 'Lưu & Tải Quests'."
+        />
+      );
+    }
+
+    if (loading && quests.length === 0) {
+      return (
+        <div className="surface py-20 flex flex-col items-center justify-center gap-3 text-xs text-[#9aa8a0]">
+          <Loader2 className="w-6 h-6 animate-spin text-[#8e96e8]" />
+          <span>Đang kết nối Discord API tải danh sách nhiệm vụ...</span>
+        </div>
+      );
+    }
+
+    if (filteredQuests.length === 0) {
+      return (
+        <EmptyState
+          title={quests.length === 0 ? 'Tài khoản chưa có nhiệm vụ nào' : 'Không có nhiệm vụ phù hợp'}
+          description={
+            quests.length === 0
+              ? 'Discord chưa mở nhiệm vụ cho tài khoản này lúc này. Bạn thử tải lại sau nhé.'
+              : 'Thử chọn bộ lọc khác hoặc kiểm tra mục "Đang mở".'
+          }
+        />
+      );
+    }
+
     return (
-      <div className="surface p-5 rounded-xl space-y-4 border border-[#2d3b33] bg-[#1a231f]">
-        <div className="flex items-center justify-between pb-3 border-b border-[#2d3b33]">
-          <div className="space-y-0.5">
-            <span className="eyebrow text-[#8e96e8]">NHIỆM VỤ</span>
-            <h3 className="text-base font-bold text-[#f2f5f1]">Không gian hoạt động</h3>
-            <p className="text-xs text-[#9aa8a0]">
-              Tiến trình được cập nhật theo thời gian thực
-            </p>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        {filteredQuests.map((quest) => {
+          const activeJob = jobs.get(quest.id);
+          const isRunning = isJobActive(activeJob);
+          const progress = activeJob ? activeJob.progressPercent : quest.task.progressPercent;
+          const isCompleted = quest.status.completed || activeJob?.status === 'completed';
+          const isExpired = isQuestExpired(quest);
+          const isVideo = quest.task.type.includes('VIDEO');
+          const expiry = formatExpiresAt(quest.status.expiresAt);
+          const bannerUrl = quest.assets.banner || quest.assets.hero || quest.rewards.assetUrl;
 
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold bg-[#72b991]/15 border border-[#72b991]/30 text-[#72b991]">
-            <span className="w-2 h-2 rounded-full bg-[#72b991]" />
-            <span>LIVE</span>
-          </span>
-        </div>
+          return (
+            <div
+              key={quest.id}
+              className={`surface overflow-hidden rounded-xl border transition-all duration-200 flex flex-col justify-between group ${
+                isRunning
+                  ? 'border-[#8e96e8] bg-[#212c27]/70 shadow-[0_0_15px_rgba(142,150,232,0.12)]'
+                  : 'border-[#2d3b33] hover:border-[#3b4c42] bg-[#1a231f]'
+              }`}
+            >
+              {/* Header with Artwork backdrop */}
+              <div className="relative p-4 pb-3 overflow-hidden">
+                {bannerUrl && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-35 transition-opacity duration-300 pointer-events-none"
+                    style={{ backgroundImage: `url(${bannerUrl})` }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#1a231f]/70 via-[#1a231f]/95 to-[#1a231f] pointer-events-none" />
 
-        {/* User Badge Bar (Unboxed to eliminate nested card borders) */}
-        <div className="p-2.5 rounded-lg bg-[#212c27]/40 flex items-center justify-between">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#1a231f] shrink-0">
-              <img
-                src={user?.avatarUrl || 'https://cdn.discordapp.com/embed/avatars/0.png'}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-bold text-[#f2f5f1] truncate">
-                {user?.username ? `@${user.username}` : 'Tài khoản Discord'}
-              </p>
-              <p className="text-xs font-mono text-[#cbd5e1] truncate">
-                {maskedToken}
-              </p>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            <span className="text-xs font-mono font-semibold text-[#8e96e8]">
-              {counts.all} quest • <strong className="text-[#72b991]">{counts.running} chạy</strong>
-            </span>
-          </div>
-        </div>
-
-        {/* Quest Cards List (Clean list items without nested card borders) */}
-        <div className="space-y-3 pt-1">
-          {filteredQuests.length === 0 ? (
-            <div className="py-12 text-center text-xs text-[#9aa8a0]">
-              Chưa có nhiệm vụ nào trong danh sách hiển thị
-            </div>
-          ) : (
-            filteredQuests.map((quest) => {
-              const activeJob = jobs.get(quest.id);
-              const isRunning = isJobActive(activeJob);
-              const progress = activeJob ? activeJob.progressPercent : quest.task.progressPercent;
-              const isCompleted = quest.status.completed || activeJob?.status === 'completed';
-              const isExpired = isQuestExpired(quest);
-              const isVideo = quest.task.type.includes('VIDEO');
-              const expiry = formatExpiresAt(quest.status.expiresAt);
-              const bannerUrl = quest.assets.banner || quest.assets.hero || quest.rewards.assetUrl;
-
-              return (
-                <div
-                  key={quest.id}
-                  className={`relative overflow-hidden rounded-lg transition-colors p-3.5 flex items-center justify-between gap-4 min-h-[82px] group ${
-                    isRunning
-                      ? 'bg-[#212c27] ring-1 ring-[#8e96e8]'
-                      : 'bg-[#212c27]/40 hover:bg-[#212c27]/70'
-                  }`}
-                >
-                  {bannerUrl && (
-                    <div
-                      className="absolute inset-0 bg-cover bg-center opacity-15 pointer-events-none"
-                      style={{ backgroundImage: `url(${bannerUrl})` }}
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#161e1a] via-[#161e1a]/95 to-transparent pointer-events-none" />
-
-                  <div className="relative z-10 flex items-center gap-3 min-w-0 pr-2">
-                    <div className="shrink-0 flex items-center gap-2">
-                      <QuestThumbnail quest={quest} size="sm" />
-                      {isCompleted ? (
-                        <span className="w-5 h-5 rounded bg-[#72b991]/20 border border-[#72b991]/40 text-[#72b991] flex items-center justify-center text-xs">
-                          ✓
-                        </span>
-                      ) : isRunning ? (
-                        <span className="w-5 h-5 rounded bg-[#8e96e8]/20 border border-[#8e96e8]/40 text-[#8e96e8] flex items-center justify-center text-xs">
-                          ▶
-                        </span>
-                      ) : (
-                        <span className="w-5 h-5 rounded bg-[#1a231f] border border-[#2d3b33] text-[#9aa8a0] flex items-center justify-center text-xs">
-                          ☐
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="min-w-0 space-y-0.5">
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2.5 py-1 rounded text-xs font-mono font-bold bg-[#1a231f] text-[#cbd5e1] border border-[#2d3b33]">
+                <div className="relative z-10 flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <QuestThumbnail quest={quest} size="md" className="shrink-0 rounded-lg shadow-md" />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#161e1a] text-[#8e96e8] border border-[#2d3b33]">
                           {isVideo ? 'VIDEO' : 'GAME'}
                         </span>
-                        <h4 className="text-xs font-bold text-[#f2f5f1] truncate max-w-[200px]" title={quest.name}>
-                          {quest.name}
-                        </h4>
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-2 text-xs text-[#cbd5e1] font-mono font-medium">
                         {expiry && (
-                          <span className={expiry.tone}>
+                          <span className={`text-xs font-mono ${expiry.tone}`}>
                             HSD {expiry.label}
                           </span>
                         )}
-                        <span>•</span>
-                        <span className="text-[#8e96e8] font-semibold">
-                          {quest.rewards.name || '200 Orbs'}
-                        </span>
                       </div>
-
-                      <div className="pt-0.5">
-                        {isRunning ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#8e96e8]" />
-                            <span>{activeJob?.message || `Đang chạy (${activeJob?.currentSeconds || 0}s)`}</span>
-                          </span>
-                        ) : isCompleted ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
-                            <span>✨ Đã hoàn thành</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold text-[#cbd5e1] bg-[#1a231f] border border-[#2d3b33]">
-                            <span>⏳ Sẵn sàng</span>
-                          </span>
-                        )}
-                      </div>
+                      <h4 className="text-sm font-bold text-[#f2f5f1] truncate mt-1" title={quest.name}>
+                        {quest.name}
+                      </h4>
+                      <p className="text-xs text-[#9aa8a0] truncate">
+                        {quest.application.name}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="relative z-10 flex items-center gap-2 shrink-0">
+                  <div className="shrink-0">
                     <CircularProgress percent={progress} isRunning={isRunning} />
-                    <div className="hidden sm:block">
-                      {renderAction(quest, isRunning, isCompleted, isExpired)}
-                    </div>
                   </div>
                 </div>
-              );
-            })
-          )}
-        </div>
+              </div>
+
+              {/* Middle Bar: Rewards & Status */}
+              <div className="px-4 py-2.5 bg-[#161e1a]/80 border-t border-b border-[#2d3b33] flex items-center justify-between gap-2 text-xs">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="shrink-0">🎁</span>
+                  <span className="truncate font-medium text-[#cbd5e1]" title={quest.rewards.name}>
+                    {quest.rewards.name || '200 Orbs'}
+                  </span>
+                </div>
+
+                <div className="shrink-0">
+                  {isRunning ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#8e96e8]/20 text-[#8e96e8] border border-[#8e96e8]/30">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#8e96e8]" />
+                      <span>{activeJob?.message || `Đang chạy (${activeJob?.currentSeconds || 0}s)`}</span>
+                    </span>
+                  ) : isCompleted ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold bg-[#72b991]/20 text-[#72b991] border border-[#72b991]/30">
+                      <span>✨ Đã xong</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono font-semibold text-[#cbd5e1] bg-[#161e1a] border border-[#2d3b33]">
+                      <span>⏳ Sẵn sàng</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer: Progress bar & Action button */}
+              <div className="p-4 pt-3 flex items-center justify-between gap-3 bg-[#1a231f]">
+                <div className="flex-1 min-w-0 pr-1">
+                  <div className="flex items-center justify-between text-xs font-mono text-[#9aa8a0] mb-1">
+                    <span>Tiến độ</span>
+                    <span className={`font-semibold ${isRunning ? 'text-[#8e96e8]' : isCompleted ? 'text-[#72b991]' : 'text-[#f2f5f1]'}`}>
+                      {progress.toFixed(0)}%
+                    </span>
+                  </div>
+                  <div className="h-1.5 w-full bg-[#161e1a] rounded-full overflow-hidden border border-[#2d3b33]">
+                    <div
+                      className={`h-full transition-all duration-300 rounded-full ${
+                        isCompleted ? 'bg-[#72b991]' : isRunning ? 'bg-[#8e96e8]' : 'bg-[#3b4c42]'
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="shrink-0">
+                  {renderAction(quest, isRunning, isCompleted, isExpired)}
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -779,6 +773,72 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
         </div>
       </form>
 
+      {/* Active Running Jobs Banner */}
+      {runningJobs.length > 0 && (
+        <div className="surface p-4 sm:p-5 border border-[#8e96e8]/40 bg-[#8e96e8]/5 rounded-xl space-y-3">
+          <div className="flex items-center justify-between pb-2.5 border-b border-[#2d3b33]">
+            <div className="flex items-center gap-2.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#8e96e8]" />
+              <h3 className="text-sm font-bold text-[#f2f5f1] flex items-center gap-2">
+                <span>⚡ Tiến trình đang chạy trực tiếp</span>
+                <span className="px-2 py-0.5 rounded-full bg-[#8e96e8]/20 text-[#8e96e8] text-xs font-mono font-semibold">
+                  {runningJobs.length} nhiệm vụ
+                </span>
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={handleStopAll}
+              disabled={actionLoading.all}
+              className="btn-danger btn-sm text-xs"
+            >
+              Dừng tất cả
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {runningJobs.map((job) => {
+              const matchedQuest = quests.find((q) => q.id === job.questId);
+              return (
+                <div
+                  key={job.questId}
+                  className="p-3.5 rounded-lg bg-[#161e1a] border border-[#8e96e8]/40 flex items-center justify-between gap-3"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {matchedQuest && <QuestThumbnail quest={matchedQuest} size="sm" />}
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-[#f2f5f1] truncate">
+                        {job.questName || matchedQuest?.name || 'Đang cày nhiệm vụ'}
+                      </p>
+                      <p className="text-xs font-mono text-[#8e96e8] truncate">
+                        {job.message || `Đang chạy (${job.currentSeconds}s)`}
+                      </p>
+                      <div className="w-36 pt-1.5 flex items-center gap-2">
+                        <ProgressBar value={job.progressPercent} tone="brand" />
+                        <span className="text-xs font-mono text-[#8e96e8] tabular-nums shrink-0 font-semibold">
+                          {job.progressPercent.toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleStopQuest(job.questId)}
+                    disabled={actionLoading[job.questId]}
+                    className="btn-danger btn-sm shrink-0"
+                    title="Dừng tác vụ này"
+                  >
+                    <Square className="w-3 h-3 fill-current" />
+                    <span>Dừng</span>
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       {/* VIEW CONTROLS & FILTERS */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <SegmentedControl
@@ -801,6 +861,20 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
           <div className="flex items-center p-1 rounded-lg bg-[#1a231f] border border-[#2d3b33] shrink-0">
             <button
               type="button"
+              onClick={() => setViewMode('cards')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                viewMode === 'cards'
+                  ? 'bg-[#8e96e8] text-[#111714] font-semibold'
+                  : 'text-[#9aa8a0] hover:text-[#f2f5f1]'
+              }`}
+              title="Xem dạng Thẻ trực quan"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Dạng Thẻ</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setViewMode('table')}
               className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                 viewMode === 'table'
@@ -810,35 +884,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
               title="Xem dạng Bảng chi tiết"
             >
               <List className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Bảng</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setViewMode('live')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                viewMode === 'live'
-                  ? 'bg-[#8e96e8] text-[#111714] font-semibold'
-                  : 'text-[#9aa8a0] hover:text-[#f2f5f1]'
-              }`}
-              title="Không gian hoạt động LIVE"
-            >
-              <Radio className="w-3.5 h-3.5" />
-              <span>LIVE</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setViewMode('split')}
-              className={`hidden xl:flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-colors ${
-                viewMode === 'split'
-                  ? 'bg-[#8e96e8] text-[#111714] font-semibold'
-                  : 'text-[#9aa8a0] hover:text-[#f2f5f1]'
-              }`}
-              title="Xem song song cả hai"
-            >
-              <Split className="w-3.5 h-3.5" />
-              <span>Song song</span>
+              <span>Dạng Bảng</span>
             </button>
           </div>
 
@@ -857,20 +903,7 @@ export const QuestDashboard: React.FC<QuestDashboardProps> = ({
       </div>
 
       {/* MAIN VIEW CONTENT */}
-      {viewMode === 'table' && renderQuestsTable()}
-
-      {viewMode === 'live' && renderLiveActivitySpace()}
-
-      {viewMode === 'split' && (
-        <div className="grid grid-cols-1 xl:grid-cols-[1fr_420px] gap-6 items-start">
-          <div className="min-w-0 overflow-x-auto">
-            {renderQuestsTable()}
-          </div>
-          <div className="sticky top-20">
-            {renderLiveActivitySpace()}
-          </div>
-        </div>
-      )}
+      {viewMode === 'cards' ? renderQuestsGrid() : renderQuestsTable()}
     </div>
   );
 };
