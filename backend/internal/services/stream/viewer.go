@@ -245,12 +245,18 @@ func (v *ViewerService) cleanupConnections() {
 	v.currentStreamKey = ""
 	v.mu.Unlock()
 
+	if guildID == "" && v.cfg != nil {
+		v.cfg.RLock()
+		guildID = v.cfg.GuildID
+		v.cfg.RUnlock()
+	}
+
 	if gw != nil {
 		if key != "" {
 			_ = gw.DeleteStream(key)
 		}
 		if guildID != "" {
-			_ = gw.UpdateVoiceState(guildID, nil, true, true, false)
+			_ = gw.UpdateVoiceState(guildID, nil, false, false, false)
 		}
 	}
 }

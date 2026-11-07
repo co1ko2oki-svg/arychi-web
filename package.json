@@ -12,10 +12,11 @@
     "build:linux": "node scripts/build-linux.mjs",
     "test:go": "go test -v ./backend/tests/...",
     "vet:go": "go vet ./...",
-    "server": "bin/arychi-server.exe",
-    "quest": "bin/quest-server.exe",
-    "stream": "bin/stream-server.exe",
-    "bot": "bin/quest-bot.exe",
-    "spoofer": "bin/spoofer.exe"
+    "server": "go run ./backend/cmd/server",
+    "quest": "go run ./backend/cmd/quest",
+    "stream": "npm --prefix stream run start:node",
+    "build:stream": "npm --prefix stream run build",
+    "bot": "go run ./backend/cmd/bot",
+    "spoofer": "go run ./backend/cmd/spoofer"
   }
 }

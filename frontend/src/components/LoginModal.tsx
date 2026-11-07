@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   ExternalLink,
   KeyRound,
+  Loader2,
   LogOut,
   PlusCircle,
   ShieldCheck,
@@ -15,6 +16,7 @@ import { questApi } from '../services/api';
 import { AuthUser, UserSubscription } from '../types';
 import { Dialog } from './ui';
 import { DiscordIcon } from './Navbar';
+import { useToast } from './Toast';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -29,7 +31,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   user,
   onSaveAuth,
 }) => {
+  const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
+  const [loginMethod, setLoginMethod] = useState<'oauth' | 'token'>('oauth');
+  const [tokenInput, setTokenInput] = useState('');
+  const [tokenLoading, setTokenLoading] = useState(false);
 
   const [oauthConfig, setOAuthConfig] = useState<{
     discordConfigured: boolean;
@@ -55,14 +61,36 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   }, [isOpen]);
 
   const handleDiscordOAuthRedirect = () => {
-    if (oauthConfig?.discordAuthUrl) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (!isLocal && oauthConfig?.discordAuthUrl) {
       window.location.href = oauthConfig.discordAuthUrl;
-    } else {
-      const clientId = oauthConfig?.discordClientId || '1566061523636330497';
-      const redirectUri = window.location.origin;
-      window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(
-        redirectUri
-      )}&scope=identify+guilds+guilds.join`;
+      return;
+    }
+    const clientId = oauthConfig?.discordClientId || '1566061523636330497';
+    const redirectUri = window.location.origin;
+    window.location.href = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&scope=identify+guilds+guilds.join+email`;
+  };
+
+  const handleDirectTokenLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tokenInput.trim()) {
+      setError('Vui lòng nhập Discord User Token');
+      return;
+    }
+    setError(null);
+    setTokenLoading(true);
+    try {
+      const res = await questApi.oauthLogin({ accessToken: tokenInput.trim() });
+      onSaveAuth(res.account, res.sessionToken, res.subscription);
+      toast.success(`Đã kết nối tài khoản Discord: @${res.account.username}`);
+      setTokenInput('');
+      onClose();
+    } catch (err: any) {
+      setError(err?.message || 'Token Discord không hợp lệ hoặc đã hết hạn');
+    } finally {
+      setTokenLoading(false);
     }
   };
 
@@ -76,7 +104,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       title={user ? 'Tài khoản Discord đã kết nối' : 'Đăng nhập tài khoản Discord'}
-      description="Đăng nhập tài khoản Discord qua OAuth2 để đồng bộ và truy cập bảng điều khiển dash.arychi.xyz."
+      description="Đăng nhập tài khoản Discord để đồng bộ và truy cập bảng điều khiển."
     >
       {user && (
         <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-line">
@@ -156,32 +184,103 @@ export const LoginModal: React.FC<LoginModalProps> = ({
         </div>
       ) : (
         <div className="space-y-4">
-          {/* Pure Discord OAuth2 Login Card */}
-          <div className="p-4 rounded-xl bg-white/[0.04] border border-[#1E2230] space-y-3.5">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
-                <DiscordIcon className="w-5 h-5 text-black" />
-              </div>
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold text-white">
-                  Ủy quyền ứng dụng Discord (OAuth2)
-                </h4>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Đăng nhập trực tiếp bằng tài khoản Discord của bạn (yêu cầu quyền identify, guilds, guilds.join).
-                </p>
-              </div>
-            </div>
-
+          {/* Method Selector Tabs */}
+          <div className="grid grid-cols-2 p-1 rounded-xl bg-[#0E1017] border border-[#1E2230] text-xs font-semibold">
             <button
               type="button"
-              onClick={handleDiscordOAuthRedirect}
-              className="w-full py-3 px-4 rounded-xl bg-white hover:bg-[#F2F3F5] text-black text-xs font-bold flex items-center justify-center gap-2.5 transition-all duration-150 active:scale-95 shadow-sm border border-white/40 cursor-pointer"
+              onClick={() => { setLoginMethod('oauth'); setError(null); }}
+              className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                loginMethod === 'oauth'
+                  ? 'bg-white text-black shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
             >
-              <DiscordIcon className="w-4 h-4 text-black shrink-0" />
-              <span>Đăng nhập bằng Discord OAuth2</span>
-              <ExternalLink className="w-3.5 h-3.5 opacity-60 ml-auto text-black" />
+              <DiscordIcon className={`w-3.5 h-3.5 ${loginMethod === 'oauth' ? 'text-black' : 'text-slate-400'}`} />
+              <span>Discord OAuth2</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => { setLoginMethod('token'); setError(null); }}
+              className={`py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                loginMethod === 'token'
+                  ? 'bg-[#72b991] text-[#111714] shadow-sm font-bold'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Token Discord</span>
             </button>
           </div>
+
+          {loginMethod === 'oauth' ? (
+            /* Pure Discord OAuth2 Login Card */
+            <div className="p-4 rounded-xl bg-white/[0.04] border border-[#1E2230] space-y-3.5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shrink-0 shadow-sm">
+                  <DiscordIcon className="w-5 h-5 text-black" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-white">
+                    Ủy quyền ứng dụng Discord (OAuth2)
+                  </h4>
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Đăng nhập trực tiếp bằng tài khoản Discord của bạn (tự động điều hướng về màn hình ứng dụng an toàn).
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDiscordOAuthRedirect}
+                className="w-full py-3 px-4 rounded-xl bg-white hover:bg-[#F2F3F5] text-black text-xs font-bold flex items-center justify-center gap-2.5 transition-all duration-150 active:scale-95 shadow-sm border border-white/40 cursor-pointer"
+              >
+                <DiscordIcon className="w-4 h-4 text-black shrink-0" />
+                <span>Đăng nhập bằng Discord OAuth2</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-60 ml-auto text-black" />
+              </button>
+            </div>
+          ) : (
+            /* Direct Token Login Form */
+            <form onSubmit={handleDirectTokenLogin} className="p-4 rounded-xl bg-white/[0.04] border border-[#1E2230] space-y-3.5">
+              <div className="space-y-1">
+                <label htmlFor="direct-token-input" className="text-xs font-bold text-white flex items-center gap-1.5">
+                  <KeyRound className="w-3.5 h-3.5 text-[#72b991]" />
+                  <span>Dán User Token Discord</span>
+                </label>
+                <p className="text-[11px] text-slate-300 leading-relaxed">
+                  Đăng nhập tức thì 1 giây bằng Token cá nhân, không cần qua chuyển hướng hay DNS tên miền.
+                </p>
+              </div>
+
+              <input
+                id="direct-token-input"
+                type="password"
+                value={tokenInput}
+                onChange={(e) => setTokenInput(e.target.value)}
+                placeholder="Dán mã Discord Token của bạn tại đây..."
+                className="input font-mono text-xs w-full"
+                autoComplete="off"
+              />
+
+              <button
+                type="submit"
+                disabled={tokenLoading || !tokenInput.trim()}
+                className="btn-primary w-full justify-center text-xs font-bold py-2.5 cursor-pointer disabled:opacity-50"
+              >
+                {tokenLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Đang xác thực Token...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Đăng nhập ngay</span>
+                  </>
+                )}
+              </button>
+            </form>
+          )}
 
           {/* Workflow Guide: Login First, Enter Tokens on Dash */}
           <div className="p-3.5 rounded-lg bg-[#0E1017] border border-[#1E2230] space-y-2 text-xs">
@@ -196,7 +295,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-mono text-blue-300 font-bold">2.</span>
-                <span>Chuyển sang trung tâm điều khiển <code className="text-white font-mono bg-white/[0.08] px-1.5 py-1 rounded">dash.arychi.xyz</code> để nhập Token Quest &amp; Token Stream.</span>
+                <span>Chuyển sang trung tâm điều khiển Dashboard để nhập Token Quest &amp; Token Stream.</span>
               </div>
             </div>
           </div>

@@ -297,7 +297,7 @@ func getAllowedRedirectURIs() []string {
 		raw = os.Getenv("DISCORD_REDIRECT_URI")
 	}
 	if raw == "" {
-		raw = "https://arychi.xyz"
+		raw = "http://localhost:5173,http://127.0.0.1:5173,https://arychi.xyz,https://dash.arychi.xyz"
 	}
 	var res []string
 	for _, part := range strings.Split(raw, ",") {
@@ -306,8 +306,18 @@ func getAllowedRedirectURIs() []string {
 			res = append(res, trimmed)
 		}
 	}
+	hasLocalhost := false
+	for _, a := range res {
+		if strings.Contains(a, "localhost:5173") || strings.Contains(a, "127.0.0.1:5173") {
+			hasLocalhost = true
+			break
+		}
+	}
+	if !hasLocalhost {
+		res = append(res, "http://localhost:5173", "http://127.0.0.1:5173")
+	}
 	if len(res) == 0 {
-		res = []string{"https://arychi.xyz"}
+		res = []string{"http://localhost:5173", "https://arychi.xyz"}
 	}
 	return res
 }
@@ -317,9 +327,12 @@ func resolveRedirectURI(candidate string) string {
 	norm := strings.TrimRight(strings.TrimSpace(candidate), "/")
 	if norm != "" {
 		for _, a := range allowed {
-			if a == norm {
-				return norm
+			if strings.EqualFold(a, norm) {
+				return a
 			}
+		}
+		if strings.HasPrefix(norm, "http://localhost:") || strings.HasPrefix(norm, "http://127.0.0.1:") {
+			return norm
 		}
 	}
 	return allowed[0]

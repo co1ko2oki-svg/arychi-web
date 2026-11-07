@@ -39,21 +39,12 @@ const preflightPortCheck = () => {
   }
 };
 
-const openBrowser = (url) => {
-  try {
-    if (process.platform === 'win32') {
-      execSync(`start ${url}`, { stdio: 'ignore' });
-    } else if (process.platform === 'darwin') {
-      execSync(`open ${url}`, { stdio: 'ignore' });
-    } else {
-      execSync(`xdg-open ${url}`, { stdio: 'ignore' });
-    }
-  } catch {}
-};
-
+let isShuttingDown = false;
 const children = [];
 
 const terminateAllServices = () => {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
   console.log('\n\x1b[31m[Launcher] Dang dung toan bo cac tien trinh dich vu...\x1b[0m');
   for (const item of children) {
     if (item.process && item.process.pid) {
@@ -114,57 +105,26 @@ const startServices = () => {
   printBanner();
 
   const rootEnv = parseEnvFile(path.join(rootDir, '.env'));
+  const binDir = path.join(rootDir, 'bin');
+  const pathEnv = `${binDir}${path.delimiter}${process.env.PATH || ''}`;
 
   const isWin = process.platform === 'win32';
-  const binExt = isWin ? '.exe' : '';
-  const questGoBin = path.join(rootDir, 'bin', `quest-server${binExt}`);
-  const streamGoBin = path.join(rootDir, 'bin', `stream-server${binExt}`);
-
-  if (!fs.existsSync(questGoBin)) {
-    console.log('\x1b[33m[Launcher] Bien dich quest-server Go lan dau...\x1b[0m');
-    try {
-      execSync(`go build -o bin/quest-server${binExt} ./backend/cmd/quest`, { cwd: rootDir, stdio: 'inherit' });
-      if (!isWin) {
-        try { fs.chmodSync(questGoBin, 0o755); } catch {}
-      }
-    } catch (err) {
-      console.warn('\x1b[31m[Launcher] Khong the build quest-server Go:\x1b[0m', err?.message);
-    }
-  }
-
-  if (!fs.existsSync(streamGoBin)) {
-    console.log('\x1b[33m[Launcher] Bien dich stream-server Go lan dau...\x1b[0m');
-    try {
-      execSync(`go build -o bin/stream-server${binExt} ./backend/cmd/stream`, { cwd: rootDir, stdio: 'inherit' });
-      if (!isWin) {
-        try { fs.chmodSync(streamGoBin, 0o755); } catch {}
-      }
-    } catch (err) {
-      console.warn('\x1b[31m[Launcher] Khong the build stream-server Go:\x1b[0m', err?.message);
-    }
-  }
-
-  if (!isWin) {
-    if (fs.existsSync(questGoBin)) { try { fs.chmodSync(questGoBin, 0o755); } catch {} }
-    if (fs.existsSync(streamGoBin)) { try { fs.chmodSync(streamGoBin, 0o755); } catch {} }
-  }
-
-  console.log('\x1b[32m[Launcher] Khoi dong cac dich vu Go Backend hieu nang cao (bin/quest-server & bin/stream-server)...\x1b[0m');
+  console.log('\x1b[32m[Launcher] Khoi dong Go Backend tu source code (go run)...\x1b[0m');
 
   const services = [
     {
       name: 'QUEST :3001 (Go)',
       color: '\x1b[35m',
       cwd: rootDir,
-      cmd: questGoBin,
-      args: [],
+      cmd: 'go',
+      args: ['run', './backend/cmd/quest'],
     },
     {
-      name: 'STREAM :3000 (Go)',
+      name: 'STREAM :3000 (StreamBot)',
       color: '\x1b[33m',
-      cwd: rootDir,
-      cmd: streamGoBin,
-      args: [],
+      cwd: path.join(rootDir, 'stream'),
+      cmd: isWin ? 'node.exe' : 'node',
+      args: ['--experimental-websocket', 'dist/index.js'],
     },
     {
       name: 'WEB :5173',
@@ -175,16 +135,15 @@ const startServices = () => {
     },
   ];
 
-  let browserOpened = false;
-
-  services.forEach((service) => {
+  const spawnService = (service) => {
     const child = spawn(service.cmd, service.args, {
       cwd: service.cwd,
-      env: { ...process.env, ...rootEnv, FORCE_COLOR: '1' },
+      env: { ...process.env, ...rootEnv, PATH: pathEnv, Path: pathEnv, FORCE_COLOR: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    children.push({ name: service.name, process: child });
+    const childEntry = { name: service.name, process: child };
+    children.push(childEntry);
 
     const prefix = `${service.color}[${service.name}]\x1b[0m `;
 
@@ -193,14 +152,6 @@ const startServices = () => {
       for (const line of lines) {
         if (!line.trim()) continue;
         console.log(`${prefix}${line}`);
-
-        if (!browserOpened && (line.includes('5173') || line.includes('Local:'))) {
-          browserOpened = true;
-          setTimeout(() => {
-            console.log(`\x1b[32m[Launcher] Dang tu dong mo trinh duyet den http://localhost:5173...\x1b[0m`);
-            openBrowser('http://localhost:5173');
-          }, 800);
-        }
       }
     };
 
@@ -212,19 +163,24 @@ const startServices = () => {
     });
 
     child.on('exit', (code) => {
+      const idx = children.indexOf(childEntry);
+      if (idx !== -1) children.splice(idx, 1);
+
       if (code !== 0 && code !== null) {
         console.log(`${prefix}\x1b[33mDich vu da thoat voi ma: ${code}\x1b[0m`);
+        if (!isShuttingDown) {
+          console.log(`${prefix}\x1b[36m[Auto-Restart] Tu dong khoi dong lai dich vu sau 3 giay...\x1b[0m`);
+          setTimeout(() => {
+            if (!isShuttingDown) {
+              spawnService(service);
+            }
+          }, 3000);
+        }
       }
     });
-  });
+  };
 
-  setTimeout(() => {
-    if (!browserOpened) {
-      browserOpened = true;
-      console.log(`\x1b[32m[Launcher] Dang tu dong mo trinh duyet den http://localhost:5173...\x1b[0m`);
-      openBrowser('http://localhost:5173');
-    }
-  }, 2500);
+  services.forEach(spawnService);
 };
 
 startServices();

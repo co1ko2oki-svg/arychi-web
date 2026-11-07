@@ -116,9 +116,11 @@ export interface StreamStatus {
     isOnline?: boolean;
     isWatching?: boolean;
     viewerTag?: string;
+    currentSessionSeconds?: number;
+    totalFarmedSeconds?: number;
+    totalMinutesWatched?: number;
     formattedSessionTime?: string;
     formattedTotalTime?: string;
-    totalMinutesWatched?: number;
     activeChannelsCount?: number;
     autoWatch: boolean;
   };

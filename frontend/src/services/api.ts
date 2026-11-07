@@ -11,20 +11,19 @@ import {
 
 const resolveHost = (): string => {
   if (typeof window === 'undefined') return 'localhost';
-  const h = window.location.hostname;
-  if (!h || h.endsWith('arychi.xyz') || h.endsWith('arychy.xyz')) {
-    return 'localhost';
-  }
-  return h;
+  return window.location.hostname || 'localhost';
 };
 
 const host = resolveHost();
+const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+const httpProto = isSecure ? 'https' : 'http';
+const wsProto = isSecure ? 'wss' : 'ws';
 
-export const QUEST_API_URL = import.meta.env.VITE_QUEST_API_URL || `http://${host}:3001`;
-export const QUEST_WS_URL = import.meta.env.VITE_QUEST_WS_URL || `ws://${host}:3001/ws`;
+export const QUEST_API_URL = import.meta.env.VITE_QUEST_API_URL || `${httpProto}://${host}:3001`;
+export const QUEST_WS_URL = import.meta.env.VITE_QUEST_WS_URL || `${wsProto}://${host}:3001/ws`;
 
-export const STREAM_API_URL = import.meta.env.VITE_STREAM_API_URL || `http://${host}:3000`;
-export const STREAM_WS_URL = import.meta.env.VITE_STREAM_WS_URL || `ws://${host}:3000/ws`;
+export const STREAM_API_URL = import.meta.env.VITE_STREAM_API_URL || `${httpProto}://${host}:3000`;
+export const STREAM_WS_URL = import.meta.env.VITE_STREAM_WS_URL || `${wsProto}://${host}:3000/ws`;
 
 export const questApi = {
   async getOAuthConfig(): Promise<{
@@ -77,8 +76,9 @@ export const questApi = {
     return data;
   },
 
-  async loginWithOAuthCode(code: string) {
-    return this.oauthLogin({ code });
+  async loginWithOAuthCode(code: string, redirectUri?: string) {
+    const origin = redirectUri || (typeof window !== 'undefined' ? window.location.origin : undefined);
+    return this.oauthLogin({ code, redirectUri: origin });
   },
 
   async startBadgeFarm(payload: {
@@ -381,6 +381,20 @@ export const streamApi = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ autoWatch: enable }),
+    });
+    return res.json();
+  },
+
+  async stopFarm(): Promise<{ success: boolean }> {
+    const res = await fetch(`${STREAM_API_URL}/api/farm/stop`, {
+      method: 'POST',
+    });
+    return res.json();
+  },
+
+  async startFarm(): Promise<{ success: boolean }> {
+    const res = await fetch(`${STREAM_API_URL}/api/farm/watch`, {
+      method: 'POST',
     });
     return res.json();
   },

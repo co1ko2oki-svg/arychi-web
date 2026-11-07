@@ -26,9 +26,13 @@ build/
 **/build/
 *.tsbuildinfo
 
-# Go binaries
-bin/*.exe
-bin/*
+# Binaries and executables
+*.exe
+*.exe.*
+bin/
+**/bin/
+scripts/*.exe
+stream/scripts/*.exe
 
 # Cache directories
 .cache/

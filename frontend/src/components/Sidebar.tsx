@@ -169,7 +169,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div>
                 <span className="text-sm font-bold text-[#f2f5f1] block leading-none">Arychi Suite</span>
-                <span className="text-xs font-mono text-[#8e96e8]">dash.arychi.xyz</span>
+                <span className="text-xs font-mono text-[#8e96e8]">
+                  {typeof window !== 'undefined' && (window.location.hostname.includes('arychi') || window.location.hostname.includes('arychy'))
+                    ? 'dash.arychi.xyz'
+                    : 'Local Environment'}
+                </span>
               </div>
             </div>
             <button
@@ -269,7 +273,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="btn-ghost w-full justify-start text-xs text-[#9aa8a0] hover:text-[#f2f5f1] rounded-lg"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Về trang chủ arychi.xyz</span>
+          <span>Về trang chủ</span>
         </button>
       </div>
     </div>

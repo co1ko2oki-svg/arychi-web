@@ -194,7 +194,8 @@ const AppContent: React.FC = () => {
   // Redirect / Navigate to Dashboard
   const handleEnterDashboard = () => {
     const host = window.location.hostname.toLowerCase();
-    if ((host === 'arychi.xyz' || host === 'www.arychi.xyz' || host === 'arychy.xyz') && !host.startsWith('dash.')) {
+    const isLocal = host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.') || host.startsWith('10.') || host.startsWith('172.');
+    if (!isLocal && (host === 'arychi.xyz' || host === 'www.arychi.xyz' || host === 'arychy.xyz') && !host.startsWith('dash.')) {
       const rootDomain = host.replace(/^www\./, '');
       const sess = sessionToken ? `?session=${encodeURIComponent(sessionToken)}` : '';
       window.location.href = `https://dash.${rootDomain}${sess}#home`;
@@ -420,7 +421,7 @@ const AppContent: React.FC = () => {
             onBackToLanding={handleBackToLanding}
           />
 
-          <main className="flex-1 min-w-0 px-4 sm:px-8 py-8 max-w-6xl">
+          <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 py-8 w-full max-w-[1720px]">
             {activeTab === 'home' && (
               <DashboardOverview
                 user={user}
@@ -464,6 +465,7 @@ const AppContent: React.FC = () => {
                 onRefresh={loadStreamStatus}
                 streamConnected={streamConnected}
                 onOpenLoginModal={() => setIsLoginModalOpen(true)}
+                logs={logs}
               />
             )}
 

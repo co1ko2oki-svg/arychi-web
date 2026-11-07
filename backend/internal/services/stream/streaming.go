@@ -463,6 +463,7 @@ func (s *StreamingService) ensureVoiceConnection(guildID, channelID, title strin
 }
 
 func (s *StreamingService) prepareVideoSource(msg *events.MessageCreateData, videoSource, title string) (string, string, error) {
+	isURL := strings.HasPrefix(videoSource, "http://") || strings.HasPrefix(videoSource, "https://")
 	mediaSource := s.mediaService.ResolveMediaSource(videoSource)
 	if mediaSource != nil && mediaSource.Type == "youtube" && !mediaSource.IsLive {
 		tempFile := s.handleDownload(msg, videoSource, title)
@@ -471,8 +472,11 @@ func (s *StreamingService) prepareVideoSource(msg *events.MessageCreateData, vid
 		}
 		return "", "", fmt.Errorf("Failed to prepare video source due to download failure.")
 	}
-	if mediaSource != nil {
+	if mediaSource != nil && mediaSource.URL != "" {
 		return mediaSource.URL, "", nil
+	}
+	if isURL {
+		return "", "", fmt.Errorf("URL video/stream không hợp lệ hoặc video không khả dụng: %s", videoSource)
 	}
 	return videoSource, "", nil
 }
@@ -700,11 +704,18 @@ func (s *StreamingService) CleanupStreamStatus(forceLeave bool) {
 	s.mu.Lock()
 	if s.cancelFunc != nil {
 		s.cancelFunc()
+		s.cancelFunc = nil
 	}
 	gw := s.client
 	guildID := s.streamStatus.ChannelInfo.GuildID
 	joined := s.streamStatus.Joined
 	s.mu.Unlock()
+
+	if guildID == "" && s.cfg != nil {
+		s.cfg.RLock()
+		guildID = s.cfg.GuildID
+		s.cfg.RUnlock()
+	}
 
 	s.stopActiveStream()
 
@@ -714,7 +725,7 @@ func (s *StreamingService) CleanupStreamStatus(forceLeave bool) {
 
 	if forceLeave || s.queueService.IsEmpty() || !joined {
 		if gw != nil && guildID != "" {
-			_ = gw.UpdateVoiceState(guildID, nil, false, true, false)
+			_ = gw.UpdateVoiceState(guildID, nil, false, false, false)
 		}
 		s.mu.Lock()
 		if s.voiceConn != nil {
@@ -727,10 +738,7 @@ func (s *StreamingService) CleanupStreamStatus(forceLeave bool) {
 	}
 
 	if gw != nil {
-		s.cfg.RLock()
-		prefix := s.cfg.Prefix
-		s.cfg.RUnlock()
-		_ = gw.UpdateStatusIdle(prefix)
+		_ = gw.UpdateStatusIdle()
 	}
 
 	s.mu.Lock()
@@ -746,14 +754,13 @@ func (s *StreamingService) CleanupStreamStatus(forceLeave bool) {
 }
 
 func (s *StreamingService) StopAndClearQueue(msg *events.MessageCreateData) bool {
-	if !s.checkAndAcquireVoiceLock(msg) {
-		return false
-	}
-	defer s.releaseVoiceLock()
+	s.voiceLockMu.Lock()
+	s.isVoiceActionInProgress = false
+	s.voiceLockMu.Unlock()
 
 	s.queueService.ClearQueue()
 	s.syncQueueStatus()
-	utils.StreamLogs.Info("Queue cleared by stop command")
+	utils.StreamLogs.Info("Queue cleared and stopping all stream services")
 	s.CleanupStreamStatus(true)
 	return true
 }

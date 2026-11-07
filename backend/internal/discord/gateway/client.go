@@ -798,11 +798,8 @@ func (c *Client) DeleteStream(streamKey string) error {
 	return c.SendStreamDelete(streamKey)
 }
 
-func (c *Client) UpdateStatusIdle(prefix string) error {
-	if prefix == "" {
-		prefix = "$"
-	}
-	return c.UpdatePresence(fmt.Sprintf("%shelp | Arychi Stream", prefix), 0)
+func (c *Client) UpdateStatusIdle(status ...string) error {
+	return c.UpdatePresence("Arychi Stream", 0)
 }
 
 func (c *Client) UpdateStatusWatch(title string) error {

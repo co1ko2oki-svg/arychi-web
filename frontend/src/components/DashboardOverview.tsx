@@ -180,7 +180,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
               )}
               <span>@{user?.username || 'khách'}</span>
             </span>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-mono text-xs">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-[#72b991]/15 text-[#72b991] border border-[#72b991]/30 font-mono text-xs">
               <ShieldCheck className="w-3.5 h-3.5 text-[#72b991]" />
               Thành viên chính thức
             </span>
@@ -221,7 +221,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <span>✨</span>
                 <span>DISCORD QUESTS (1 TOKEN)</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono text-white bg-white/[0.05]">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono text-white bg-white/[0.05]">
                 <StatusDot tone={hasQuestToken ? 'ok' : 'warn'} />
                 {hasQuestToken ? 'Đã sẵn sàng' : 'Chưa có Token'}
               </span>
@@ -302,7 +302,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                 <span>🎧</span>
                 <span>TREO STREAM VOICE (2 TOKEN)</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-mono text-white bg-white/[0.05]">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-mono text-white bg-white/[0.05]">
                 <StatusDot tone={hasStreamTokens ? 'ok' : 'warn'} />
                 {hasStreamTokens ? 'Đã sẵn sàng' : 'Cần 2 Token'}
               </span>

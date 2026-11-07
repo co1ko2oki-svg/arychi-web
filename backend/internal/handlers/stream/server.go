@@ -170,10 +170,6 @@ func (s *Server) connectMainClient(token string) {
 		s.StreamingService.HandleVoiceStateUpdate(raw)
 	})
 
-	gw.OnEvent(events.EventMessageCreate, func(_ string, raw json.RawMessage) {
-		s.CommandManager.HandleMessageCreate(raw, s.StreamStatus, s.StreamingService)
-	})
-
 	go func() {
 		if err := gw.Connect(); err != nil {
 			utils.StreamLogs.Warn("Could not login to Discord: %v. Web API server remains active.", err)
@@ -466,10 +462,13 @@ func (s *Server) handlePlayerStop(w http.ResponseWriter, r *http.Request) {
 	}
 	s.StreamStatus.ManualStop = true
 	stopped := s.StreamingService.StopAndClearQueue(nil)
+	if s.ViewerService != nil {
+		s.ViewerService.StopWatching()
+	}
 	s.Broadcast(map[string]any{"type": "status", "data": s.GetFullStatus()})
 	writeStreamJSON(w, http.StatusOK, map[string]any{
 		"success": stopped,
-		"message": "Stream stopped and queue cleared",
+		"message": "Stream stopped and both accounts disconnected",
 	})
 }
 
